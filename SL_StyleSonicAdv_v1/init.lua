@@ -20,6 +20,8 @@ assert((SUBVERSION > 9), packType.."Mod requires features from "..version.."+")
 // I just want to minimalize situation, where some genius decides 
 // to play this on older version of SRB2.
 
+// Don't forget to mercilessly tease everyone by git push.
+
 // Man idiot proofing is so so SOO teadious :earless:
 if VERSION == 202 and SUBVERSION > 9 then
 	print(packType.."As this is WIP version of "..gameString.." pack and UDMF update is not out yet. Game allows to load this pack in "..VERSIONSTRING)
