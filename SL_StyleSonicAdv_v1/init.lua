@@ -44,7 +44,5 @@ if VERSION == 202 and SUBVERSION > 9 then
 	dofile(gameString.."_models_capsule.lua")	
 	
 	dofile(gameString.."_user_interface.lua")
-	
-	// menutest
-	dofile("customexetests/test_testexe.lua")
+
 end
