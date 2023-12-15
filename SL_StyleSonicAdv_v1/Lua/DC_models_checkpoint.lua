@@ -254,7 +254,7 @@ end
 local rewards = {
 	[1] = function(p) 
 		P_GivePlayerRings(p, 5)
-		insertPlayerItemToHud(p, SPR_TVER, A)
+		insertPlayerItemToHud(p, SPR_TVER, E)
 	end;
 	[2] = function(p) 
 		P_GivePlayerRings(p, 10)
@@ -262,7 +262,7 @@ local rewards = {
 	end;
 	[3] = function(p) 
 		P_GivePlayerRings(p, 20)
-		insertPlayerItemToHud(p, SPR_TVER, E)
+		insertPlayerItemToHud(p, SPR_TVER, A)
 	end;
 	[4] = function(p) 
 		p.powers[pw_sneakers] = 20*TICRATE
