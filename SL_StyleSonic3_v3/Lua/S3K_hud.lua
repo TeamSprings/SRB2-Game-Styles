@@ -8,8 +8,6 @@ addHook("MapLoad", function()
 	end
 end)
 
-
-
 local debugmode_coordinates = CV_RegisterVar({
 	name = "S3_CordinatesDebug",
 	defaultvalue = "0",
