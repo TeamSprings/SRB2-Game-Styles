@@ -1,8 +1,9 @@
 --[[
+
 		Sonic Adventure Style's Capsule
 
 Contributors: Ace Lite
-@Team Blue Spring 2022-2023
+@Team Blue Spring 2022-2024
 
 ]]
 
@@ -11,10 +12,19 @@ Contributors: Ace Lite
 -- S3K Code currently, model in progress.
 --
 
-
+local Disable_Capsules = false
 freeslot("SPR_SA1C")
 
+addHook("MapLoad", function()
+	Disable_Capsules = false
+	if CV_FindVar("dc_capsule").value == 0 then
+		Disable_Capsules = true
+	end
+end)
+
 addHook("MapThingSpawn", function(a, tm)
+	if Disable_Capsules then return end
+
 	a.radius = 46*FRACUNIT
 	a.height = 88*FRACUNIT
 	a.spaz = a.z
@@ -95,6 +105,7 @@ addHook("MapThingSpawn", function(a, tm)
 end, MT_EGGTRAP)
 
 addHook("MobjThinker", function(a)
+	if Disable_Capsules then return end
 	if not a.boss and a.disty < 0 then
 		for mo in mobjs.iterate() do
 			if mo.flags & MF_BOSS then
@@ -121,9 +132,9 @@ addHook("MobjThinker", function(a)
 
 	if a.activate == true and a.disty < 0 then
 		a.disty = $+a.scale*2
-		P_TeleportMove(a, a.x, a.y, a.spaz+a.disty)
+		P_MoveOrigin(a, a.x, a.y, a.spaz+a.disty)
 		for k,v in ipairs(a.capsule) do
-			P_TeleportMove(v, a.x+FixedMul(v.offx, a.scale), a.y+FixedMul(v.offy, a.scale), a.z)
+			P_MoveOrigin(v, a.x+FixedMul(v.offx, a.scale), a.y+FixedMul(v.offy, a.scale), a.z)
 		end
 	end
 
@@ -184,6 +195,7 @@ addHook("MobjThinker", function(a)
 end, MT_EGGTRAP)
 
 addHook("MobjCollide", function(a,mt)
+	if Disable_Capsules then return end
 	if mt.player and a.activatable == true then
 		local discenter = P_AproxDistance(a.x - mt.x, a.y - mt.y)
 		if discenter < 26*a.scale and a.z+a.height+10*FRACUNIT > mt.z then

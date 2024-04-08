@@ -1,8 +1,9 @@
 --[[
+
 		Sonic Adventure Style's Common Objects
 
 Contributors: Ace Lite
-@Team Blue Spring 2022-2023
+@Team Blue Spring 2022-2024
 
 ]]
 
@@ -10,6 +11,15 @@ freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAER
 "S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY",
 "SPR_CA2D", "SPR_CA3D", "SPR_1CAP", "SPR_GEM1", "SPR_GEM2", "SPR_FLB9", "SPR_INV1",
 "SPR_CHE0", "S_HWRSA2SPRING", "S_DIASA2SPRING")
+
+local Disable_Miscs = false
+
+addHook("MapLoad", function()
+	Disable_Miscs = false
+	if CV_FindVar("dc_miscassets").value == 0 then
+		Disable_Miscs = true
+	end
+end)
 
 --
 --
@@ -74,7 +84,7 @@ mobjinfo[MT_ROTATEOVERLAY] = {
 addHook("MobjThinker", function(a)
 	if a.target then
 		a.rollangle = $+ANG2
-		P_TeleportMove(a, a.target.x, a.target.y, a.target.z)
+		P_MoveOrigin(a, a.target.x, a.target.y, a.target.z)
 	else
 		P_RemoveMobj(a)
 	end
@@ -265,6 +275,7 @@ states[S_CEMG7] = {
 freeslot("SPR_SA2K")
 
 addHook("MapThingSpawn", function(a)
+	if Disable_Miscs then return end
 	a.state = S_INVISIBLE
 	a.sprite = SPR_SA2K
 	a.frame = B|FF_PAPERSPRITE
@@ -289,19 +300,21 @@ end, MT_TOKEN)
 
 
 addHook("MobjDeath", function(a)
+	if Disable_Miscs then return end
 	for _,key in ipairs(a.nsides) do
 		P_RemoveMobj(key)
 	end
 end, MT_TOKEN)
 
 addHook("MobjThinker", function(a)
+	if Disable_Miscs then return end
 	if a and a.valid then
 		a.angle = $ + ANG1*3
 		for k,key in ipairs(a.nsides) do
 			if key and key.valid then
 				local ang = a.angle + k*ANGLE_180
 				key.angle = ang+ANGLE_270
-				P_TeleportMove(key, a.x + 2*cos(ang), a.y + 2*sin(ang), a.z)
+				P_SetOrigin(key, a.x + 2*cos(ang), a.y + 2*sin(ang), a.z)
 			end
 		end
 	end
@@ -320,6 +333,7 @@ mobjinfo[MT_REDBOOSTER].painsound = sfx_advdas
 sfxinfo[freeslot("sfx_advite")].caption = "Pop"
 
 addHook("MapThingSpawn", function(a, mt)
+	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
 	a.state = S_YELLOWBOOSTERROLLER
@@ -327,6 +341,7 @@ addHook("MapThingSpawn", function(a, mt)
 end, MT_YELLOWBOOSTER)
 
 addHook("MapThingSpawn", function(a, mt)
+	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
 	a.state = S_REDBOOSTERROLLER
@@ -353,6 +368,7 @@ mobjinfo[MT_YELLOWDIAG].painsound = sfx_advspr
 mobjinfo[MT_REDDIAG].painsound = sfx_advspr
 
 local function propellerSpringThinker(a)
+	if Disable_Miscs then return end
 	if a.tracer and a.tracer.valid then
 		if not a.chainconnect then
 			a.chainconnect = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
@@ -387,6 +403,7 @@ local function propellerSpringThinker(a)
 end
 
 local function removalPropellerSpring(a)
+	if Disable_Miscs then return end
 	if a.chainconnect then
 		P_RemoveMobj(a.chainconnect)
 	end
@@ -450,6 +467,7 @@ local invAngles = {
 
 
 local function invincibilityModel(a, p)
+	if Disable_Miscs then return end
 	if not a.raylist and p.powers[pw_invulnerability] then
 		a.raylist = {}
 
@@ -497,10 +515,12 @@ local function invincibilityModel(a, p)
 end
 
 addHook("PlayerThink", function(p)
+	if Disable_Miscs then return end
 	invincibilityModel(p.mo, p)
 end)
 
 addHook("MobjThinker", function(a)
+	if Disable_Miscs then return end
 	local transparency = 4 << FF_TRANSSHIFT
 	if a.transparencytimer then
 		a.transparencytimer = $-1
@@ -519,6 +539,7 @@ addHook("MobjThinker", function(a)
 end, MT_EXTRAINVRAY)
 
 addHook("MobjThinker", function(a)
+	if Disable_Miscs then return end
 	P_RemoveMobj(a)
 end, MT_IVSP)
 

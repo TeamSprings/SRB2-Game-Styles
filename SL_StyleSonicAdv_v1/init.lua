@@ -1,6 +1,5 @@
 local gameString = "DC"
 local packType = '[Sonic Adventure Style]'
-local libReq = 1
 local version = '2.2.13'
 
 --[[
@@ -10,6 +9,10 @@ local version = '2.2.13'
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
 assert((SUBVERSION > 12), packType.."Mod requires features from "..version.."+")
+
+local function macro_dofile(str)
+	dofile(gameString..'_'..str)
+end
 
 -- Shut up and load it in.
 
@@ -28,20 +31,19 @@ if VERSION == 202 and SUBVERSION > 9 then
 	--	dofile("TBS_libary.lua")
 	--end
 
-	dofile('libraries'.."/lib_lite.lua")
+	dofile("LIB_TBS_lite.lua")
 
-	-- Settings, I/O etc.
-	dofile(gameString.."_cvar_settings.lua")
+	-- Globals
+	macro_dofile("game_globals.lua")
 
 	-- Game Assets
-	dofile(gameString.."_objects_custom.lua")
-	--dofile(gameString.."_map_executable.lua")
+	macro_dofile("objects_custom.lua")
 
-	dofile(gameString.."_models_common.lua")
-	dofile(gameString.."_models_itembox.lua")
-	dofile(gameString.."_models_checkpoint.lua")
-	dofile(gameString.."_models_capsule.lua")
+	macro_dofile("models_common.lua")
+	macro_dofile("models_itembox.lua")
+	macro_dofile("models_checkpoint.lua")
+	macro_dofile("models_capsule.lua")
 
-	dofile(gameString.."_user_interface.lua")
+	macro_dofile("user_interface.lua")
 
 end

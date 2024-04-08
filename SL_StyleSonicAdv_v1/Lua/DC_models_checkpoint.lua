@@ -1,12 +1,22 @@
 --[[
+
 		Sonic Adventure Style's Checkpoint
 
 Contributors: Ace Lite
-@Team Blue Spring 2022-2023
+@Team Blue Spring 2022-2024
 
 ]]
 
 local MapthingCheckpoints = {thg = {}; dis = {};}
+
+local Disable_Checkpoints = false
+
+addHook("MapLoad", function()
+	Disable_Checkpoints = false
+	if CV_FindVar("dc_checkpoints").value == 0 then
+		Disable_Checkpoints = true
+	end
+end)
 
 addHook("MapChange", function()
 	MapthingCheckpoints.thg = {}
@@ -14,6 +24,8 @@ addHook("MapChange", function()
 end)
 
 addHook("MobjSpawn", function(a, mt)
+	if Disable_Checkpoints then return end
+
 		-- Set up of Adventure Checkpoint
 		a.state = S_INVISIBLE
 		a.sprite = SPR_CHE0
@@ -89,6 +101,8 @@ sfxinfo[freeslot("sfx_advche")].caption = "Checkpoint"
 mobjinfo[MT_STARPOST].painsound = sfx_advche
 
 addHook("MobjThinker", function(a)
+	if Disable_Checkpoints then return end
+
 	local thglist = MapthingCheckpoints.thg
 	if a.checksurrondings == nil and #thglist > 1 then
 		for k,rvmt in ipairs(MapthingCheckpoints.thg) do
@@ -286,6 +300,8 @@ local rewards = {
 }
 
 addHook("TouchSpecial", function(a,t)
+	if Disable_Checkpoints then return end
+
 	if t.player and t.player.starposttime < leveltime then
 
 		t.player.checkpointtime = TICRATE*3
@@ -305,6 +321,8 @@ addHook("TouchSpecial", function(a,t)
 end,  MT_STARPOST)
 
 addHook("PlayerThink", function(p)
+	if Disable_Checkpoints then return end
+
 	if not p.boxdisplay or not p.boxdisplay.timer then
 		p.boxdisplay = {}
 	end

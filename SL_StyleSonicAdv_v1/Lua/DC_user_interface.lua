@@ -1,8 +1,9 @@
 --[[
+
 		User Interfaces inspired by Sonic Adventure 2.
 
 Contributors: Ace Lite, Demnyx
-@Team Blue Spring 2022-2023
+@Team Blue Spring 2022-2024
 
 ]]
 
@@ -241,7 +242,15 @@ end
 local finishSectors = {}
 local exitmap, superexit, skiptally, checkemerald
 
+local Disable_TallyThinker = false
+
 local function hacksForCustomCustomExit()
+	Disable_TallyThinker = false
+	if CV_FindVar("dc_newtallyscreen").value == 0 then
+		Disable_TallyThinker = true
+		return
+	end
+
 	finishSectors = {}
 	exitmap, superexit, skiptally, checkemerald = nil, nil, nil, nil
 
@@ -301,6 +310,7 @@ local function P_NewSA2Exit(exitmap, superexit, checkemerald)
 end
 
 local function P_BackEndOfTally(p)
+	if Disable_TallyThinker then return end
 	if customhud then return end
 
 	if p.mrce and p.mrce.hud then
@@ -428,6 +438,7 @@ addHook("PlayerThink", P_BackEndOfTally)
 
 
 addHook("KeyDown", function(key)
+	if Disable_TallyThinker then return end
 	if hud.tallysa then
 		if key.num == input.gameControlToKeyNum(GC_SPIN) then
 			hud.skiptallysa = true
@@ -441,6 +452,7 @@ sfxinfo[freeslot("sfx_advchi")].caption = "cha-ching!"
 sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
 local function tallyDrawer(v, p)
+	if Disable_TallyThinker then return end
 	if customhud then return end
 	-- Ease and timing
 
@@ -613,13 +625,18 @@ local function tallyDrawer(v, p)
 
 end
 
+--
+-- Rank Display
+--
 
---[[
 hud.add(function(v, p, t, e)
+	if CV_FindVar("dc_hud_rankdisplay").value == 0 then return end
+
 	local rank = RankCounter(p)
-	v.draw(144, 10, v.cachePatch("SA2RANK"..rank))
+	local patch = v.cachePatch("SA2RANK"..rank)
+
+	v.draw(160, 28, patch)
 end, "game")
-]]
 
 --
 -- In-Game Hook
@@ -632,7 +649,7 @@ hud.add(function(v, p, t, e)
 		hud.disable("score")
 		hud.disable("lives")
 
-		if not customhud then --Check of K.S. Custom Hud Framework. I should have use it...
+		if CV_FindVar("dc_hud_gamehud").value ~= 0 and not customhud then --Check of K.S. Custom Hud Framework. I should have use it...
 			local mint, sect, cent = convertPlayerTime(p.realtime)
 			local numrings = (p.rings > 99  and p.rings or (p.rings < 10 and '00'..p.rings or '0'..p.rings))
 			local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
@@ -643,11 +660,11 @@ hud.add(function(v, p, t, e)
 			--
 
 
-			v.drawScaled((hudinfo[HUD_RINGS].x+7)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-18)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, FRACUNIT/4*3, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", 1, 8)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SECONDS].x+6)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, FRACUNIT/4*3, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", 1, 0)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_RINGSNUM].x-37)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
-			if p.rings == 0 then TBS_FontDrawer(v, 'SA2NUMR', (hudinfo[HUD_RINGSNUM].x-37)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, "000", hudinfo[HUD_RINGS].f|hud.transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0) end
+			v.drawScaled((hudinfo[HUD_RINGS].x)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-96)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, FRACUNIT/4*3, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-96)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, FRACUNIT/4*3, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_RINGSNUM].x-48)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			if p.rings == 0 then TBS_FontDrawer(v, 'SA2NUMR', (hudinfo[HUD_RINGSNUM].x-48)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, "000", hudinfo[HUD_RINGS].f|hud.transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0) end
 
 			if token then
 				v.drawScaled((hudinfo[HUD_RINGS].x+65)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
@@ -668,10 +685,10 @@ hud.add(function(v, p, t, e)
 
 
 			for i = 1, 4 do
-				v.draw((hudinfo[HUD_LIVES].x+16+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
+				v.draw((hudinfo[HUD_LIVES].x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
 			end
-			v.draw(hudinfo[HUD_LIVES].x+16, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_LIVES].x+46)*FRACUNIT, (hudinfo[HUD_LIVES].y+58)*FRACUNIT, FRACUNIT/4*3, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			v.draw(hudinfo[HUD_LIVES].x+8, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_LIVES].x+38)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, FRACUNIT/4*3, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 
 			--
 			--	BOSS HEALTH COUNTER
@@ -787,6 +804,8 @@ hud.disable("stagetitle")
 sfxinfo[freeslot("sfx_advtts")].caption = "titlecard"
 
 hud.add(function(v, p, t, et)
+	if CV_FindVar("dc_hud_titlecard").value == 0 then return end
+
 	if customhud then return end
 	local namezone = mapheaderinfo[gamemap].lvlttl..""
 	local subtitle = mapheaderinfo[gamemap].subttl..""
@@ -903,7 +922,7 @@ hud.add(function(v, p, t, et)
 end, "titlecard")
 
 
-addHook("PreThinkFrame", function() 
+addHook("PreThinkFrame", function()
 	for p in players.iterate() do
 		if hud.sa2musicstop then
 			S_PauseMusic(p)

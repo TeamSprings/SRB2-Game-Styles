@@ -1,12 +1,24 @@
 --[[
+
 		Sonic Adventure Style's Item Box
 
 Contributors: Ace Lite, Demnyx
-@Team Blue Spring 2022-2023
+@Team Blue Spring 2022-2024
 
 ]]
 
+
+local Disable_ItemBox = false
+
+addHook("MapLoad", function()
+	Disable_ItemBox = false
+	if CV_FindVar("dc_itembox").value == 0 then
+		Disable_ItemBox = true
+	end
+end)
+
 addHook("MobjSpawn", function(a, mt)
+	if Disable_ItemBox then return end
 	if a.info.flags & MF_MONITOR then
 
 		local icon = mobjinfo[a.type].damage
@@ -197,6 +209,7 @@ local ringboxrandomizer = {
 
 
 addHook("MobjThinker", function(a)
+	if Disable_ItemBox then return end
 	if (a.info.flags & MF_MONITOR) then
 
 		--	Segment for calling Item Box switch.
@@ -342,6 +355,7 @@ end
 
 
 addHook("MobjDeath", function(a, d, s)
+	if Disable_ItemBox then return end
 	if a.info.flags & MF_MONITOR then
 		if not a.target then
 			if s or d then
@@ -393,6 +407,7 @@ addHook("MobjDeath", function(a, d, s)
 end)
 
 addHook("MobjRemoved", function(a, d)
+	if Disable_ItemBox then return end
 	if not (gamestate & GS_LEVEL) then return false end
 	if a and a.valid and a.item or a.caps and a.info.flags & MF_MONITOR then
 		if a.item and a.item.valid then
@@ -405,6 +420,7 @@ addHook("MobjRemoved", function(a, d)
 end)
 
 addHook("MobjMoveCollide", function(a, mt)
+	if Disable_ItemBox then return end
 	if mt and mt.valid and (mt.flags & MF_MONITOR) and a.player and a.z <= mt.z+mt.height and a.z >= mt.z and
 	not ((a.player.ctfteam == 1 and monitor.type == MT_RING_BLUEBOX) or (a.player.ctfteam == 2 and monitor.type == MT_RING_REDBOX))	then
 		mt.target = a

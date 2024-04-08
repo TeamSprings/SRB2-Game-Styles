@@ -1,9 +1,11 @@
 --[[
+
 		Team Blue Spring's Series of Libaries.
-		Lite version of Common Library - lib_lite.lua
+		Lite version of Common Library - LIB_TBS_lite.lua
 
 Contributors: Skydusk
 @Team Blue Spring 2024
+
 ]]
 
 local fontregistry = {}
@@ -79,19 +81,19 @@ local function V_FontDrawer(v, font, x, y, scale, value, flags, color, alligment
 		lenght = $+cur.width
 	end
 
-	x = FixedMul(x, scale)
-	y = FixedMul(y, scale)
+	local nx = FixedMul(x, scale)
+	local ny = FixedMul(y, scale)
 
 	if alligment == "center" then
-		x = $-(lenght*scale >> 1)
+		nx = $-(lenght*scale >> 1)
 	elseif alligment == "right" then
-		x = $-lenght*scale
+		nx = $-lenght*scale
 	end
 
 	local drawer = v.drawScaled
 
 	for i = 1,maxv do
-		drawer(x+fontoffset*scale, y, scale, cache[i].patch, flags, color)
+		drawer(nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color)
 		fontoffset = $+cache[i].width
 	end
 end
