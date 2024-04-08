@@ -1,21 +1,21 @@
-/* 
+--[[
 		Sonic Adventure Style's Common Objects
 
 Contributors: Ace Lite
 @Team Blue Spring 2022-2023
 
-*/
+]]
 
 freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAERADUMMY", "MT_ROTATEOVERLAY", "MT_EXTRAINVRAY",
-"S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY", 
+"S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY",
 "SPR_CA2D", "SPR_CA3D", "SPR_1CAP", "SPR_GEM1", "SPR_GEM2", "SPR_FLB9", "SPR_INV1",
 "SPR_CHE0", "S_HWRSA2SPRING", "S_DIASA2SPRING")
 
-//
-//
-//	DUMMY/OVERLAY OBJECT MOBJINFO
-//
-//
+--
+--
+--	DUMMY/OVERLAY OBJECT MOBJINFO
+--
+--
 
 mobjinfo[MT_EXTRAERADUMMY] = {
 	spawnhealth = 1,
@@ -81,9 +81,9 @@ addHook("MobjThinker", function(a)
 end, MT_ROTATEOVERLAY)
 
 
-//
-// 	Animated Smoke
-//
+--
+-- 	Animated Smoke
+--
 
 states[S_ERASMOKE1] = {
 	sprite = SPR_CA2D,
@@ -101,9 +101,9 @@ states[S_ERASMOKE2] = {
 	var2 = 4
 }
 
-//
-// 	Animated Explosion + Flicky Bubble spawn
-//
+--
+-- 	Animated Explosion + Flicky Bubble spawn
+--
 
 sfxinfo[freeslot("sfx_advexp")].caption = "Boom"
 
@@ -111,7 +111,7 @@ states[S_XPLD_FLICKY].sprite = SPR_CA3D
 states[S_XPLD_FLICKY].frame = A|FF_TRANS30
 states[S_XPLD1].sprite = SPR_CA3D
 states[S_XPLD1].frame = A|FF_TRANS30
-states[S_XPLD1].action = function(a) 
+states[S_XPLD1].action = function(a)
 	a.blendmode = AST_ADD
 	a.scale = $+FRACUNIT
 	S_StartSound(a, sfx_advexp)
@@ -186,14 +186,14 @@ local Flickylist = {
 rawset(_G, "SA_BubbleFlickylist", Flickylist)
 
 for k,v in ipairs(Flickylist) do
-	
+
 addHook("MobjSpawn", bubbleflicky, v)
 
-end 
+end
 
-//
-//	Chaos Emeralds
-//
+--
+--	Chaos Emeralds
+--
 
 states[S_CEMG1] = {
 	sprite = SPR_GEM1,
@@ -258,9 +258,9 @@ states[S_CEMG7] = {
 	nextstate = S_CEMG7,
 }
 
-//
-//	Chao Key (Key to get to Chao Garden)
-//
+--
+--	Chao Key (Key to get to Chao Garden)
+--
 
 freeslot("SPR_SA2K")
 
@@ -268,7 +268,7 @@ addHook("MapThingSpawn", function(a)
 	a.state = S_INVISIBLE
 	a.sprite = SPR_SA2K
 	a.frame = B|FF_PAPERSPRITE
-	a.nsides = {} 
+	a.nsides = {}
 	for i = 1,2 do
 		local sideSpawn = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
 		sideSpawn.target = a
@@ -284,18 +284,18 @@ addHook("MapThingSpawn", function(a)
 	Dot.state = S_INVISIBLE
 	Dot.sprite = SPR_SA2K
 	Dot.frame = C
-	
+
 end, MT_TOKEN)
 
 
 addHook("MobjDeath", function(a)
-	for _,key in ipairs(a.nsides) do 
+	for _,key in ipairs(a.nsides) do
 		P_RemoveMobj(key)
 	end
 end, MT_TOKEN)
 
 addHook("MobjThinker", function(a)
-	if a and a.valid
+	if a and a.valid then
 		a.angle = $ + ANG1*3
 		for k,key in ipairs(a.nsides) do
 			if key and key.valid then
@@ -308,9 +308,9 @@ addHook("MobjThinker", function(a)
 end, MT_TOKEN)
 
 
-//
-//	Boosters/ Dash Panels
-//
+--
+--	Boosters/ Dash Panels
+--
 
 sfxinfo[freeslot("sfx_advdas")].caption = "Dash"
 
@@ -334,9 +334,9 @@ addHook("MapThingSpawn", function(a, mt)
 end, MT_REDBOOSTER)
 
 
-//
-//	Springs
-//
+--
+--	Springs
+--
 
 sfxinfo[freeslot("sfx_advspr")].caption = "Spring"
 
@@ -358,8 +358,8 @@ local function propellerSpringThinker(a)
 			a.chainconnect = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
 			a.chainconnect.state = S_INVISIBLE
 			a.chainconnect.sprite = SPR_RSPB
-			a.chainconnect.frame = G			
-			a.chainconnect.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT	
+			a.chainconnect.frame = G
+			a.chainconnect.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 		else
 			local ang = R_PointToAngle2(a.x, a.y, a.tracer.x, a.tracer.y)
 			P_TeleportMove(a.chainconnect, a.x+24*cos(ang), a.y+24*sin(ang), a.z)
@@ -372,8 +372,8 @@ local function propellerSpringThinker(a)
 				properer.state = S_INVISIBLE
 				properer.sprite = SPR_RSPB
 				properer.angle = ((360/3)*ANG1)*i
-				properer.frame = F|FF_PAPERSPRITE			
-				properer.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT			
+				properer.frame = F|FF_PAPERSPRITE
+				properer.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 				table.insert(a.properer, properer)
 			end
 		else
@@ -390,12 +390,12 @@ local function removalPropellerSpring(a)
 	if a.chainconnect then
 		P_RemoveMobj(a.chainconnect)
 	end
-		
+
 	if a.properer then
 		for i = 1,3 do
 			P_RemoveMobj(a.properer[i])
 		end
-		a.properer = nil		
+		a.properer = nil
 	end
 end
 
@@ -405,9 +405,9 @@ addHook("MobjThinker", propellerSpringThinker, MT_REDSPRINGBALL)
 addHook("MobjRemoved", removalPropellerSpring, MT_YELLOWSPRINGBALL)
 addHook("MobjRemoved", removalPropellerSpring, MT_REDSPRINGBALL)
 
-//
-// Invincibility
-//
+--
+-- Invincibility
+--
 
 mobjinfo[MT_EXTRAINVRAY] = {
 	spawnhealth = 1,
@@ -445,15 +445,15 @@ local invAngles = {
 	[13] = {ANGLE_45, -ANGLE_45},
 	[14] = {ANGLE_135, -ANGLE_45},
 	[15] = {0, ANGLE_180-ANG10},
-	[16] = {0, ANGLE_180+ANG10},	
+	[16] = {0, ANGLE_180+ANG10},
 }
 
 
 local function invincibilityModel(a, p)
 	if not a.raylist and p.powers[pw_invulnerability] then
 		a.raylist = {}
-	
-		for i = 1,16 do		
+
+		for i = 1,16 do
 			local ray = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_EXTRAINVRAY)
 			ray.transparencytimer = (50+15*i) % 50
 			ray.offsh = invAngles[i][1]
@@ -469,14 +469,14 @@ local function invincibilityModel(a, p)
 		a.raylist[17].sprite = SPR_INV1
 		a.raylist[17].frame = A|FF_ADD|FF_TRANS40|FF_SEMIBRIGHT
 	end
-	
+
 	if a.raylist and not p.powers[pw_invulnerability] then
 		for v, k in ipairs(a.raylist) do
 			P_RemoveMobj(k)
 		end
 		a.raylist = nil
 	end
-	
+
 	if a.raylist and p.powers[pw_invulnerability] then
 		for k,v in ipairs(a.raylist) do
 			local x,y,z
@@ -493,7 +493,7 @@ local function invincibilityModel(a, p)
 				v.momz = a.momz
 			end
 		end
-	end	
+	end
 end
 
 addHook("PlayerThink", function(p)
@@ -502,10 +502,10 @@ end)
 
 addHook("MobjThinker", function(a)
 	local transparency = 4 << FF_TRANSSHIFT
-	if a.transparencytimer then 
+	if a.transparencytimer then
 		a.transparencytimer = $-1
 	end
-	
+
 	if a.transparencytimer == 0 then
 		a.transparencytimer = 50
 	end
@@ -514,7 +514,7 @@ addHook("MobjThinker", function(a)
 	a.spriteyscale = 2*FRACUNIT/3
 
 	a.rollangle = a.offsv
-	
+
 	a.frame = $|transparency
 end, MT_EXTRAINVRAY)
 

@@ -1,14 +1,14 @@
-/* 
+--[[
 		Sonic Adventure Style's Cvars
 
 Contributors: Ace Lite
 @Team Blue Spring 2022-2023
 
-*/
+]]
 
-//
-//	Extra Functions
-//
+--
+--	Extra Functions
+--
 
 
 CV_RegisterVar({
@@ -32,9 +32,9 @@ CV_RegisterVar({
 	PossibleValue = {MIN = 0, MAX = 5}
 })
 
-//
-//	Disable Functions
-//
+--
+--	Disable Functions
+--
 
 CV_RegisterVar({
 	name = "dc_itembox",
@@ -64,9 +64,9 @@ CV_RegisterVar({
 	PossibleValue = CV_OnOff
 })
 
-//
-//	Chao Garden!
-//
+--
+--	Chao Garden!
+--
 
 CV_RegisterVar({
 	name = "dc_pricedifficulty",
