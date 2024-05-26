@@ -660,14 +660,14 @@ hud.add(function(v, p, t, e)
 			--
 
 
-			v.drawScaled((hudinfo[HUD_RINGS].x)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-96)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, FRACUNIT/4*3, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-96)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, FRACUNIT/4*3, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_RINGSNUM].x-48)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
-			if p.rings == 0 then TBS_FontDrawer(v, 'SA2NUMR', (hudinfo[HUD_RINGSNUM].x-48)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, "000", hudinfo[HUD_RINGS].f|hud.transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0) end
+			v.drawScaled((hudinfo[HUD_RINGS].x+12)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, FRACUNIT/4*3, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, FRACUNIT/4*3, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_RINGSNUM].x-32)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			if p.rings == 0 then TBS_FontDrawer(v, 'SA2NUMR', (hudinfo[HUD_RINGSNUM].x-32)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, FRACUNIT/4*3, "000", hudinfo[HUD_RINGS].f|hud.transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0) end
 
 			if token then
-				v.drawScaled((hudinfo[HUD_RINGS].x+65)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+				v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, FRACUNIT/4*3, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
 			end
 
 			--
@@ -685,10 +685,10 @@ hud.add(function(v, p, t, e)
 
 
 			for i = 1, 4 do
-				v.draw((hudinfo[HUD_LIVES].x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
+				v.draw((hudinfo[HUD_LIVES].x+20+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
 			end
-			v.draw(hudinfo[HUD_LIVES].x+8, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
-			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_LIVES].x+38)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, FRACUNIT/4*3, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			TBS_FontDrawer(v, 'SA2NUM', (hudinfo[HUD_LIVES].x+54)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, FRACUNIT/4*3, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 
 			--
 			--	BOSS HEALTH COUNTER

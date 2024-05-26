@@ -17,34 +17,40 @@ addHook("MapLoad", function()
 	end
 end)
 
-addHook("MobjSpawn", function(a, mt)
-	if Disable_ItemBox then return end
-	if a.info.flags & MF_MONITOR then
-
+local function P_SpawnItemBox(a)
 		local icon = mobjinfo[a.type].damage
 		local icstate = mobjinfo[icon].spawnstate
 		local icsprite = states[icstate].sprite
 		local icframe = states[icstate].frame
 
-		a.item = P_SpawnMobjFromMobj(a, 0,0,25*FRACUNIT, MT_BACKTIERADUMMY)
-		a.item.state = S_INVISIBLE
-		a.item.target = a
-		a.item.icsprite = icsprite
-		a.item.icframe = icframe
-		a.item.sprite = icsprite
-		a.item.frame = icframe|FF_PAPERSPRITE
-		a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-		a.item.flags2 = $|MF2_LINKDRAW
-		a.item.tfl = 1
+		if a.health > 0 then
+			if not a.item then
+				a.item = P_SpawnMobjFromMobj(a, 0,0,25*FRACUNIT, MT_BACKTIERADUMMY)
+				a.item.state = S_INVISIBLE
+				a.item.target = a
+				a.item.icsprite = icsprite
+				a.item.icframe = icframe
+				a.item.sprite = icsprite
+				a.item.frame = icframe|FF_PAPERSPRITE
+				a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				a.item.flags2 = $|MF2_LINKDRAW
+				a.item.tfl = 1
+			end
+
+			if not a.caps then
+				a.caps = P_SpawnMobjFromMobj(a, 0,0,0, MT_OVERLAY)
+				a.caps.state = S_INVISIBLE
+				a.caps.target = a
+				a.caps.sprite = SPR_1CAP
+				a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				a.caps.flags2 = $|MF2_LINKDRAW
+			end
+
+			a.settedup = nil
+		end
 
 		a.state = S_INVISIBLE
 		a.sprite = SPR_1CAP
-		a.caps = P_SpawnMobjFromMobj(a, 0,0,0, MT_OVERLAY)
-		a.caps.state = S_INVISIBLE
-		a.caps.target = a
-		a.caps.sprite = SPR_1CAP
-		a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-		a.caps.flags2 = $|MF2_LINKDRAW
 
 		--a.item.dispoffset = -32*FRACUNIT
 
@@ -65,21 +71,23 @@ addHook("MobjSpawn", function(a, mt)
 
 		a.originscale = a.scale
 		mobjinfo[a.type].deathsound = sfx_advite
-
-	end
-end, MT_NULL)
+end
 
 --	Item Box Switcher is a function switcing between "float" type or "ground" type capsule
 --	After function runs a.settedup makes sure to not run this function again.
 
 local function itemBoxSwitching(a, typem)
 	if typem == 1 then
-		a.flags = $ &~ MF_SOLID
+		a.flags = $ &~ MF_SOLID|MF_NOGRAVITY
 		a.caps.frame = C|FF_TRANS50
 		if a.info.flags & MF_GRENADEBOUNCE then
 			a.frame = H
 		else
-			a.frame = A
+			if a.health > 0 then
+				a.frame = A
+			else
+				a.frame = B
+			end
 		end
 	else
 		a.flags = $|MF_NOGRAVITY &~ MF_SOLID
@@ -209,17 +217,21 @@ local ringboxrandomizer = {
 
 
 addHook("MobjThinker", function(a)
-	if Disable_ItemBox then return end
 	if (a.info.flags & MF_MONITOR) then
+		if not (a.item and a.caps) then
+			P_SpawnItemBox(a)
+		end
 
 		--	Segment for calling Item Box switch.
-		if not a.settedup then
-			local typemonitor = 2
-			if a.caps.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.caps.ceilingz > a.z+25*FRACUNIT) then
-				typemonitor = 1
+		if not a.settedup and leveltime then
+			a.dctypemonitor = 2
+			if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz < a.z+25*FRACUNIT) then
+				a.dctypemonitor = 1
 			end
 
-			itemBoxSwitching(a, typemonitor)
+			itemBoxSwitching(a, a.dctypemonitor)
+		elseif not (a.settedup and leveltime) then
+			a.flags = $|MF_NOGRAVITY
 		end
 
 		-- Monitor Swaps by Cvar.
@@ -269,13 +281,13 @@ addHook("MobjThinker", function(a)
 			end
 
 			a.item.angle = $+ANG1*4
-			P_TeleportMove(a.item, a.x, a.y, a.z+FixedMul((a.flags2 & MF2_OBJECTFLIP and -10 or 25)*FRACUNIT, a.item.scale))
+			P_SetOrigin(a.caps, a.x, a.y, a.z+FixedMul(25*FRACUNIT, a.item.scale)*P_MobjFlip(a))
 
 			local curicon = states[mobjinfo[mobjinfo[a.type].damage].spawnstate]
 
 			if a.health >= 1 then
 				-- Scale if necessary
-				local height = 73*FRACUNIT
+				local height = 73*a.scale
 
 				if a.caps.ceilingz < (a.caps.floorz + height) then
 					local funny =  FixedDiv(a.caps.ceilingz - a.caps.floorz, height)
@@ -283,7 +295,10 @@ addHook("MobjThinker", function(a)
 					a.item.scale = funny
 					a.caps.spriteyscale = funny
 				else
+					a.spritexscale = FRACUNIT
 					a.spriteyscale = FRACUNIT
+					a.scale = a.originscale
+					a.caps.scale = a.originscale
 					a.item.scale = a.spawnpoint and a.spawnpoint.scale or a.originscale
 				end
 
@@ -291,10 +306,15 @@ addHook("MobjThinker", function(a)
 					A_GoldMonitorSparkle(a)
 					a.goldentimer = nil
 				end
+			elseif not (a.info.flags & MF_GRENADEBOUNCE) then
+				if a.item then
+					P_RemoveMobj(a.item)
+				end
 
-
+				if a.caps then
+					P_RemoveMobj(a.caps)
+				end
 			end
-
 		end
 
 		if a and a.health < 1 and a.info.flags & MF_GRENADEBOUNCE then
@@ -309,15 +329,21 @@ addHook("MobjThinker", function(a)
 			end
 		end
 
-		if not (a and a.valid and a.flags & MF_NOGRAVITY) then return end
+		if not (a and a.valid and a.caps and a.item and a.flags & MF_NOGRAVITY and a.dctypemonitor and a.dctypemonitor > 1) then return end
 
 		local transp = FF_TRANS30
 
 		if a.health < 1 then
 			if a.scale > a.originscale*5/2 then
-				a.item.flags2 = $|MF2_DONTDRAW
-				a.caps.flags2 = $|MF2_DONTDRAW
 				a.flags2 = $|MF2_DONTDRAW
+
+				if a.item then
+					P_RemoveMobj(a.item)
+				end
+
+				if a.caps then
+					P_RemoveMobj(a.caps)
+				end
 			else
 				transp = $+FRACUNIT*2
 				a.scale = $+FRACUNIT/14
@@ -381,7 +407,7 @@ addHook("MobjDeath", function(a, d, s)
 			insertPlayerItemToHud(a.target.player, a.item.sprite, a.item.frame)
 		end
 
-		if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY then
+		if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY and a.dctypemonitor and a.dctypemonitor > 1 then
 			boxicon.flags2 = $|MF2_DONTDRAW
 		else
 			local smuk = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
@@ -409,7 +435,7 @@ end)
 addHook("MobjRemoved", function(a, d)
 	if Disable_ItemBox then return end
 	if not (gamestate & GS_LEVEL) then return false end
-	if a and a.valid and a.item or a.caps and a.info.flags & MF_MONITOR then
+	if a and a.valid and ((a.item and a.item.valid) or (a.caps and a.caps.valid)) and a.info.flags & MF_MONITOR then
 		if a.item and a.item.valid then
 			P_RemoveMobj(a.item)
 		end

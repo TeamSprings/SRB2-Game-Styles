@@ -47,13 +47,18 @@ CV_RegisterVar({
 
 local function disable_huds(cvar)
 	if not disabled_hud then return end
-	CONS_Printf(consoleplayer, "[Adventure Style] Entire hud system was disabled by another mod. Apology for inconvenience.")
+	CONS_Printf(consoleplayer, "[Adventure Style] Entire hud system was disabled by another mod. We apologize for inconvenience.")
 	CV_Set(cvar, 0)
 end
 
 local function disable_assets(cvar)
 	if not disabled_assets then return end
-	CONS_Printf(consoleplayer, "[Adventure Style] Assets were disabled by another mod. Apology for inconvenience.")
+	CONS_Printf(consoleplayer, "[Adventure Style] Assets were disabled by another mod. We apologize for inconvenience.")
+	CV_Set(cvar, 0)
+end
+
+local function disable_assets_as_well_cvar(cvar)
+	CONS_Printf(consoleplayer, "[Adventure Style] This console command is yet to be functional. We apologize for inconvenience.")
 	CV_Set(cvar, 0)
 end
 
@@ -65,7 +70,7 @@ CV_RegisterVar({
 	PossibleValue = CV_OnOff,
 	category = "Adventure Style - Eyecandy",
 	displayname = "Item Capsule",
-	func = disable_assets,
+	func = disable_assets_as_well_cvar,
 })
 
 CV_RegisterVar({
@@ -75,7 +80,7 @@ CV_RegisterVar({
 	PossibleValue = CV_OnOff,
 	category = "Adventure Style - Eyecandy",
 	displayname = "Item Capsule",
-	func = disable_assets,
+	func = disable_assets_as_well_cvar,
 })
 
 CV_RegisterVar({
@@ -193,7 +198,7 @@ rawset(_G, "Adventure_Style", setmetatable({
 	end,
 
 	__call = function()
-		return true, rawget(Adventure_Style, "version"), rawget(Adventure_Style, "string_version")
+		return rawget(Adventure_Style, "version"), rawget(Adventure_Style, "string_version")
 	end,
 }))
 

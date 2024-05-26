@@ -22,14 +22,14 @@ addHook("MapLoad", function()
 	end
 end)
 
-addHook("MapThingSpawn", function(a, tm)
+addHook("MobjSpawn", function(a)
 	if Disable_Capsules then return end
 
 	a.radius = 46*FRACUNIT
 	a.height = 88*FRACUNIT
 	a.spaz = a.z
 	a.scale = $+FRACUNIT/6
-	P_TeleportMove(a, tm.x*FRACUNIT, tm.y*FRACUNIT, tm.z*FRACUNIT-a.scale*200)
+	P_SetOrigin(a, a.x*FRACUNIT, a.y*FRACUNIT, a.z*FRACUNIT-a.scale*200)
 	a.disty = -a.scale*200
 
 	for sector in sectors.iterate do

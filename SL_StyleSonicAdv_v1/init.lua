@@ -10,8 +10,15 @@ local version = '2.2.13'
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
 assert((SUBVERSION > 12), packType.."Mod requires features from "..version.."+")
 
-local function macro_dofile(str)
-	dofile(gameString..'_'..str)
+-- Pointless really, merely attempt to create iterator, possibly useful for other type of iterations
+local function iterator_n(array, n) if n < #array then n = $+1 return n, array[n] end end
+local function iterator(array) return iterator_n, array, 0 end
+
+local function macro_dofile(prefix, ...)
+	local array = {...}
+	for _,use in iterator(array) do
+		dofile(prefix..'_'..use)
+	end
 end
 
 -- Shut up and load it in.
@@ -33,17 +40,29 @@ if VERSION == 202 and SUBVERSION > 9 then
 
 	dofile("LIB_TBS_lite.lua")
 
+	 macro_dofile(gameString,
+	 "game_globals.lua",
+
+	 "objects_custom.lua",
+
+	 "models_common.lua",
+	 "models_itembox.lua",
+	 "models_checkpoint.lua",
+	 "models_capsule.lua",
+
+	 "user_interface.lua")
+
 	-- Globals
-	macro_dofile("game_globals.lua")
+	--macro_dofile("game_globals.lua")
 
 	-- Game Assets
-	macro_dofile("objects_custom.lua")
+	--macro_dofile("objects_custom.lua")
 
-	macro_dofile("models_common.lua")
-	macro_dofile("models_itembox.lua")
-	macro_dofile("models_checkpoint.lua")
-	macro_dofile("models_capsule.lua")
+	--macro_dofile("models_common.lua")
+	--macro_dofile("models_itembox.lua")
+	--macro_dofile("models_checkpoint.lua")
+	--macro_dofile("models_capsule.lua")
 
-	macro_dofile("user_interface.lua")
+	--macro_dofile("user_interface.lua")
 
 end

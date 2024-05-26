@@ -23,18 +23,41 @@ addHook("MapChange", function()
 	MapthingCheckpoints.dis = {}
 end)
 
-addHook("MobjSpawn", function(a, mt)
-	if Disable_Checkpoints then return end
-
+local function P_SpawnCheckPoint(a)
 		-- Set up of Adventure Checkpoint
 		a.state = S_INVISIBLE
 		a.sprite = SPR_CHE0
 		a.frame = A
 		a.flags2 = $|MF2_DONTDRAW
-		a.base = {}
-		a.pads = {}
-		a.stick = {}
-		a.bulb = {}
+
+		if a.base == nil then
+			a.base = {}
+			a.pads = {}
+			a.stick = {}
+			a.bulb = {}
+		end
+
+		-- clean up
+		for i = 1, 2 do
+			if a.base[i] then
+				P_RemoveMobj(a.base[i])
+			end
+
+			if a.stick[i] then
+				P_RemoveMobj(a.stick[i])
+			end
+
+			if a.bulb[i] then
+				P_RemoveMobj(a.bulb[i])
+			end
+
+			if a.pads[i] then
+				P_RemoveMobj(a.pads[i])
+			end
+
+			--print("yes, checkpoints are cleaned")
+			a.pads[i], a.base[i], a.stick[i], a.bulb[i] = nil,nil,nil,nil
+		end
 
 		-- Model build
 
@@ -49,59 +72,68 @@ addHook("MobjSpawn", function(a, mt)
 
 		for i = 1,2 do
 			local ang = a.angle+ANGLE_180*i-ANGLE_90
+			local base, pad, stick, bulb
 
-			local base = P_SpawnMobjFromMobj(a, 73*cos(ang), 73*sin(ang),0, MT_FRONTERADUMMY)
-			base.state = S_INVISIBLE
-			base.sprite = a.sprite
-			base.angle = ang
-			base.frame = A
-			base.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-			base.flags2 = $|MF2_LINKDRAW
-
-			local pad = P_SpawnMobjFromMobj(a, 56*cos(ang), 56*sin(ang),0, MT_BACKTIERADUMMY)
-			pad.state = S_INVISIBLE
-			pad.sprite = a.sprite
-			pad.angle = ang
-			pad.frame = B
-			pad.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-			pad.flags2 = $|MF2_LINKDRAW
-
-			local stick = P_SpawnMobjFromMobj(base, 0, 0, 44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_BACKTIERADUMMY)
-			stick.state = S_INVISIBLE
-			stick.sprite = a.sprite
-			stick.angle = ang
-			if i == 1 then
-				stick.frame = C|FF_PAPERSPRITE
-				stick.rollangle = ANGLE_180
-				stick.angle = ang+ANGLE_180
-			else
-				stick.frame = C|FF_PAPERSPRITE
+			if not a.base[i] then
+				base = P_SpawnMobjFromMobj(a, 73*cos(ang), 73*sin(ang),0, MT_FRONTERADUMMY)
+				base.state = S_INVISIBLE
+				base.sprite = a.sprite
+				base.angle = ang
+				base.frame = A
+				base.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				base.flags2 = $|MF2_LINKDRAW
+				table.insert(a.base, base)
 			end
-			stick.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-			stick.flags2 = $|MF2_LINKDRAW
 
-			local bulb = P_SpawnMobjFromMobj(base, -49*cos(ang), -49*sin(ang),36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_FRONTERADUMMY)
-			bulb.state = S_INVISIBLE
-			bulb.sprite = a.sprite
-			bulb.angle = ang
-			bulb.frame = E
-			bulb.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-			bulb.flags2 = $|MF2_LINKDRAW
+			if not a.pads[i] then
+				pad = P_SpawnMobjFromMobj(a, 56*cos(ang), 56*sin(ang),0, MT_BACKTIERADUMMY)
+				pad.state = S_INVISIBLE
+				pad.sprite = a.sprite
+				pad.angle = ang
+				pad.frame = B
+				pad.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				pad.flags2 = $|MF2_LINKDRAW
+				table.insert(a.pads, pad)
+			end
 
-			table.insert(a.base, base)
-			table.insert(a.pads, pad)
-			table.insert(a.stick, stick)
-			table.insert(a.bulb, bulb)
+			if not a.stick[i] then
+				stick = P_SpawnMobjFromMobj(base, 0, 0, 44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_BACKTIERADUMMY)
+				stick.state = S_INVISIBLE
+				stick.sprite = a.sprite
+				stick.angle = ang
+				if i == 1 then
+					stick.frame = C|FF_PAPERSPRITE
+					stick.rollangle = ANGLE_180
+					stick.angle = ang+ANGLE_180
+				else
+					stick.frame = C|FF_PAPERSPRITE
+				end
+				stick.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				stick.flags2 = $|MF2_LINKDRAW
+				table.insert(a.stick, stick)
+			end
 
+			if not a.bulb[i] then
+				bulb = P_SpawnMobjFromMobj(base, -49*cos(ang), -49*sin(ang),36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_FRONTERADUMMY)
+				bulb.state = S_INVISIBLE
+				bulb.sprite = a.sprite
+				bulb.angle = ang
+				bulb.frame = E
+				bulb.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+				bulb.flags2 = $|MF2_LINKDRAW
+				table.insert(a.bulb, bulb)
+			end
 		end
-
-end, MT_STARPOST)
+end
 
 sfxinfo[freeslot("sfx_advche")].caption = "Checkpoint"
 mobjinfo[MT_STARPOST].painsound = sfx_advche
 
 addHook("MobjThinker", function(a)
-	if Disable_Checkpoints then return end
+	if not (a.base and a.base[1]) then
+		P_SpawnCheckPoint(a)
+		a.ohnomorecheckpoints = nil
+	end
 
 	local thglist = MapthingCheckpoints.thg
 	if a.checksurrondings == nil and #thglist > 1 then
@@ -125,23 +157,24 @@ addHook("MobjThinker", function(a)
 	end
 
 	local ang = a.angle-ANGLE_90
+
 	if a.ohnomorecheckpoints ~= nil then
 		ang = R_PointToAngle2(a.x, a.y, MapthingCheckpoints.dis[a.idmt].x or 0, MapthingCheckpoints.dis[a.idmt].y or 0)
-	end
 
-	if a.ohnomorecheckpoints ~= nil and a.pads[2] then
-		P_TryMove(a, a.x+25*cos(ang), a.y+25*sin(ang), true)
-		P_RemoveMobj(a.base[2])
-		P_RemoveMobj(a.stick[2])
-		P_RemoveMobj(a.bulb[2])
-		P_RemoveMobj(a.pads[2])
-		--print("yes, checkpoints are cleaned")
-		a.pads[2], a.base[2], a.stick[2], a.bulb[2] = nil,nil,nil,nil
+		if a.pads[2] then
+			P_TryMove(a, a.x+25*cos(ang), a.y+25*sin(ang), true)
+			P_RemoveMobj(a.base[2])
+			P_RemoveMobj(a.stick[2])
+			P_RemoveMobj(a.bulb[2])
+			P_RemoveMobj(a.pads[2])
+			--print("yes, checkpoints are cleaned")
+			a.pads[2], a.base[2], a.stick[2], a.bulb[2] = nil,nil,nil,nil
+		end
 	end
 
 	for id,pad in ipairs(a.pads) do
 		pad.angle = ang+ANGLE_180*id
-		P_TeleportMove(pad,
+		P_SetOrigin(pad,
 		a.x+56*cos(ang+ANGLE_180*id),
 		a.y+56*sin(ang+ANGLE_180*id),
 		a.z)
@@ -149,27 +182,29 @@ addHook("MobjThinker", function(a)
 
 	for id,base in ipairs(a.base) do
 		base.angle = ang+ANGLE_180*id
-		P_TeleportMove(base,
+		P_SetOrigin(base,
 		a.x+73*cos(ang+ANGLE_180*id),
 		a.y+73*sin(ang+ANGLE_180*id),
 		a.z)
 	end
 
-	if a.state == S_STARPOST_SPIN then
+	if a.state == S_STARPOST_SPIN and not a.sprong then
 
 		local decreasespd = ease.linear((a.tics*FRACUNIT)/states[S_STARPOST_SPIN].tics, 47*ANG1, 36*ANG1)
 
 		for id,stick in ipairs(a.stick) do
 			stick.angle =  $ + (id == 1 and decreasespd or -decreasespd)
-			P_TeleportMove(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 		for id,bulb in ipairs(a.bulb) do
 			bulb.frame = F
 			bulb.angle =  $ + (id == 1 and decreasespd or -decreasespd)
-			P_TeleportMove(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 	elseif a.state == S_STARPOST_FLASH then
+		a.sprong = true
+
 		if a.angv == nil then
 			a.angv = 0
 		end
@@ -188,7 +223,7 @@ addHook("MobjThinker", function(a)
 				stick.rollangle = (id == 1 and ANGLE_180-calcangle or calcangle)
 				stick.angle =  $ + (id == 1 and decreasespd or -decreasespd)
 
-				P_TeleportMove(stick,
+				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
 				a.z+38*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
@@ -197,7 +232,7 @@ addHook("MobjThinker", function(a)
 			for id,bulb in ipairs(a.bulb) do
 				bulb.angle =  $ + (id == 1 and decreasespd or -decreasespd)
 
-				P_TeleportMove(bulb,
+				P_SetOrigin(bulb,
 				a.base[id].x-57*cos(bulb.angle)+height*cos(bulb.angle),
 				a.base[id].y-57*sin(bulb.angle)+height*sin(bulb.angle),
 				a.z+(34+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
@@ -214,14 +249,14 @@ addHook("MobjThinker", function(a)
 
 			for id,bulb in ipairs(a.bulb) do
 				bulb.frame = F
-				P_TeleportMove(bulb,
+				P_SetOrigin(bulb,
 				a.base[id].x,
 				a.base[id].y,
 				a.z+(33+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 			for id,stick in ipairs(a.stick) do
-				P_TeleportMove(stick,
+				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
 				a.z+34*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
@@ -233,12 +268,12 @@ addHook("MobjThinker", function(a)
 
 		for id,stick in ipairs(a.stick) do
 			stick.angle = ang
-			P_TeleportMove(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 		for id,bulb in ipairs(a.bulb) do
 			bulb.angle = ang+ANGLE_180*id
-			P_TeleportMove(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 	end
