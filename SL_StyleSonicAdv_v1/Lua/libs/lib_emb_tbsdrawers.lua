@@ -104,31 +104,4 @@ local function V_GetCharLenght(v, patch, str, font, val, padding, i)
 	return (fontregistry[font] and fontregistry[font][char] or V_RegisterFont(d, font, char)).width+padding
 end
 
---
--- Extra Math Section
---
-
-local function atan(x)
-    return asin(FixedDiv(x,(1 + FixedMul(x,x)))^(1/2))
-end
-
-local function FixedPower(x, n)
-	for i = 1, (n-1) do
-		x = FixedMul(x, x)
-	end
-	return x
-end
-
--- sTBS's Fixedpoint interpretation of Roblox's lua doc interpretation's of Bezier's curves.
-
-local function Math_QuadBezier(t, p0, p1, p2)
-	return FixedMul(FixedMul(FRACUNIT - t, FRACUNIT - t), p0) + 2 * FixedMul(FixedMul(FRACUNIT - t, t), p1) + FixedMul(FixedMul(t, t), p2)
-end
-
-rawset(_G, "atan", atan)
-rawset(_G, "FixedPower", FixedPower)
-
-rawset(_G, "TBS_FontDrawer", V_FontDrawer)
-rawset(_G, "TBS_GetCharLenght", V_GetCharLenght)
-
-rawset(_G, "Math_QuadBezier", Math_QuadBezier)
+return {draw = V_FontDrawer, lenght = V_GetCharLenght}

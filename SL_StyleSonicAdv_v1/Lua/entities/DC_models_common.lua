@@ -348,6 +348,15 @@ addHook("MapThingSpawn", function(a, mt)
 	return true
 end, MT_REDBOOSTER)
 
+local function boost_sound(mo, mop)
+	if mop.player and mop.z + mop.height > mo.z
+	and mo.z + mo.height > mop.z and not S_SoundPlaying(mop, mo.info.painsound) then
+		S_StartSound(mop, mo.info.painsound)
+	end
+end
+
+addHook("MobjCollide", boost_sound, MT_YELLOWBOOSTER)
+addHook("MobjCollide", boost_sound, MT_REDBOOSTER)
 
 --
 --	Springs
@@ -378,7 +387,7 @@ local function propellerSpringThinker(a)
 			a.chainconnect.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 		else
 			local ang = R_PointToAngle2(a.x, a.y, a.tracer.x, a.tracer.y)
-			P_TeleportMove(a.chainconnect, a.x+24*cos(ang), a.y+24*sin(ang), a.z)
+			P_SetOrigin(a.chainconnect, a.x+24*cos(ang), a.y+24*sin(ang), a.z)
 		end
 	else
 		if not a.properer then
@@ -396,7 +405,7 @@ local function propellerSpringThinker(a)
 			--local ang = (360/3)*ANG1
 			for k,pr in ipairs(a.properer) do
 				pr.angle = $+ANG1*5
-				P_TeleportMove(pr, a.x-8*cos(pr.angle), a.y-8*sin(pr.angle), a.z)
+				P_SetOrigin(pr, a.x-8*cos(pr.angle), a.y-8*sin(pr.angle), a.z)
 			end
 		end
 	end
@@ -505,7 +514,7 @@ local function invincibilityModel(a, p)
 				y = 18*FixedMul(sin(v.angle), cos(v.offsv))
 				z = 28*sin(v.offsv)+26*a.scale
 
-				P_TeleportMove(v, a.raylist[17].x+(x or 0), a.raylist[17].y+(y or 0), a.raylist[17].z+(z or 0))
+				P_MoveOrigin(v, a.raylist[17].x+(x or 0), a.raylist[17].y+(y or 0), a.raylist[17].z+(z or 0))
 				v.momx = a.momx
 				v.momy = a.momy
 				v.momz = a.momz

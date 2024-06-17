@@ -33,7 +33,7 @@ local function P_SpawnItemBox(a)
 				a.item.sprite = icsprite
 				a.item.frame = icframe|FF_PAPERSPRITE
 				a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-				a.item.flags2 = $|MF2_LINKDRAW
+				a.item.flags2 = $|MF2_LINKDRAW &~ MF2_OBJECTFLIP
 				a.item.tfl = 1
 			end
 
@@ -225,7 +225,7 @@ addHook("MobjThinker", function(a)
 		--	Segment for calling Item Box switch.
 		if not a.settedup and leveltime then
 			a.dctypemonitor = 2
-			if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz < a.z+25*FRACUNIT) then
+			if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
 				a.dctypemonitor = 1
 			end
 
@@ -270,7 +270,7 @@ addHook("MobjThinker", function(a)
 
 			if a.standingslope then
 				local slope = a.standingslope
-				local angle = slope.zangle*angleway(slope.xydirection)
+				local angle = FixedAngle(FixedMul(AngleFixed(slope.zangle), AngleFixed(slope.xydirection - R_PointToAngle(a.x, a.y))))
 				a.rollangle = angle
 				a.caps.rollangle = angle
 				a.item.rollangle = angle
@@ -280,8 +280,10 @@ addHook("MobjThinker", function(a)
 				a.item.rollangle = 0
 			end
 
+			local questionable = min(P_MobjFlip(a) * 80, 25)
+
 			a.item.angle = $+ANG1*4
-			P_SetOrigin(a.caps, a.x, a.y, a.z+FixedMul(25*FRACUNIT, a.item.scale)*P_MobjFlip(a))
+			P_SetOrigin(a.item, a.x, a.y, a.z+questionable * a.item.scale)
 
 			local curicon = states[mobjinfo[mobjinfo[a.type].damage].spawnstate]
 
@@ -289,10 +291,10 @@ addHook("MobjThinker", function(a)
 				-- Scale if necessary
 				local height = 73*a.scale
 
-				if a.caps.ceilingz < (a.caps.floorz + height) then
-					local funny =  FixedDiv(a.caps.ceilingz - a.caps.floorz, height)
+				if a.ceilingz < (a.floorz + height) then
+					local funny =  FixedDiv(a.ceilingz - a.floorz, height)
 					a.spriteyscale = funny
-					a.item.scale = funny
+					a.item.scale = FixedMul(funny, a.scale)
 					a.caps.spriteyscale = funny
 				else
 					a.spritexscale = FRACUNIT
@@ -306,7 +308,7 @@ addHook("MobjThinker", function(a)
 					A_GoldMonitorSparkle(a)
 					a.goldentimer = nil
 				end
-			elseif not (a.info.flags & MF_GRENADEBOUNCE) then
+			elseif not (a.info.flags & MF_GRENADEBOUNCE) and a.dctypemonitor and a.dctypemonitor == 1 then
 				if a.item then
 					P_RemoveMobj(a.item)
 				end
@@ -337,11 +339,11 @@ addHook("MobjThinker", function(a)
 			if a.scale > a.originscale*5/2 then
 				a.flags2 = $|MF2_DONTDRAW
 
-				if a.item then
+				if a.item and a.item.valid then
 					P_RemoveMobj(a.item)
 				end
 
-				if a.caps then
+				if a.caps and a.caps.valid then
 					P_RemoveMobj(a.caps)
 				end
 			else
@@ -411,6 +413,7 @@ addHook("MobjDeath", function(a, d, s)
 			boxicon.flags2 = $|MF2_DONTDRAW
 		else
 			local smuk = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
+			smuk.renderflags = a.flags2 & MF2_OBJECTFLIP and ($|RF_VERTICALFLIP) or $
 			smuk.state = S_ERASMOKE1
 			smuk.fuse = 32
 			smuk.scale = a.scale*8/3
