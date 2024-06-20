@@ -8,6 +8,8 @@ Contributors: Ace Lite, Demnyx
 ]]
 
 
+local slope_handler = tbsrequire 'helpers/mo_slope'
+
 local Disable_ItemBox = false
 
 addHook("MapLoad", function()
@@ -78,7 +80,7 @@ end
 
 local function itemBoxSwitching(a, typem)
 	if typem == 1 then
-		a.flags = $ &~ MF_SOLID|MF_NOGRAVITY
+		a.flags = $ &~ (MF_SOLID|MF_NOGRAVITY)
 		a.caps.frame = C|FF_TRANS50
 		if a.info.flags & MF_GRENADEBOUNCE then
 			a.frame = H
@@ -223,15 +225,17 @@ addHook("MobjThinker", function(a)
 		end
 
 		--	Segment for calling Item Box switch.
-		if not a.settedup and leveltime then
-			a.dctypemonitor = 2
-			if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
-				a.dctypemonitor = 1
-			end
+		if not a.settedup then
+			if leveltime then
+				a.dctypemonitor = 2
+				if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
+					a.dctypemonitor = 1
+				end
 
-			itemBoxSwitching(a, a.dctypemonitor)
-		elseif not (a.settedup and leveltime) then
-			a.flags = $|MF_NOGRAVITY
+				itemBoxSwitching(a, a.dctypemonitor)
+			else
+				a.flags = $|MF_NOGRAVITY
+			end
 		end
 
 		-- Monitor Swaps by Cvar.
@@ -266,18 +270,19 @@ addHook("MobjThinker", function(a)
 
 		-- Thinker
 
+		if a and a.valid and a.dctypemonitor == 1 then
+			slope_handler.slopeRotation(a)
+		end
+
 		if a and a.valid and a.item and a.item.valid and a.caps and a.caps.valid then
 
 			if a.standingslope then
-				local slope = a.standingslope
-				local angle = FixedAngle(FixedMul(AngleFixed(slope.zangle), AngleFixed(slope.xydirection - R_PointToAngle(a.x, a.y))))
+				local angle = slope_handler.slopeRotBaseReturn(a, a.standingslope)
 				a.rollangle = angle
 				a.caps.rollangle = angle
-				a.item.rollangle = angle
 			else
 				a.rollangle = 0
 				a.caps.rollangle = 0
-				a.item.rollangle = 0
 			end
 
 			local questionable = min(P_MobjFlip(a) * 80, 25)
@@ -290,9 +295,9 @@ addHook("MobjThinker", function(a)
 			if a.health >= 1 then
 				-- Scale if necessary
 				local height = 73*a.scale
+				local funny =  FixedDiv(a.caps.ceilingz - a.caps.floorz, height)
 
-				if a.ceilingz < (a.floorz + height) then
-					local funny =  FixedDiv(a.ceilingz - a.floorz, height)
+				if funny < FRACUNIT then
 					a.spriteyscale = funny
 					a.item.scale = FixedMul(funny, a.scale)
 					a.caps.spriteyscale = funny
@@ -346,6 +351,8 @@ addHook("MobjThinker", function(a)
 				if a.caps and a.caps.valid then
 					P_RemoveMobj(a.caps)
 				end
+
+				P_RemoveMobj(a)
 			else
 				transp = $+FRACUNIT*2
 				a.scale = $+FRACUNIT/14

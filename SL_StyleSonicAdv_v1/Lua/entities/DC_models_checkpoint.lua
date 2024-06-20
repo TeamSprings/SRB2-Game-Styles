@@ -322,7 +322,7 @@ local rewards = {
 			P_SwitchShield(p, SH_PITY)
 			insertPlayerItemToHud(p, SPR_TVPI, C)
 		elseif p.powers[pw_shield] == SH_PITY then
-			if CV_FindVar("SA2_ReplaceShields").value then
+			if CV_FindVar("dc_replaceshields").value then
 				P_SwitchShield(p, SH_ATTRACT)
 				insertPlayerItemToHud(p, SPR_TVAT, C)
 			else

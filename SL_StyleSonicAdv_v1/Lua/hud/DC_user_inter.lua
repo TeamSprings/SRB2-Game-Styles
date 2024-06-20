@@ -297,9 +297,9 @@ HOOK("stagetitle", "sa2hud", function(v, p, t, et)
 			v.drawScaled(FixedDiv((123+#lenght*13)*easescaleout+420, easescale), FixedDiv(75*easescaleout+185*sin(easespeen), easescale), easescale, spinGhost, V_ADD|V_PERPLAYER|(easetranp << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
 		end
 
-		v.draw((96+#lenght*10)-easespin+easespout, 75, v.cachePatch("SA2TTSPIN"), 0, v.getColormap(TC_DEFAULT, p.skincolor))
+		v.draw((96+#lenght*10)-easespin+easespout, 75, v.cachePatch("SA2TTSPIN"), V_PERPLAYER, v.getColormap(TC_DEFAULT, p.skincolor))
 
-		font_drawer(v, 'SA2TTFONT', (116+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+		font_drawer(v, 'SA2TTFONT', (116+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
 
 		-- SUBTITLE
 
@@ -318,7 +318,7 @@ HOOK("stagetitle", "sa2hud", function(v, p, t, et)
 
 		for i = 1, #split do
 			local spliteaseout = ease.inquint((max(min(t-5*TICRATE/2-(i-1), TICRATE/2+(i-1)), 0)*FRACUNIT)/(TICRATE/2+(i-1)), 0, 500)
-			font_drawer(v, 'SA2TTFONT', FixedDiv((96-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FRACUNIT, FRACUNIT+FRACUNIT/2), FixedDiv((88+(i-1)*20)*FRACUNIT, FRACUNIT+FRACUNIT/2), FRACUNIT+FRACUNIT/2, split[i], hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', FixedDiv((96-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FRACUNIT, FRACUNIT+FRACUNIT/2), FixedDiv((88+(i-1)*20)*FRACUNIT, FRACUNIT+FRACUNIT/2), FRACUNIT+FRACUNIT/2, split[i], V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
 		end
 
 	end

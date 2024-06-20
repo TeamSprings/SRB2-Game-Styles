@@ -8,7 +8,7 @@ Contributors: Ace Lite
 ]]
 
 freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAERADUMMY", "MT_ROTATEOVERLAY", "MT_EXTRAINVRAY",
-"S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY",
+"S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_SA2FLICKYBUBBLE", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY",
 "SPR_CA2D", "SPR_CA3D", "SPR_1CAP", "SPR_GEM1", "SPR_GEM2", "SPR_FLB9", "SPR_INV1",
 "SPR_CHE0", "S_HWRSA2SPRING", "S_DIASA2SPRING")
 
@@ -83,8 +83,10 @@ mobjinfo[MT_ROTATEOVERLAY] = {
 
 addHook("MobjThinker", function(a)
 	if a.target then
-		a.rollangle = $+ANG2
-		P_MoveOrigin(a, a.target.x, a.target.y, a.target.z)
+		if not a.shield then
+			a.rollangle = $+ANG2
+			P_MoveOrigin(a, a.target.x, a.target.y, a.target.z)
+		end
 	else
 		P_RemoveMobj(a)
 	end
@@ -158,6 +160,15 @@ states[S_XPLD9] = {
 	tics = 2
 }
 
+states[S_SA2FLICKYBUBBLE] = {
+	sprite = SPR_FLB9,
+	frame = FF_ANIMATE|FF_ADD|FF_TRANS20|A,
+	tics = 35,
+	var1 = 34,
+	var2 = 1,
+	nextstate = S_SA2FLICKYBUBBLE,
+}
+
 addHook("MobjSpawn", function(a, tm)
 	a.state = S_XPLD1
 	a.scale = $*2
@@ -165,9 +176,7 @@ end, MT_SONIC3KBOSSEXPLODE)
 
 local function bubbleflicky(a)
 	local overlay = P_SpawnMobjFromMobj(a, 0,0,0, MT_ROTATEOVERLAY)
-	overlay.state = S_INVISIBLE
-	overlay.sprite = SPR_FLB9
-	overlay.frame = FF_ADD|FF_TRANS20
+	overlay.state = S_SA2FLICKYBUBBLE
 	overlay.target = a
 	overlay.fuse = TICRATE*6
 end
