@@ -128,7 +128,121 @@ HOOK("checkpointtimer", "sa2hud", function(v, p, t, e)
 	hudinfo[HUD_POWERUPS].y = poweruporiginaly - hud.powerupsatic
 end, "game")
 
+--
+-- SCORE ADDITIVES
+--
 
+local score_add = {}
+
+local score_graphic = {
+	"SCOREADDSA21",
+	"SCOREADDSA22",
+	"SCOREADDSA23",
+	"SCOREADDSA24",
+	"SCOREADDSA25",
+	"SCOREADDSA26",
+	"SCOREADDSA27",
+	"SCOREADDSA28",
+	"SCOREADDSA29",
+	"SCOREADDSA2A",
+}
+
+rawset(_G, "dc_addscoreprompt", function(score_level)
+	table.insert(score_add, {graphic = score_graphic[max(min(score_level, #score_graphic), 1)], x = 160, tics = 5*TICRATE})
+end)
+
+COM_AddCommand("dc_addfakescore", function(p, num)
+	dc_addscoreprompt(tonumber(num))
+end)
+
+HOOK("scoreadditives", "sa2hud", function(v, p, t, e)
+	if score_add then
+		local y = hudinfo[HUD_RINGS].y + 14
+
+		for k, prompt in ipairs(score_add) do
+			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FRACUNIT, y*FRACUNIT, FRACUNIT/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP)
+
+
+			if prompt.x then
+				prompt.x = $/2
+			end
+
+			prompt.tics = $-1
+			if prompt.tics == 0 then
+				table.remove(score_add, k)
+			end
+
+			y = $+8
+		end
+
+
+	end
+end, "game")
+
+
+--
+-- FLICKIES
+--
+
+local flickies_y = 200 - 25
+local flicky_flags = V_SNAPTORIGHT|V_SNAPTOBOTTOM
+local flicky_scale = FRACUNIT/2
+
+local color_flickies = {
+	["flight"] = SKINCOLOR_BLUE,
+	["power"] = SKINCOLOR_RED,
+	["speed"] = SKINCOLOR_GREEN,
+}
+
+sfxinfo[freeslot("sfx_advaac")].caption = "Flicky Collected!"
+
+HOOK("flickies", "sa2hud", function(v, p, t, e)
+	if p.flickies and p.flickies.tics then
+		local scale_in = max(p.flickies.tics - (TICRATE*3 - 25), 0)*FRACUNIT/25
+		local move_in = max(p.flickies.tics - (TICRATE*3 - 15), 0)*FRACUNIT/15
+		local move_out = min(p.flickies.tics - 10, 0)*FRACUNIT/10
+
+		local incoming_move = min(move_in*2, FRACUNIT)
+
+		local invx = ease.linear(incoming_move, 20, 0)
+		local x = ease.linear(incoming_move - move_out, 320, 500)-35
+		local base = v.cachePatch("FLICKYBASESA2")
+		local movscale = 0
+
+		for k, fl in ipairs(p.flickies) do
+			if #p.flickies == k then
+				movscale = scale_in
+				if p.flickies.tics > (TICRATE*3 - 16) then
+					continue
+				elseif p.flickies.tics == (TICRATE*3 - 25) and not menuactive then
+					S_StartSound(nil, sfx_advaac, p)
+				end
+			end
+
+			local colorindx = 0
+
+
+			if fl.data and fl.data.type then
+				colorindx = color_flickies[fl.data.type] or 0
+			end
+
+			local state = states[mobjinfo[fl.mobjtype].spawnstate]
+			local sprite = v.getSpritePatch(state.sprite, state.frame, 0, 0)
+
+			v.drawScaled(x * FRACUNIT - movscale*base.width/2, flickies_y * FRACUNIT - movscale*base.height/2, flicky_scale+movscale, base, flicky_flags, v.getColormap(TC_DEFAULT, colorindx))
+
+			v.drawScaled((x + sprite.width/3) * FRACUNIT - movscale,
+			(flickies_y + sprite.height/3 + sprite.height/4) * FRACUNIT - movscale,
+			flicky_scale+movscale,
+			sprite,
+			flicky_flags)
+
+			x = $ - invx
+		end
+
+		p.flickies.tics = $-1
+	end
+end, "game")
 
 --
 -- RANK DISPLAY
