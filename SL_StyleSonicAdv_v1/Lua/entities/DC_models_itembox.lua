@@ -220,7 +220,7 @@ local ringboxrandomizer = {
 
 addHook("MobjThinker", function(a)
 	if (a.info.flags & MF_MONITOR) then
-		if not (a.item and a.caps) then
+		if a.health >= 1 and not (a.item and a.item.valid and a.caps and a.caps.valid) then
 			P_SpawnItemBox(a)
 		end
 

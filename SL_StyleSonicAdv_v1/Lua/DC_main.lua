@@ -14,12 +14,14 @@ Contributors: Ace Lite
 local disabled_monitors = false
 
 local function disable_assets(cvar)
+	if not consoleplayer then return end
 	if not disabled_assets then return end
 	CONS_Printf(consoleplayer, "[Adventure Style] Assets were disabled by another mod. We apologize for inconvenience.")
 	CV_Set(cvar, 0)
 end
 
 local function disable_assets_as_well_cvar(cvar)
+	if not consoleplayer then return end
 	CONS_Printf(consoleplayer, "[Adventure Style] This console command is yet to be functional. We apologize for inconvenience.")
 	CV_Set(cvar, 0)
 end
