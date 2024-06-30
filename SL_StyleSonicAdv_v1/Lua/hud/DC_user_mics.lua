@@ -17,6 +17,16 @@ local font_drawer = drawlib.draw
 
 local HOOK = customhud.SetupItem
 
+
+--
+-- Nulling function in case of things already done elsewhere
+--
+
+local function nullhud()
+	return
+end
+
+
 --
 -- BOSS DISPLAY
 --
@@ -155,9 +165,24 @@ COM_AddCommand("dc_addfakescore", function(p, num)
 	dc_addscoreprompt(tonumber(num))
 end)
 
+local y_offset = 0
+
 HOOK("scoreadditives", "sa2hud", function(v, p, t, e)
+	-- Gamma Support
+
+	if p and p.valid and p.mo and p.mo.valid and p.mo.gammaVars then
+		local gamma_vars = p.mo.gammaVars
+		for k, prompt in ipairs(gamma_vars.bonusHud) do
+			if prompt.time == 7*TICRATE/4 then
+				dc_addscoreprompt(prompt.i)
+			end
+		end
+	end
+
+	-- Main Structure
+
 	if score_add then
-		local y = hudinfo[HUD_RINGS].y + 14
+		local y = hudinfo[HUD_RINGS].y + 14 + y_offset
 
 		for k, prompt in ipairs(score_add) do
 			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FRACUNIT, y*FRACUNIT, FRACUNIT/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP)
@@ -169,16 +194,19 @@ HOOK("scoreadditives", "sa2hud", function(v, p, t, e)
 
 			prompt.tics = $-1
 			if prompt.tics == 0 then
+				y_offset = $ + 8
 				table.remove(score_add, k)
 			end
 
 			y = $+8
 		end
 
-
+		if y_offset then
+			y_offset = $ - 1
+		end
 	end
-end, "game")
 
+end, "game")
 
 --
 -- FLICKIES
@@ -287,3 +315,9 @@ HOOK("coopemeralds", "sa2hud", function(v)
 	end
 	return true
 end, "scores")
+
+--
+-- NUlLING
+--
+
+HOOK("gammaBonus", "sa2hud", nullhud, "game")
