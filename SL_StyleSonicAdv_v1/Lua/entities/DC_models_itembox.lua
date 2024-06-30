@@ -20,6 +20,8 @@ addHook("MapLoad", function()
 end)
 
 local function P_SpawnItemBox(a)
+		if not (a.info.flags & MF_MONITOR) then return end
+
 		local icon = mobjinfo[a.type].damage
 		local icstate = mobjinfo[icon].spawnstate
 		local icsprite = states[icstate].sprite
@@ -47,8 +49,6 @@ local function P_SpawnItemBox(a)
 				a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 				a.caps.flags2 = $|MF2_LINKDRAW
 			end
-
-			a.settedup = nil
 		end
 
 		a.state = S_INVISIBLE
@@ -58,6 +58,7 @@ local function P_SpawnItemBox(a)
 
 		if a.info.flags & MF_GRENADEBOUNCE then
 			a.color = SKINCOLOR_GOLD
+			a.goldenmonitor = true
 		else
 			if a.info.spawnstate == S_RING_BLUEBOX1 then
 				a.color = SKINCOLOR_SAPPHIRE
@@ -94,7 +95,6 @@ local function itemBoxSwitching(a, typem)
 	else
 		a.flags = $|MF_NOGRAVITY &~ MF_SOLID
 		a.frame = D
-		a.item.scale = a.scale+3*FRACUNIT/4
 		a.caps.frame = E|FF_TRANS50
 	end
 	a.settedup = true
@@ -217,163 +217,166 @@ local ringboxrandomizer = {
 	MT_SARANDRING_BOX,
 }
 
+addHook("MobjSpawn", P_SpawnItemBox)
+
 
 addHook("MobjThinker", function(a)
-	if (a.info.flags & MF_MONITOR) then
-		if a.health >= 1 and not (a.item and a.item.valid and a.caps and a.caps.valid) then
-			P_SpawnItemBox(a)
-		end
+	if (a and a.valid and a.info.flags & MF_MONITOR) then
+		if a.health > 0 then
+			-- Alive state
 
-		--	Segment for calling Item Box switch.
-		if not a.settedup then
-			if leveltime then
-				a.dctypemonitor = 2
-				if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
-					a.dctypemonitor = 1
-				end
+			--	Segment for calling Item Box switch.
+			if not a.settedup then
+				if leveltime then
+					a.dctypemonitor = 2
+					if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
+						a.dctypemonitor = 1
+					end
 
-				itemBoxSwitching(a, a.dctypemonitor)
-			else
-				a.flags = $|MF_NOGRAVITY
-			end
-		end
-
-		-- Monitor Swaps by Cvar.
-		if a and a.valid and a.health > 0 then
-			if (srbshield[a.type] or a.type == MT_ATTRACT_BOX) and a.info.flags &~ MF_GRENADEBOUNCE then
-				if CV_FindVar("dc_replaceshields").value and srbshield[a.type] then
-					local replacement = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_ATTRACT_BOX)
-					replacement.orgcapsule = a.type
-					P_RemoveMobj(a)
-				elseif not (CV_FindVar("dc_replaceshields").value) and a.type == MT_ATTRACT_BOX and a.orgcapsule then
-					P_SpawnMobjFromMobj(a, 0, 0, 0, a.orgcapsule)
-					P_RemoveMobj(a)
+					itemBoxSwitching(a, a.dctypemonitor)
+				else
+					a.flags = $|MF_NOGRAVITY
 				end
 			end
 
-			if a.randomring and (a.type == ringboxrandomizer[a.randomring] or a.type == MT_RING_BOX) then
-				if CV_FindVar("dc_ringboxrandomizer").value and a.type ~= ringboxrandomizer[a.randomring] then
-					local replacement = P_SpawnMobjFromMobj(a, 0, 0, 0, ringboxrandomizer[a.randomring])
-					replacement.randomring = a.randomring
-					P_RemoveMobj(a)
-				elseif not CV_FindVar("dc_ringboxrandomizer").value and a.type ~= MT_RING_BOX then
-					local replacement = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_RING_BOX)
-					replacement.randomring = a.randomring
-					P_RemoveMobj(a)
+			if a.item and a.item.valid and a.caps and a.caps.valid then
+				a.alpha = FRACUNIT
+				a.item.alpha = FRACUNIT
+				a.caps.alpha = FRACUNIT
+
+				-- Static Behavior
+				a.item.angle = $+ANG1*4
+				a.caps.rollangle = a.rollangle
+
+				local monitor_type = a.dctypemonitor and a.dctypemonitor or 1
+				local questionable = min(P_MobjFlip(a) * 80, 25)
+				P_SetOrigin(a.item, a.x, a.y, a.z+questionable * a.item.scale)
+
+				-- Mario Monitors
+
+				if MonitorSprites[a.item.icsprite] then
+					P_MarioMonitorThink(a.item, a.item.icsprite, a.item.icframe)
 				end
-			end
-		end
 
-		if a and a.valid and a.item and a.item.valid and MonitorSprites[a.item.icsprite] ~= nil then
-			P_MarioMonitorThink(a.item, a.item.icsprite, a.item.icframe)
-		end
+				-- Monitor Swapping
 
-		-- Thinker
+				if (srbshield[a.type] or a.type == MT_ATTRACT_BOX) and not a.goldenmonitor then
+					if CV_FindVar("dc_replaceshields").value and srbshield[a.type] then
+						a.orgcapsule = a.type
+						a.type = MT_ATTRACT_BOX
+						P_RemoveMobj(a.item)
 
-		if a and a.valid and a.dctypemonitor == 1 then
-			slope_handler.slopeRotation(a)
-		end
+						P_SpawnItemBox(a)
+					elseif not (CV_FindVar("dc_replaceshields").value) and a.type == MT_ATTRACT_BOX and a.orgcapsule then
+						a.type = a.orgcapsule
+						P_RemoveMobj(a.item)
 
-		if a and a.valid and a.item and a.item.valid and a.caps and a.caps.valid then
+						P_SpawnItemBox(a)
+					end
+				end
 
-			if a.standingslope then
-				local angle = slope_handler.slopeRotBaseReturn(a, a.standingslope)
-				a.rollangle = angle
-				a.caps.rollangle = angle
-			else
-				a.rollangle = 0
-				a.caps.rollangle = 0
-			end
+				if a.randomring and (a.type == ringboxrandomizer[a.randomring] or a.type == MT_RING_BOX) then
+					if CV_FindVar("dc_ringboxrandomizer").value and a.type ~= ringboxrandomizer[a.randomring] then
+						a.type = ringboxrandomizer[a.randomring]
+						P_RemoveMobj(a.item)
 
-			local questionable = min(P_MobjFlip(a) * 80, 25)
+						P_SpawnItemBox(a)
+					elseif not CV_FindVar("dc_ringboxrandomizer").value and a.type ~= MT_RING_BOX then
+						a.type = MT_RING_BOX
+						P_RemoveMobj(a.item)
 
-			a.item.angle = $+ANG1*4
-			P_SetOrigin(a.item, a.x, a.y, a.z+questionable * a.item.scale)
+						P_SpawnItemBox(a)
+					end
+				end
 
-			local curicon = states[mobjinfo[mobjinfo[a.type].damage].spawnstate]
+				-- Type specific
+				if monitor_type == 1 then
+					slope_handler.slopeRotation(a)
+				end
 
-			if a.health >= 1 then
-				-- Scale if necessary
+				-- Golden Monitors
+				if a.info.flags & MF_GRENADEBOUNCE and (leveltime % 4)/3 then
+					A_GoldMonitorSparkle(a)
+					a.goldentimer = nil
+				end
+
+
+				-- Squash in tiny spaces
 				local height = 73*a.scale
 				local funny =  FixedDiv(a.caps.ceilingz - a.caps.floorz, height)
 
 				if funny < FRACUNIT then
 					a.spriteyscale = funny
-					a.item.scale = FixedMul(funny, a.scale)
+					a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or 0))
 					a.caps.spriteyscale = funny
 				else
 					a.spritexscale = FRACUNIT
 					a.spriteyscale = FRACUNIT
 					a.scale = a.originscale
 					a.caps.scale = a.originscale
-					a.item.scale = a.spawnpoint and a.spawnpoint.scale or a.originscale
+					a.item.scale = (a.spawnpoint and a.spawnpoint.scale or a.originscale) + (monitor_type == 2 and FRACUNIT/3 or 0)
 				end
-
-				if a.info.flags & MF_GRENADEBOUNCE and (leveltime % 4)/3 then
-					A_GoldMonitorSparkle(a)
-					a.goldentimer = nil
-				end
-			elseif not (a.info.flags & MF_GRENADEBOUNCE) and a.dctypemonitor and a.dctypemonitor == 1 then
-				if a.item then
-					P_RemoveMobj(a.item)
-				end
-
-				if a.caps then
-					P_RemoveMobj(a.caps)
-				end
-			end
-		end
-
-		if a and a.health < 1 and a.info.flags & MF_GRENADEBOUNCE then
-			if not a.goldentimer then
-				a.goldentimer = 0
-			end
-			a.goldentimer = $+1
-			if a.goldentimer == 89 then
-				local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
-				newitembox.scale = a.originscale
-				P_RemoveMobj(a)
-			end
-		end
-
-		if not (a and a.valid and a.caps and a.item and a.flags & MF_NOGRAVITY and a.dctypemonitor and a.dctypemonitor > 1) then return end
-
-		local transp = FF_TRANS30
-
-		if a.health < 1 then
-			if a.scale > a.originscale*5/2 then
-				a.flags2 = $|MF2_DONTDRAW
-
-				if a.item and a.item.valid then
-					P_RemoveMobj(a.item)
-				end
-
-				if a.caps and a.caps.valid then
-					P_RemoveMobj(a.caps)
-				end
-
-				P_RemoveMobj(a)
 			else
-				transp = $+FRACUNIT*2
-				a.scale = $+FRACUNIT/14
-				a.item.scale = $+FRACUNIT/14
-				a.caps.scale = $+FRACUNIT/14
+				-- Spawns all necessary components
+				P_SpawnItemBox(a)
+			end
+		else
+			-- Dying State
 
-				a.frame = $|transp
-				a.caps.frame = $|transp
-				a.item.frame = $|transp
-				--print(a.scale)
+			-- Golden monitors
+			if a.goldenmonitor then
+				if not a.goldentimer then
+					a.goldentimer = 0
+				end
+
+				a.goldentimer = $+1
+
+				if a.goldentimer == 89 then
+					local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
+					newitembox.scale = a.originscale
+					newitembox.alpha = FRACUNIT
+					P_RemoveMobj(a)
+
+					return
+				end
 			end
 
-		elseif a.health >= 1 then
-			a.frame = $ &~ transp
-			a.caps.frame = $ &~ transp
-			a.item.frame = $ &~ transp
+			if a.item and a.item.valid and a.caps and a.caps.valid then
+				if a.dctypemonitor and a.dctypemonitor == 1 then
+					if a.item then
+						P_RemoveMobj(a.item)
+					end
 
-			transp = FF_TRANS30
-			a.item.scale = a.scale+FRACUNIT/3
+					if a.caps then
+						P_RemoveMobj(a.caps)
+					end
+				else
+					if a.alpha then
+						a.alpha = $ - FRACUNIT/14
+						a.item.alpha = a.alpha
+						a.caps.alpha = a.alpha
+
+						a.scale = $ + FRACUNIT/14
+						a.item.scale = $ + FRACUNIT/14
+						a.caps.scale = $ + FRACUNIT/14
+					else
+						if a.item and a.item.valid then
+							P_RemoveMobj(a.item)
+						end
+
+						if a.caps and a.caps.valid then
+							P_RemoveMobj(a.caps)
+						end
+
+						if a.goldenmonitor then
+							a.flags2 = $ | MF2_DONTDRAW
+						else
+							P_RemoveMobj(a)
+						end
+					end
+				end
+			end
 		end
-
 	end
 end)
 
@@ -388,10 +391,11 @@ local function insertPlayerItemToHud(p, sprite, frame)
 	table.insert(p.boxdisplay.item, {sprite, frame})
 end
 
-
 addHook("MobjDeath", function(a, d, s)
 	if Disable_ItemBox then return end
 	if a.info.flags & MF_MONITOR then
+		if a.health < 0 and a.once_already then return end
+
 		if not a.target then
 			if s or d then
 				a.target = (s or d)
@@ -438,26 +442,33 @@ addHook("MobjDeath", function(a, d, s)
 			a.item.fuse = itemrespawnvalue*TICRATE + 2
 		end
 
+		a.once_already = true
+
 		return true
 	end
 end)
 
 addHook("MobjRemoved", function(a, d)
-	if Disable_ItemBox then return end
-	if not (gamestate & GS_LEVEL) then return false end
-	if a and a.valid and ((a.item and a.item.valid) or (a.caps and a.caps.valid)) and a.info.flags & MF_MONITOR then
-		if a.item and a.item.valid then
-			P_RemoveMobj(a.item)
-		end
-		if a.caps and a.caps.valid then
-			P_RemoveMobj(a.caps)
-		end
+	if not (gamestate & GS_LEVEL) then return end
+	if not (a and a.valid) then return end
+	if not (a.info.flags & MF_MONITOR) then return end
+
+	if a.item and a.item.valid then
+		P_RemoveMobj(a.item)
+	end
+
+	if a.caps and a.caps.valid then
+		P_RemoveMobj(a.caps)
 	end
 end)
 
 addHook("MobjMoveCollide", function(a, mt)
-	if Disable_ItemBox then return end
-	if mt and mt.valid and (mt.flags & MF_MONITOR) and a.player and a.z <= mt.z+mt.height and a.z >= mt.z and
+	if not (mt and mt.valid) then return end
+	if not (mt.flags & MF_MONITOR) then return end
+
+	if not mt.settedup then return end
+
+	if a.player and a.z <= mt.z+mt.height and a.z >= mt.z and
 	not ((a.player.ctfteam == 1 and monitor.type == MT_RING_BLUEBOX) or (a.player.ctfteam == 2 and monitor.type == MT_RING_REDBOX))	then
 		mt.target = a
 		P_KillMobj(mt, a, a)

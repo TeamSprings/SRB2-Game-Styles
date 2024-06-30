@@ -34,7 +34,7 @@ mobjinfo[MT_EXTRAERADUMMY] = {
 	radius = 1048576,
 	height = 6291456,
 	mass = 100,
-	flags = MF_NOGRAVITY|MF_SCENERY|MF_NOCLIP|MF_NOCLIPHEIGHT
+	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 }
 
 mobjinfo[MT_BACKERADUMMY] = {
@@ -44,7 +44,7 @@ mobjinfo[MT_BACKERADUMMY] = {
 	radius = 1048576,
 	height = 6291456,
 	mass = 100,
-	flags = MF_NOTHINK|MF_NOBLOCKMAP|MF_NOCLIP|MF_SCENERY,
+	flags = MF_NOBLOCKMAP|MF_NOGRAVITY|MF_NOCLIP|MF_SCENERY,
 	dispoffset = -256
 }
 
@@ -55,7 +55,7 @@ mobjinfo[MT_BACKTIERADUMMY] = {
 	radius = 1048576,
 	height = 6291456,
 	mass = 100,
-	flags = MF_NOTHINK|MF_NOBLOCKMAP|MF_NOCLIP|MF_SCENERY,
+	flags = MF_NOBLOCKMAP|MF_NOGRAVITY|MF_NOCLIP|MF_SCENERY,
 	dispoffset = -2
 }
 
@@ -66,7 +66,7 @@ mobjinfo[MT_FRONTERADUMMY] = {
 	radius = 1048576,
 	height = 6291456,
 	mass = 100,
-	flags = MF_NOTHINK|MF_NOBLOCKMAP|MF_NOCLIP|MF_SCENERY,
+	flags = MF_NOBLOCKMAP|MF_NOGRAVITY|MF_NOCLIP|MF_SCENERY,
 	dispoffset = 2
 }
 
