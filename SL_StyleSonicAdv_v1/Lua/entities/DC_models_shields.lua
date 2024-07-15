@@ -16,21 +16,25 @@ states[S_MAGN1] = {
 	nextstate = S_MAGN1,
 }
 
-states[S_MAGN1] = {
-	sprite = SPR_MAGN,
-	frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|A,
-	tics = 182,
-	var1 = 91,
-	var2 = 2,
-	nextstate = S_MAGN1,
-}
-
 states[S_MAGN13] = {
 	sprite = SPR_MAGN,
 	frame = FF_TRANS20|FF_SEMIBRIGHT|92,
 	tics = 2,
 	nextstate = S_MAGN1,
 }
+
+states[S_FIRS1] = {
+	sprite = SPR_FIRS,
+	frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|A,
+	tics = 60,
+	var1 = 59,
+	var2 = 1,
+	nextstate = S_FIRS1,
+}
+
+states[S_FIRS10].frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|60
+
+
 
 freeslot("S_MAGN14")
 

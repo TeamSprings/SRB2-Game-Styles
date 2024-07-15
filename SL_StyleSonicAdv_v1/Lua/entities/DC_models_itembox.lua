@@ -72,7 +72,6 @@ local function P_SpawnItemBox(a)
 			end
 		end
 
-		a.originscale = a.scale
 		mobjinfo[a.type].deathsound = sfx_advite
 end
 
@@ -222,6 +221,10 @@ addHook("MobjSpawn", P_SpawnItemBox)
 
 addHook("MobjThinker", function(a)
 	if (a and a.valid and a.info.flags & MF_MONITOR) then
+		if not a.originscale then
+			a.originscale = (a.spawnpoint and a.spawnpoint.scale or a.scale)
+		end
+
 		if a.health > 0 then
 			-- Alive state
 
@@ -249,7 +252,7 @@ addHook("MobjThinker", function(a)
 				a.caps.rollangle = a.rollangle
 
 				local monitor_type = a.dctypemonitor and a.dctypemonitor or 1
-				local questionable = min(P_MobjFlip(a) * 80, 25)
+				local questionable = max(P_MobjFlip(a) * 25, -6)
 				P_SetOrigin(a.item, a.x, a.y, a.z+questionable * a.item.scale)
 
 				-- Mario Monitors
@@ -302,19 +305,17 @@ addHook("MobjThinker", function(a)
 
 
 				-- Squash in tiny spaces
-				local height = 73*a.scale
-				local funny =  FixedDiv(a.caps.ceilingz - a.caps.floorz, height)
+				local height = (monitor_type == 2 and 90 or 73)*a.scale
+				local funny =  P_MobjFlip(a) < 0 and FixedDiv(a.caps.ceilingz - a.caps.floorz, height) or FixedDiv(a.caps.ceilingz - a.caps.z, height)
 
 				if funny < FRACUNIT then
 					a.spriteyscale = funny
-					a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or 0))
 					a.caps.spriteyscale = funny
+					a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or 0))
 				else
 					a.spritexscale = FRACUNIT
 					a.spriteyscale = FRACUNIT
-					a.scale = a.originscale
-					a.caps.scale = a.originscale
-					a.item.scale = (a.spawnpoint and a.spawnpoint.scale or a.originscale) + (monitor_type == 2 and FRACUNIT/3 or 0)
+					a.item.scale = a.originscale + (monitor_type == 2 and FRACUNIT/3 or 0)
 				end
 			else
 				-- Spawns all necessary components
