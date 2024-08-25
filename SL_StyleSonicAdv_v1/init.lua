@@ -54,7 +54,6 @@ if VERSION == 202 and SUBVERSION > 9 then
 		"models_common.lua",
 		"models_itembox.lua",
 		"models_checkpoint.lua",
-		"models_capsule.lua",
 		"models_shields.lua",
 		"flickies.lua")
 

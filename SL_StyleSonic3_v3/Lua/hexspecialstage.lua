@@ -1,40 +1,11 @@
 freeslot("S_S3KBSPHERES", "SPR_S3KS", "S_PLAY_S3KWALK")
 -- Notes : 9x
 
+
+--
+
 -- Game info
 local inbdistance = FRACUNIT/64
-
--- spheres and rings from player
--- will be used even in bonus stages
-local S3K_player_class = {
-	-- general info
-	plane = 1,
-	finished = 0, -- 0 - not, 1 - red sphereSB, 2 - emerald
-
-	-- spacial info
-	x = 3*inbdistance,
-	y = 3*inbdistance,
-	angle = ANGLE_90,
-	height = 0,
-
-	-- save info
-	save_info = {
-		x = 0,
-		y = 0,
-		z = 0,
-		angle = 0,
-
-		leveltime = 0,
-		powerup = 0,
-		rings = 0,
-
-		starpost = 0,
-		starpostx = 0,
-		starposty = 0,
-		starpostz = 0,
-	}
-}
-
 local sphereplayer = {
 	active = nil,
 	map = 1,
@@ -59,140 +30,142 @@ local sphereplayer = {
 	}
 }
 
+// This whole thing gives me errors if I don't give it some order.
+// 1) mapload done. 2) playerset 3)item spawn done 4) done
+local loadingorder = 0
 
 states[S_S3KBSPHERES] = {
 	sprite = SPR_S3KS,
 	frame = A,
 }
 
-rawset(_G, "S3K_BLUESPHERE", {})
-
--- no need for duplicates
-S3K_BLUESPHERE.non_special_last_map = 0
-
-local BS_EMPTY = 0
-local BS_RED_SPHERE = 1
-local BS_BLU_SPHERE = 2
-local BS_BUMPER = 3
-local BS_RING = 4
-local BS_SPRING = 5
-
-S3K_BLUESPHERE.items = {
-	[BS_EMPTY] = {S_INVISIBLE, 			G}, 			-- Empty
-	[BS_RED_SPHERE] = {S_S3KBSPHERES, 	C}, 			-- Red Sphere
-	[BS_BLU_SPHERE] = {S_S3KBSPHERES, 	A}, 			-- Blue Sphere
-	[BS_BUMPER] = {S_S3KBSPHERES, 		H}, 			-- Bumper
-	[BS_RING] = {S_RING, 				A|FF_ANIMATE}, 	-- Ring
-	[BS_SPRING] = {S_S3KBSPHERES, 		B}, 			-- Spring
+rawset(_G, "sphereplayer", sphereplayer)
+local frames = {
+	[0] = {S_INVISIBLE, G}, -- Empty
+	[1] = {S_S3KBSPHERES, C}, -- Red Sphere
+	[2] = {S_S3KBSPHERES, A}, -- Blue Sphere
+	[3] = {S_S3KBSPHERES, H}, -- Bumper
+	[4] = {S_RING, A|FF_ANIMATE}, -- Ring
+	[5] = {S_S3KBSPHERES, B}, -- Spring
 }
 
 local scrollysec = {}
-S3K_BLUESPHERE.map_data = {}
+local mapdata = {}
+local S3KSS_Current = {}
+
+-- from Stackoverflow.com's user Renshaw
+local function P_SplitArray(table, x)
+	local result = {}
+	for i=#mapdata,x do
+		local item = {}
+		for j=i,i+x-1 do
+			if table[j] then
+				table.insert(item, table[j])
+			end
+		end
+		table.insert(result, item)
+	end
+	return result
+end
 
 --402 player.x
 --404 player.y
 --400 player.angle -- front 0x00: -- left: 0x40 -- back: 0x80 -- right: 0xC0
-S3K_BLUESPHERE.load_map = function(mapnum)
-	local map_file = io.openlocal("tbs/S3K/"..mapnum..".dat", "rb")
-	if map_file then
-		local data = map_file:read('*all')
-		local buffer = {}
-
-		for i = 1, 32 do
-			buffer[i] = {}
-		end
-
-		-- Data Transfer
-		for bin = 0,1023 do
-			local loc = (bin % 32)
-			local y = (bin / 32)
-			buffer[y+1][loc+1] = data:byte((bin), (bin))
-		end
-
-		-- Position
-		buffer.player_spawn_x = (data:byte(1026, 1026))+1
-		buffer.player_spawn_y = (data:byte(1028, 1028))+1
-		buffer.player_spawn_a = ((data:byte(1024, 1024))/64)*90
-
-		print(buffer.player_spawn_x..'',
-			  buffer.player_spawn_y..'',
-			  buffer.player_spawn_a..'')
-
-		S3K_BLUESPHERE.mapdata = buffer
-		io.close(mapx)
+local function P_LoadS3KData(mapnum)
+	local mapx = io.openlocal("tbs/S3K/"..mapnum..".dat", "rb")
+	if mapx then
+		local data = mapx:read('*all')
+			for i = 1, 32 do
+				mapdata[i] = {}
+			end
+			for bin = 0,1023 do
+				local loc = (bin % 32)
+				local y = (bin / 32)
+				mapdata[y+1][loc+1] = string.byte(data, (bin), (bin))
+				--print(""..mapdata[bin])
+			end
+			--S3KSS_Current = P_SplitArray(mapdata, 32)
+			S3KSS_Current = mapdata
+			S3KSS_Current.playerspawnx = (string.byte(data, 1026, 1026))+1
+			S3KSS_Current.playerspawny = (string.byte(data, 1028, 1028))+1
+			S3KSS_Current.playerspawna = (string.byte(data, 1024, 1024))*90
+			print(S3KSS_Current.playerspawnx..'', ''..S3KSS_Current.playerspawny, ''..S3KSS_Current.playerspawna)
+			io.close(mapx)
 	else
-		S3K_BLUESPHERE.mapdata = S3KSS_Map[sphereplayer.map]
+		S3KSS_Current = S3KSS_Map[sphereplayer.map]
 	end
 end
 
-S3K_BLUESPHERE.iterate_maps = function()
+addHook("MapChange", function()
+	loadingorder = 0
+	P_LoadS3KData(sphereplayer.map)
+end)
 
-end
-
-
-S3K_BLUESPHERE.get_previous_mapinfo = function()
-
-end
-
-S3K_BLUESPHERE.lastSphereMap = 0
-S3K_BLUESPHERE.collectedRings = {}
-S3K_BLUESPHERE.map = 0
-
-S3K_BLUESPHERE.set_up = function()
+addHook("MapLoad", function()
+	sphereplayer.active = mapheaderinfo[gamemap].spheremode
 	if not mapheaderinfo[gamemap].spheremode then
-		hud.enable("score")
-		hud.enable("time")
-		hud.enable("rings")
+		if sphereplayer.lastpos.map ~= 0 then
+			for player in players.iterate() do
+				P_SetOrigin(player.mo, sphereplayer.lastpos.x, sphereplayer.lastpos.y, sphereplayer.lastpos.z)
+				player.mo.angle = sphereplayer.lastpos.angle
+				player.starpostnum = sphereplayer.lastpos.powerup
+				realtime = sphereplayer.lastpos.leveltime
+				if sphereplayer.lastpos.powerup ~= 0
+					player.powers[pw_shield] = sphereplayer.lastpos.powerup
+				end
+			end
+			sphereplayer.lastpos.map = 0
+			sphereplayer.lastpos.x = 0
+			sphereplayer.lastpos.y = 0
+			sphereplayer.lastpos.z = 0
+			sphereplayer.lastpos.angle = 0
+			sphereplayer.lastpos.checkpoint = 0
+			sphereplayer.lastpos.leveltime = 0
+			sphereplayer.lastpos.powerup = 0
+		end
 		return
 	end
 
-	local number_maps = S3K_BLUESPHERE.iterate_maps()+1
-	P_LoadS3KData((max(S3K_BLUESPHERE.lastSphereMap, 0)+1) % (number_maps))
-
-	S3K_BLUESPHERE.map = S3K_BLUESPHERE.lastSphereMap+1
-	S3K_BLUESPHERE.lastSphereMap = S3K_BLUESPHERE.map
-
-	hud.disable("score")
-	hud.disable("time")
-	hud.disable("rings")
+	sphereplayer.timer = mapheaderinfo[gamemap].spheretimer
+	P_LoadS3KData(sphereplayer.map)
+	sphereplayer.spheres = 0
 
 	scrollysec = {}
 	for sector in sectors.iterate do
-		if sector.floorpic == 'GFZFLR01' and sector.floorxoffs ~= nil then
-			sector.floorpic = 'S3KSSFL'..S3K_BLUESPHERE.map
-			scrollysec:insert(sector)
+		if sector.floorpic == 'GFZFLR01' then
+			sector.floorpic = 'S3KSSFL'..sphereplayer.map
+			table.insert(scrollysec, sector)
 
-			if sector.floorxoffs then
-				sector.floorxoffs = 34*FRACUNIT
-				sector.flooryoffs = -86*FRACUNIT
-			end
+			sector.floorxoffset = 34*FRACUNIT
+			sector.flooryoffset = -86*FRACUNIT
 		end
 
 		if sector.ceilingpic == 'S3KSPLIT' then
-			sector.floorpic = 'S3KSPLT'..S3K_BLUESPHERE.map
-			sector.ceilingpic =	'S3KSPLT'..S3K_BLUESPHERE.map
+			sector.floorpic = 'S3KSPLT'..(sphereplayer.map)
+			sector.ceilingpic =	'S3KSPLT'..(sphereplayer.map)
 		end
 
 		if sector.ceilingpic == 'S3KSPLIG' then
-			sector.floorpic = 'S3KSPLG'..S3K_BLUESPHERE.map
-			sector.ceilingpic =	'S3KSPLG'..S3K_BLUESPHERE.map
+			sector.floorpic = 'S3KSPLG'..(sphereplayer.map)
+			sector.ceilingpic =	'S3KSPLG'..(sphereplayer.map)
 		end
+	end
+
+	if multiplayer then
+		print("MULTIPLAYER WARNING: Special stage weren't designed for Multiplayer. Other players are expected to be desynced immediedly and kicked out from server.")
 	end
 
 	for y = 1,32 do
 		for x = 1,32 do
-			if S3K_BLUESPHERE.map_data[y][x] == BS_BLU_SPHERE then
-				consoleplayer.sphere = $+1
+			if S3KSS_Current[y][x] == 2 then
+				sphereplayer.spheres = $+1
 			end
 		end
 	end
-end
+	loadingorder = 1
+	print(loadingorder)
+end)
 
-S3K_BLUESPHERE.start_timer = 5*TICRATE
-
-S3K_BLUESPHERE.player_set_up = function(player)
-
-end
 
 local pos = {
 	{-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4}, {4, -4},
@@ -205,17 +178,6 @@ local pos = {
 	{-4, 3}, {-3, 3}, {-2, 3}, {-1, 3}, {0, 3}, {1, 3}, {2, 3}, {3, 3}, {4, 3},
 	{-4, 4}, {-3, 4}, {-2, 4}, {-1, 4}, {0, 4}, {1, 4}, {2, 4}, {3, 4}, {4, 4},
 }
-
-
-//
-//
-//	CONTINUE FROM THERE
-//
-//
-
-
-
-
 
 --41 is middle one
 
@@ -230,6 +192,8 @@ addHook("MapThingSpawn", function(a, mt)
 end, MT_BLUESPHERE)
 
 addHook("MobjThinker", function(a)
+
+
 	if loadingorder == 2 and a.posx ~= nil and a.posy ~= nil and S3KSS_Current ~= nil then
 		a.xpos = (a.posx+sphereplayer.x/inbdistance)
 		a.ypos = (a.posy+sphereplayer.y/inbdistance)
@@ -250,7 +214,8 @@ addHook("MobjThinker", function(a)
 		a.frame = frames[(mapin or 0)][2]
 
 		if a and a.valid then
-			P_TryMove(a, a.spawnpoint.x*FRACUNIT-(((sphereplayer.x*64) % FRACUNIT)*96), a.spawnpoint.y*FRACUNIT+(((sphereplayer.y*64) % FRACUNIT)*96), true)
+			P_SetOrigin(a, a.spawnpoint.x*FRACUNIT-(((sphereplayer.x*64) % FRACUNIT)*96), a.spawnpoint.y*FRACUNIT+(((sphereplayer.y*64) % FRACUNIT)*96), a.floorz)
+			P_SetOrigin(a, a.x, a.y, a.floorz) -- stupid method of updating a.floorz
 		end
 	end
 end, MT_BLUESPHERE)
@@ -276,7 +241,7 @@ local dir = {{1,0}, {1,1}, {0,1}, {1, -1}, {1, -1}, {-1, -1}, {-1,0}, {0,-1}}
 
 -- S3K Air's assembly addresser was kinda inspiration for this thing. You could call it translation from lemon but not really, as my set up just doesn't allow me straight up 'copy it'.
 -- so only thing I am taking is logic behind it. -- Sonic 3 Air by Eukaryot
-
+/*
 local function P_CheckS3KBalls(x, y)
 	local balls = P_CheckS3KBallsStack(x, y)
 	if balls == nil then return end
@@ -290,25 +255,59 @@ local function P_CheckS3KBalls(x, y)
 		end
 	end
 end
-
+		*/
 
 //local 4dir = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 //local dax = {-0x01, -0x20, 0x01, 0x20, -0x01, -0x20}
 
-local function P_stackBalls(q, x, y)
-	return {x = x; y = y; next = q;}
-end
+/*
+local function P_CheckS3KBallsStack(x, y)
+	local turned = {}
+	local counter, counterx, countery, yl = 0,0,0,0
 
+		for i = 1,8 do
+			if S3KSS_Current[((x + dir[i][1]) % 32) + 1)][((y + dir[i][2]) % 32) + 1)] == SB then
+				counter = $+1
+			end
+		end
 
-local function P_checkS3KBallsStack(startx, starty, replace)
-	--local target =
-	local typesphere
+		if (counter == 0) then return end
 
-	--local q =
+		repeat
+			yl = $ + 1
+		    counterx = $+1
+		until (S3KSS_Current[(((x + yl) % 32) + 1)][y] == eS)
+		yl = 0
+		repeat
+			y = $ - 1
+		    counterx = $+1
+		until (S3KSS_Current[((x + yl) % 32) + 1)][y] == eS)
+		yl = 0
+		counterx = $+1
 
-	--while ()
+		if (counterx < 3) then return end
 
+		repeat
+			yl = $ + 1
+		    countery = $+1
+		until (S3KSS_Current[x][((y + yl) % 32) + 1)] == eS)
+		yl = 0
+		repeat
+			yl = $ - 1
+		    countery = $+1
+		until (S3KSS_Current[x][((y + yl) % 32) + 1)] == eS)
+		yl = 0
+		countery = $+1
 
+		if (countery < 3) then return end
+
+		local stackbuffer = {}
+		stackbuffer[1][1] = x
+		stackbuffer[1][2] = y
+		stackbuffer.size = 0
+		stackbuffer.offset = 0
+
+		*/
 		// Current state (in addition to states saved on the stack) consists of these three variables:
 		// Offset of a direction in A4, can have values 0x00, 0x02, ..., 0x0a
 		// Offset of a different direction in A4, usually in right angle to D3
@@ -353,18 +352,48 @@ local function P_checkS3KBallsStack(startx, starty, replace)
 		//  - If all directions got checked for the current position, take the next entry from the stack and continue with it (possibly multiple times if all directions of the top-of-stack already got checked, too)
 		//  - In case the stack is empty, we're done with all checks
 
-end
+		/*
+		while (true) do
 
+			local posx = 0
+			local posy = 0
+			local neightbor = {}
+			for i = 1, 4 do
+				neightbor[i] = S3KSS_Current[(x + 4dir[i][1] + posx) % 32 + 1][(y + 4dir[i][2] + posy) % 32 + 1]
+				if neightbor[i] = SB then
+					local accepted = true
+
+					if accepted == true
+
+
+
+
+
+					end
+
+					if stackbuffer.size <= 2 then
+						accepted = false
+					end
+
+				end
+
+			end
+
+			while ()
+				if (stackSize == 0)
+					return
+
+		end
+end
+		*/
 
 
 local function P_RotateS3KPlayer(p, amount)
 	sphereplayer.x = ((sphereplayer.x+(sphereplayer.x % inbdistance)/2))/(inbdistance)*inbdistance
 	sphereplayer.y = ((sphereplayer.y+(sphereplayer.y % inbdistance)/2))/(inbdistance)*inbdistance
 	for k,sec in ipairs(scrollysec) do
-		if sec.floorxoffs ~= nil
-			sec.floorxoffs = 34 * FRACUNIT
-			sec.flooryoffs = -86 * FRACUNIT
-		end
+		sec.floorxoffset = 34 * FRACUNIT
+		sec.flooryoffset = -86 * FRACUNIT
 	end
 	sphereplayer.angle = $ + amount*ANG1
 	p.mo.rotcooldown = 10
@@ -395,9 +424,9 @@ addHook("PlayerThink", function(p)
 		end
 
 		for k,sec in ipairs(scrollysec) do
-			if sec and sec.valid and sec.floorxoffs ~= nil then
-				sec.floorxoffs = $ + cos(p.mo.angle)*4
-				sec.flooryoffs = $ - sin(p.mo.angle)*4
+			if sec and sec.valid then
+				sec.floorxoffset = $ + cos(p.mo.angle)*4
+				sec.flooryoffset = $ - sin(p.mo.angle)*4
 			end
 		end
 
@@ -482,9 +511,6 @@ local function numfont(d, font, x, y, scale, value)
 	end
 end
 
-
-
-
 /*
 hud.add(function(v, p, c)
 	local xpos, ypos, pspRS, frame
@@ -507,5 +533,3 @@ hud.add(function(v, p, c)
 
 end, "game")
 */
-
-rawset(_G, "sphereplayer", sphereplayer)

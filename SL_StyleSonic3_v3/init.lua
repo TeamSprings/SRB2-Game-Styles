@@ -17,40 +17,32 @@ assert((SUBVERSION > 9), packType.."Mod requires features from "..version.."+")
 
 -- Shut up and load it in.
 
-// Oh yeah, it is quite pointless check in grand scheme of things. 
-// I just want to minimalize situation, where some genius decides 
+// Oh yeah, it is quite pointless check in grand scheme of things.
+// I just want to minimalize situation, where some genius decides
 // to play this on older version of SRB2.
 
 // Man idiot proofing is so so SOO teadious :earless:
 if VERSION == 202 and SUBVERSION > 9 then
 	print(packType.."As this is WIP version of "..gameString.." pack and UDMF update is not out yet. Game allows to load this pack in "..VERSIONSTRING)
-	
+
 	// Libary file check, whenever or not newer version isn't used anywhere else
 	if not TBSlib or ((TBSlib.iteration < libTBSReq) or not TBSlib.iteration) then
 		dofile("TBS_libary.lua")
 	end
 
-	if not TBS_Menu or ((TBS_Menu.iteration < menuliReq) or not TBSWaylib.iteration) then
-		dofile("TBS_menu.lua")
-	end
-	
-	
 	// Game Assets
 	dofile(gameString.."_sprite_models.lua")
 	dofile(gameString.."_emerald.lua")
 	dofile(gameString.."_capsule.lua")
 	dofile(gameString.."_hud.lua")
-	
+
 	// Bonuses
 	dofile(gameString.."_special_entrances.lua")
-	dofile(gameString.."_gumball_bonus.lua")	
-	
+	dofile(gameString.."_gumball_bonus.lua")
+
 	dofile(gameString.."_specialstage_data.lua")
-	dofile(gameString.."_specialstage_engine.lua")
-
-	dofile("TIM_events.lua")
-
-	dofile("S3K_menu.lua")
+	--dofile(gameString.."_specialstage_engine.lua")
+	dofile("hexspecialstage.lua")
 end
 
 
@@ -93,7 +85,7 @@ local function table_save(tbl,filename)
 			for i,v in pairs( t ) do
 				-- escape handled values
 				if (not thandled[i]) then
-            
+
 				local str = ""
 				local stype = type( i )
 				-- handle index
@@ -108,7 +100,7 @@ local function table_save(tbl,filename)
 				elseif stype == "number" then
 					str = charS.."["..tostring( i ).."]="
 				end
-            
+
 				if str ~= "" then
 					stype = type( v )
 					-- handle value
@@ -149,7 +141,7 @@ local function P_LoadS3KData(mapnum)
 			--print(""..mapdata[bin])
 		end
 			--S3KSS_Current = P_SplitArray(mapdata, 32)
-		mapdata = rawmapdata		
+		mapdata = rawmapdata
 		mapdata.playerspawnx = (string.byte(data, 1026, 1026))+1
 		mapdata.playerspawny = (string.byte(data, 1028, 1028))+1
 		mapdata.playerspawna = (string.byte(data, 1024, 1024))*90
