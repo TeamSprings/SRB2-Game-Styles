@@ -18,9 +18,9 @@ return {
 	end,
 
 	time = function(v, p, t, e, font_type)
-		local mint = G_TicsToMinutes(leveltime, true)
-		local sect = G_TicsToSeconds(leveltime)
-		local cent = G_TicsToCentiseconds(leveltime)
+		local mint = G_TicsToMinutes(p.realtime, true)
+		local sect = G_TicsToSeconds(p.realtime)
+		local cent = G_TicsToCentiseconds(p.realtime)
 		sect = (sect < 10 and '0'..sect or sect)
 		cent = (cent < 10 and '0'..cent or cent)
 
