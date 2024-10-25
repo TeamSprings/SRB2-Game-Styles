@@ -7,7 +7,7 @@ Contributors: Ace Lite, Demnyx
 
 ]]
 
-local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
+local drawlib = tbslibrary 'lib_emb_tbsdrawers'
 local helper = 	tbsrequire 'helpers/c_inter'
 local helper2 = tbsrequire 'helpers/lua_hud'
 
@@ -43,7 +43,7 @@ addHook("MapThingSpawn", function(a, mt)
 	end
 end)
 
-HOOK("bossmeter", "sa2hud", function(v, p, t, e)
+HOOK("bossmeter", "dchud", function(v, p, t, e)
 	if Bosses and Bosses[1] and P_CheckSight(Bosses[1], p.mo) then
 		local boss = Bosses[1]
 
@@ -86,7 +86,7 @@ end, "game")
 -- MONITOR DISPLAY
 --
 
-HOOK("monitordisplay", "sa2hud", function(v, p, t, e)
+HOOK("monitordisplay", "dchud", function(v, p, t, e)
 	if p.boxdisplay and p.boxdisplay.timer and p.boxdisplay.item then
 		local lenght = p.boxdisplay.item
 		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FRACUNIT/(TICRATE/5)
@@ -102,7 +102,17 @@ HOOK("monitordisplay", "sa2hud", function(v, p, t, e)
 			end
 			local pic = v.getSpritePatch(img[1], img[2], 0)
 			local incs = pic.width+6
-			v.drawScaled(FixedDiv((offset-(incs*#lenght)/2+incs/2)*easesubtit, easesubtit), FixedDiv(180*easesubtit-extra, easesubtit), easesubtit, pic, V_PERPLAYER|(easetratit << V_ALPHASHIFT)|V_SNAPTOBOTTOM)
+
+			local x = FixedDiv((offset-(incs*#lenght)/2+incs/2)*easesubtit, easesubtit)
+			local y = FixedDiv(180*easesubtit-extra, easesubtit)
+			local flags = V_PERPLAYER|(easetratit << V_ALPHASHIFT)|V_SNAPTOBOTTOM
+
+			v.drawScaled(x, y, easesubtit, pic, flags)
+			if img[1] == SPR_TV1P and p.mo then
+				v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+			end
+
+
 			offset = $ + incs
 		end
 	end
@@ -115,7 +125,7 @@ end, "game")
 
 local poweruporiginaly = hudinfo[HUD_POWERUPS].y
 
-HOOK("checkpointtimer", "sa2hud", function(v, p, t, e)
+HOOK("checkpointtimer", "dchud", function(v, p, t, e)
 	if p.checkpointtime then
 		if (leveltime % 4)/2 then
 			local mint, sect, cent = convertPlayerTime(p.starposttime)
@@ -167,7 +177,7 @@ end)
 
 local y_offset = 0
 
-HOOK("scoreadditives", "sa2hud", function(v, p, t, e)
+HOOK("scoreadditives", "dchud", function(v, p, t, e)
 	-- Gamma Support
 
 	if p and p.valid and p.mo and p.mo.valid and p.mo.gammaVars then
@@ -185,7 +195,7 @@ HOOK("scoreadditives", "sa2hud", function(v, p, t, e)
 		local y = hudinfo[HUD_RINGS].y + 14 + y_offset
 
 		for k, prompt in ipairs(score_add) do
-			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FRACUNIT, y*FRACUNIT, FRACUNIT/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP)
+			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FRACUNIT, y*FRACUNIT, FRACUNIT/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP|V_PERPLAYER)
 
 
 			if prompt.x then
@@ -213,7 +223,7 @@ end, "game")
 --
 
 local flickies_y = 200 - 25
-local flicky_flags = V_SNAPTORIGHT|V_SNAPTOBOTTOM
+local flicky_flags = V_SNAPTORIGHT|V_SNAPTOBOTTOM|V_PERPLAYER
 local flicky_scale = FRACUNIT/2
 
 local color_flickies = {
@@ -224,7 +234,7 @@ local color_flickies = {
 
 sfxinfo[freeslot("sfx_advaac")].caption = "Flicky Collected!"
 
-HOOK("flickies", "sa2hud", function(v, p, t, e)
+HOOK("flickies", "dchud", function(v, p, t, e)
 	if p.flickies and p.flickies.tics then
 		local scale_in = max(p.flickies.tics - (TICRATE*3 - 25), 0)*FRACUNIT/25
 		local move_in = max(p.flickies.tics - (TICRATE*3 - 15), 0)*FRACUNIT/15
@@ -276,7 +286,7 @@ end, "game")
 -- RANK DISPLAY
 --
 
-HOOK("sa2forcerankdisplay", "sa2hud", function(v, p, t, e)
+HOOK("sa2forcerankdisplay", "dchud", function(v, p, t, e)
 	if CV_FindVar("dc_hud_rankdisplay").value == 0 then return end
 
 	local rank = rank_calculator(p)
@@ -293,7 +303,7 @@ end, "game")
 local emerald = {EMERALD1, EMERALD2, EMERALD3, EMERALD4, EMERALD5, EMERALD6, EMERALD7}
 
 -- random rotating rocks + add there damn 8th Peaceful Ruby.
-HOOK("coopemeralds", "sa2hud", function(v)
+HOOK("coopemeralds", "dchud", function(v)
 	if multiplayer then
 		return false
 	else
@@ -316,8 +326,9 @@ HOOK("coopemeralds", "sa2hud", function(v)
 	return true
 end, "scores")
 
+
 --
 -- NUlLING
 --
 
-HOOK("gammaBonus", "sa2hud", nullhud, "game")
+HOOK("gammaBonus", "dchud", nullhud, "game")

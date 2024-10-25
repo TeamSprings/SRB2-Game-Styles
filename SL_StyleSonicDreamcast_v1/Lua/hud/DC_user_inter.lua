@@ -7,7 +7,7 @@ Contributors: Ace Lite, Demnyx
 
 ]]
 
-local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
+local drawlib = tbslibrary 'lib_emb_tbsdrawers'
 local helper = 	tbsrequire 'helpers/c_inter'
 local helper2 = tbsrequire 'helpers/lua_hud'
 
@@ -30,7 +30,7 @@ sfxinfo[freeslot("sfx_rank")].caption = "rank drop!"
 sfxinfo[freeslot("sfx_advchi")].caption = "cha-ching!"
 sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
-HOOK("ingameintermission", "sa2hud", function(v, p, t, e)
+HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if not (p.exiting and p.tallytimer) then return true end
 	-- Ease and timing
 
@@ -209,7 +209,9 @@ end, "game")
 
 sfxinfo[freeslot("sfx_advtts")].caption = "titlecard"
 
-HOOK("stagetitle", "sa2hud", function(v, p, t, et)
+HOOK("stagetitle", "dchud", function(v, p, t, et)
+	if t > et then return end
+
 	local namezone = mapheaderinfo[gamemap].lvlttl..""
 	local subtitle = mapheaderinfo[gamemap].subttl..""
 	local actnum = mapheaderinfo[gamemap].actnum..""
@@ -272,8 +274,8 @@ HOOK("stagetitle", "sa2hud", function(v, p, t, et)
 	-- Actual Title Card Drawer
 	if t < et then
 
-		if leveltime <= et then
-			v.fadeScreen(0xFF00, 31-(easegoout*31/93))
+		if leveltime <= et and displayplayer == p then
+			v.fadeScreen(0xFF00|V_PERPLAYER, 31-(easegoout*31/93))
 		end
 
 		local lenght = split[#split]
@@ -283,11 +285,11 @@ HOOK("stagetitle", "sa2hud", function(v, p, t, et)
 		v.draw(0-easegoout,0, v.cachePatch("SA2TTBAR"), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, p.skincolor))
 
 		if easetransparency2 ~= 9 then
-			v.drawScaled(FixedDiv(41*easescaleout, easescaleout),FixedDiv(-50*easescaleout, easescaleout), easescaleout, SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|V_PERPLAYER|(easetransparency2 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
+			v.drawScaled(FixedDiv(41*easescaleout, easescaleout),FixedDiv(-50*easescaleout, easescaleout), easescaleout, SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency2 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
 		end
 
 		if easetransparency1 ~= 9 then
-			v.draw(41,-50-(t % SRB2tagsideline.height), SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_PERPLAYER|V_ADD|(easetransparency1 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
+			v.draw(41,-50-(t % SRB2tagsideline.height), SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency1 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
 		end
 
 		-- SPEEEEN

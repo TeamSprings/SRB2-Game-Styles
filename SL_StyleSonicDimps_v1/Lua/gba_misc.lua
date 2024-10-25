@@ -237,6 +237,39 @@ for _,egg in ipairs{
 end
 
 --
+--	Sign Post!
+--
+
+
+local signmove_cv = CV_RegisterVar{
+	name = "gba_sign_movement",
+	flags = CV_NETVAR,
+	defaultvalue = "stand",
+	flags = 0,
+	PossibleValue = {srb2=0, stand=1}
+}
+
+addHook("MobjThinker", function(a)
+	if signmove_cv.value then
+		if not a.style_spin then
+			a.style_z = a.z
+			a.style_spin = 1
+		end
+
+		if a.state > S_SIGNSPIN1-1 and a.state < S_SIGNSPIN6+1 then
+			if a.state == S_SIGNSPIN1 then
+				a.style_spin = $+1
+			end
+
+			if a.style_spin < 32 then
+				a.momz = 0
+				a.z = a.style_z+1
+			end
+		end
+	end
+end, MT_SIGN)
+
+--
 --	Invincibility
 --
 
@@ -258,7 +291,7 @@ addHook("PlayerThink", function(p)
 	if not p.mo then return end
 
 	if p.powers[pw_invulnerability] then
-		if not p.advance_shine_fol then
+		if not (p.advance_shine_fol and p.advance_shine_fol.valid) then
 			p.advance_shine_fol = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_OVERLAY)
 			p.advance_shine_fol.target = p.mo
 			p.advance_shine_fol.state = S_INVINCIBILITY_ADVANCE

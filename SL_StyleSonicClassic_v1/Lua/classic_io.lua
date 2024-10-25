@@ -1,26 +1,26 @@
-CV_RegisterVar{
-	name = "classic_presets",
-	defaultvalue = "disabled",
-	flags = CV_CALL,
-	func = function(var)
-		return
-	end,
-	PossibleValue = {disabled=0}
-}
-
-
 addHook("GameQuit", function(quit)
 	if not quit then return end
 	local finalpos = 0
 	local forced_variables = {
-		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		"classic_presets",
 		-- HUD
+		"classic_hud",
 		"classic_lifeicon",
 		"classic_hudfont",
-		"classic_hud",
 		"classic_debug",
-		--Assets
+		"classic_hidehudop",
+		-- Gameplay
+		"classic_specialentrance",
+		"classic_endtally",
+		"classic_monitordistribution",
+		-- Player
+		"classic_thok",
+		"classic_spindash",
+		"classic_springtwirk",
+		"classic_springroll",
+		"classic_springairwalk",
+		-- Assets
 		"classic_monitor",
 		"classic_checkpoints",
 		"classic_emeralds",
@@ -30,6 +30,15 @@ addHook("GameQuit", function(quit)
 		"classic_invincibility",
 		"classic_score",
 		"classic_sign",
+		"classic_sign_movement",
+		-- Music
+		"classic_oneuptheme",
+		"classic_shoestheme",
+		"classic_invintheme",
+		"classic_supertheme",
+		"classic_bosstheme",
+		"classic_levelendtheme",
+		"classic_drowntheme",
 	}
 
 	local check = io.openlocal("bluespring/styles/classic_config.dat", "r+")

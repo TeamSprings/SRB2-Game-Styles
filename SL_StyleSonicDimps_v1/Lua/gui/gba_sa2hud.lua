@@ -39,14 +39,10 @@ return {
 	rings = function(v, p, t, e, font_type)
 		v.draw(5, 2, v.cachePatch('RINGADV2'), hudinfo[HUD_RINGS].f)
 
-		local speed = 4-min(FixedInt(p.speed)/12, 3)
-		if speed == 1 then
-			ring_rot = (ring_rot + 1) % 10
-		else
-			ring_rot = (ring_rot + (leveltime % (speed + 1))/speed) % 10
-		end
+		local speed = p.speed/18/FRACUNIT
+		ring_rot = (ring_rot + speed) % 36
 
-		v.draw(12, 7, v.cachePatch('ADV2RIN'..(1+ring_rot)), hudinfo[HUD_RINGS].f)
+		v.draw(11, 6, v.cachePatch('ADV2RIN'..(((leveltime/3+ring_rot/2) % 18) + 1)), hudinfo[HUD_RINGS].f)
 
 		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-40)*FRACUNIT, (hudinfo[HUD_SECONDS].y-24)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGS].f, v.getColormap(TC_DEFAULT, 0), "right", 0, 3, '0')
 		if p.rings < 1 and (leveltime % 10) / 5 then

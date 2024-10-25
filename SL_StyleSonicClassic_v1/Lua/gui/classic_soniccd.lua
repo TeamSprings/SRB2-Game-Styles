@@ -124,9 +124,11 @@ return{
 				V_DrawLevelActNum(v, actw, interpolate(150, 320, FRACUNIT-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
 			end
 
+			return true
 		elseif tctime >= etime-1 then
 			v.drawString(-999, -999, "Zone") -- Draw nothing to hide it
 
+			return true
 		elseif tctime > etime-11 -- Slide out
 			local fractime = (etime-tctime-1)*FRACUNIT/10
 
@@ -160,6 +162,7 @@ return{
 				V_DrawLevelActNum(v, actw, interpolate(150, 320, FRACUNIT-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
 			end
 
+			return true
 		else -- Main loop
 			v.draw(30, 0, back, V_SNAPTOTOP)
 
@@ -189,21 +192,27 @@ return{
 				end
 				V_DrawLevelActNum(v, actw, 150, mapheaderinfo[gamemap].actnum, ttlnum)
 			end
+
+			return true
 		end
 	end,
 
-	lives = function(v, p, t, e)
-		local curtm = 0 --StyleCD_Timetravel.timeline
-		local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x)
+		if p and p.mo then
+			local curtm = 0 --StyleCD_Timetravel.timeline
+			local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 
-		for i = 1, 4 do
-			v.draw((hudinfo[HUD_LIVES].x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_ALLWHITE))
+			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
+
+			for i = 1, 4 do
+				v.draw((lives_x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_ALLWHITE))
+			end
+			v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
+			v.draw(lives_x+17, hudinfo[HUD_LIVES].y+7, v.cachePatch('CDXLIFE'), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS)
+			drawf(v, 'S1TNUM', (lives_x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+4)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+
+			v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
+			v.drawScaled((lives_x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 		end
-		v.draw(hudinfo[HUD_LIVES].x+8, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
-		v.draw(hudinfo[HUD_LIVES].x+17, hudinfo[HUD_LIVES].y+7, v.cachePatch('CDXLIFE'), hudinfo[HUD_LIVES].f)
-		drawf(v, 'S1TNUM', (hudinfo[HUD_LIVES].x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+4)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f, v.getColormap(TC_DEFAULT, 1), "left")
-
-		v.drawScaled((hudinfo[HUD_LIVES].x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
-		v.drawScaled((hudinfo[HUD_LIVES].x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 	end,
 }

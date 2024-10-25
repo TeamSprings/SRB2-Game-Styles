@@ -9,7 +9,7 @@ Contributors: Ace Lite
 
 freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAERADUMMY", "MT_ROTATEOVERLAY", "MT_EXTRAINVRAY",
 "S_XPLD7", "S_XPLD8", "S_XPLD9", "S_ERASMOKE1", "S_ERASMOKE2", "S_SA2FLICKYBUBBLE", "S_DIASA2SPRINGSOUND", "S_HWRSA2SPRINGSOUND", "S_INVINCIBILITYRAY",
-"SPR_CA2D", "SPR_CA3D", "SPR_1CAP", "SPR_GEM1", "SPR_GEM2", "SPR_FLB9", "SPR_INV1",
+"SPR_CA2D", "SPR_CA3D", "SPR_GEM1", "SPR_GEM2", "SPR_FLB9", "SPR_INV1",
 "SPR_CHE0", "S_HWRSA2SPRING", "S_DIASA2SPRING")
 
 local Disable_Miscs = false
@@ -94,6 +94,42 @@ addHook("MobjThinker", function(a)
 		if a.bubble then
 			if a.scaleup and a.scale ~= FixedMul(a.scaleup, a.target.scale) then
 				a.scale = ease.linear(FRACUNIT/24, a.scale, FixedMul(a.scaleup, a.target.scale))
+			end
+
+			if a.target.valid and a.fuse > 4 then
+				if not a.extravalue1 then
+					a.extravalue1 = a.target.state
+					a.extravalue2 = a.target.fuse
+				end
+
+				if not (a.fuse % TICRATE) then
+					a.cusval = $ + P_RandomRange(-45, 45)
+				end
+
+				a.target.state = S_INVISIBLE
+				a.target.sprite = states[a.extravalue1].sprite
+				a.target.frame = states[a.extravalue1].frame
+				a.target.flags = $ | MF_NOGRAVITY
+
+				-- Will figure out movement logic later
+				local ang_h = leveltime*ANG2 + a.cusval * ANG1
+
+				a.target.angle = ang_h
+
+				a.target.momx = cos(ang_h)*3
+				a.target.momy = sin(ang_h)*3
+				if a.floorz < 16*FRACUNIT then
+					a.target.momz = 3*a.scale
+				else
+					a.target.momz = 3*sin(2*ANG1*leveltime)
+				end
+				a.target.fuse = a.extravalue2
+			else
+				if a.extravalue1 then
+					a.target.state = a.extravalue1
+					a.target.flags = $ &~ MF_NOGRAVITY
+					a.extravalue1 = 0
+				end
 			end
 
 			if a.alpha and a.fuse < 9 then
@@ -288,7 +324,7 @@ states[S_CEMG7] = {
 }
 
 --
---	Chao Key (Key to get to Chao Garden)
+--	Chao Key (Key to get to Chao Garden or... used to be)
 --
 
 freeslot("SPR_SA2K")
@@ -306,6 +342,28 @@ addHook("MapThingSpawn", function(mo)
 	mo.spritexscale = mo.spritexscale/2
 	mo.spriteyscale = mo.spriteyscale/2
 end, MT_TOKEN)
+
+addHook("TouchSpecial", function(mo, pmo)
+	if not pmo.player then return end
+	if pmo.player ~= consoleplayer then return end
+	local p = pmo.player
+
+	p.styles_keytouch = {
+		cam_x = camera.x,
+		cam_y = camera.y,
+		cam_z = camera.z,
+		cam_angle = camera.angle,
+		cam_aiming = camera.aiming,
+
+		x = mo.x,
+		y = mo.y,
+		z = mo.z,
+
+		frame = mo.frame,
+		dur = FRACUNIT,
+	}
+end, MT_TOKEN)
+
 
 --
 --	Boosters/ Dash Panels
@@ -417,3 +475,44 @@ addHook("MobjThinker", propellerSpringThinker, MT_REDSPRINGBALL)
 addHook("MobjRemoved", removalPropellerSpring, MT_YELLOWSPRINGBALL)
 addHook("MobjRemoved", removalPropellerSpring, MT_REDSPRINGBALL)
 
+--
+--	Goal Ring
+--
+
+local goalring = freeslot("MT_SA2_GOALRING")
+local goalring_state = freeslot("S_SA2_GOALRING_NORMAL")
+
+sfxinfo[freeslot("sfx_goalrn")].caption = "Goal Ring Ambience"
+
+mobjinfo[goalring] = {
+	spawnstate = goalring_state,
+	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP,
+}
+
+states[goalring_state] = {
+	sprite = freeslot("SPR_SA2_GOALRING"),
+	frame = FF_ANIMATE,
+	var1 = 47,
+	var2 = 1,
+}
+
+addHook("MobjSpawn", function(mo)
+	local gr = P_SpawnMobjFromMobj(mo, 0, 0, 0, goalring)
+	gr.scale = $+FRACUNIT/4
+	P_RemoveMobj(mo)
+end, MT_SIGN)
+
+addHook("MobjThinker", function(a)
+	if not consoleplayer then return end
+
+
+	if consoleplayer.exiting and a.spritexscale then
+		a.spriteyscale = 138*a.spriteyscale/128
+		a.spritexscale = 118*a.spritexscale/128
+	elseif a.spritexscale then
+		if not S_SoundPlaying(a, sfx_goalrn) then
+			S_StartSound(a, sfx_goalrn)
+		end
+	end
+
+end, goalring)

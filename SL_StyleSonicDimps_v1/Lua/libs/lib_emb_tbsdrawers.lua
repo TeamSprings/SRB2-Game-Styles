@@ -62,6 +62,107 @@ local function V_CachePatches(v, patch, str, font, val, padding, i)
 	return {patch = symbol, width = symbol.width+padding}
 end
 
+local function V_FontScrollDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol, scroll, width)
+	if value == nil then return end
+	local str = value..""
+	local fontoffset = 0
+	local lenght = 0
+	local cache = {}
+
+	if leftadd then
+		str = strrep(symbol or ";", max(leftadd-#str, 0))..str
+	end
+
+	local maxv = #str
+	local start = 0
+	local cut = 0
+
+	for i = 1,maxv do
+		local cur = V_CachePatches(v, patch, str, font, val, padding or 0, i)
+		cache[i] = cur
+		lenght = $+cur.width
+
+		if start == 0 and scroll < lenght then
+			cut = lenght-scroll
+			start = i
+		end
+	end
+
+	local nx = FixedMul(x, scale)
+	local ny = FixedMul(y, scale)
+
+	if alligment == "center" then
+		nx = $-(lenght*scale >> 1)
+	elseif alligment == "right" then
+		nx = $-lenght*scale
+	end
+
+	local drawer = v.drawScaled
+	local endp = 0
+
+	--v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, 0, 0, cut*FRACUNIT, 360*FRACUNIT) -- Reverse, as if inserting anim
+	v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, (cache[start].width-cut)*FRACUNIT, 0, 360*FRACUNIT, 360*FRACUNIT)
+	fontoffset = $+cut
+
+	for i = start+1, maxv do
+		if fontoffset > width and not endp then endp = i; break; end
+
+		drawer(nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color)
+		fontoffset = $+cache[i].width
+	end
+
+	for i = 1, start-1 do
+		if fontoffset > width and not endp then endp = i; break; end
+		if endp then break end
+
+		drawer(nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color)
+		fontoffset = $+cache[i].width
+	end
+
+	if endp then
+		v.drawCropped(nx+fontoffset*scale, ny, scale, scale, cache[endp].patch, flags, color, 0, 0, max(cache[endp].width+(width-fontoffset), 0)*FRACUNIT, 360*FRACUNIT)
+	end
+end
+
+local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol, progress, anim, offset, ...)
+	if value == nil then return end
+	local str = value..""
+	local fontoffset = 0
+	local lenght = 0
+	local cache = {}
+
+	if leftadd then
+		str = strrep(symbol or ";", max(leftadd-#str, 0))..str
+	end
+
+	local maxv = #str
+
+	for i = 1,maxv do
+		local cur = V_CachePatches(v, patch, str, font, val, padding or 0, i)
+		cache[i] = cur
+		lenght = $+cur.width
+	end
+
+	local nprogress = (progress % FRACUNIT) + 1
+	local animseq = FRACUNIT / maxv
+	local animoff = offset / maxv
+
+	local nx = FixedMul(x, scale)
+	local ny = FixedMul(y, scale)
+
+	if alligment == "center" then
+		nx = $-(lenght*scale >> 1)
+	elseif alligment == "right" then
+		nx = $-lenght*scale
+	end
+
+	for i = 1,maxv do
+		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FRACUNIT)
+		anim(v, nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color, i, invprg, nprogress, {...})
+		fontoffset = $+cache[i].width
+	end
+end
+
 local function V_FontDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol)
 	if value == nil then return end
 	local str = value..""
@@ -101,7 +202,7 @@ end
 --TBSlib.fontlenghtcal(d, patch, str, font, val, padding, i)
 local function V_GetCharLenght(v, patch, str, font, val, padding, i)
 	local char = strsub(str, i, i)
-	return (fontregistry[font] and fontregistry[font][char] or V_RegisterFont(d, font, char)).width+padding
+	return (fontregistry[font] and fontregistry[font][char] or V_RegisterFont(v, font, char)).width+padding
 end
 
-return {draw = V_FontDrawer, lenght = V_GetCharLenght}
+return {draw = V_FontDrawer, drawScroll = V_FontScrollDrawer, drawAnim = V_FontAnimDrawer, lenght = V_GetCharLenght}

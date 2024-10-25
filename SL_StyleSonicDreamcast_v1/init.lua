@@ -1,14 +1,14 @@
 local gameString = "DC"
-local packType = '[Sonic Adventure Style]'
-local version = '2.2.13'
+local packType = '[Sonic Adventure Style] '
+local version = '2.2.14'
 
 --[[
 	Sonic Adventure Stylized Pack for SRB2
-	@ Contributors: Ace Lite,
+	@ Contributors: Skydusk
 ]]
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
-assert((SUBVERSION > 12), packType.."Mod requires features from "..version.."+")
+assert((SUBVERSION > 13), packType.."Mod requires features from "..version.."+")
 
 if not tbsrequire then
 	local cache_lib = {}
@@ -27,9 +27,12 @@ if not tbsrequire then
 			end
 		end
 	end)
+
+	rawset(_G, "tbslibrary", function(path)
+		return tbsrequire("libs/"..path)
+	end)
 end
 
--- Pointless really, merely attempt to create iterator, possibly useful for other type of iterations
 local function iterator_n(array, n) if n < #array then n = $+1 return n, array[n] end end
 local function iterator(array) return iterator_n, array, 0 end
 
@@ -40,8 +43,9 @@ local function macro_dofile(prefix, ...)
 	end
 end
 
-if VERSION == 202 and SUBVERSION > 9 then
-	print(packType.."As this is WIP version of "..gameString.." pack and UDMF update is not out yet. Game allows to load this pack in "..VERSIONSTRING)
+if VERSION == 202 and SUBVERSION > 13 then
+	local start_metric = getTimeMicros()
+	print(packType.."Loading")
 
 	-- sal's library
 	dofile("libs/sal_lib-customhud-v2-1.lua")
@@ -63,4 +67,16 @@ if VERSION == 202 and SUBVERSION > 9 then
 		"user_game.lua",
 		"user_inter.lua",
 		"user_mics.lua")
+
+	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
+else
+	-- Notify 'em
+	local function MisVersion_Notification(v)
+		v.drawFill(0, 95, 320, 30, 38)
+		v.drawString(160, 100, "ADVENTURE STYLE WON'T BE LOADED IN THIS VERSION OF SRB2", V_ORANGEMAP, "thin-center")
+		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.14+ or Nighty Build of SRB2", 0, "thin-center")
+	end
+
+	hud.add(MisVersion_Notification, "title")
+	hud.add(MisVersion_Notification, "game")
 end

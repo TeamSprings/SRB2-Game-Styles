@@ -68,7 +68,9 @@ end, MT_ATTRACT_ORB)
 
 
 addHook("PlayerThink", function(p)
-	if p.shieldscale == skins[p.mo.skin].shieldscale then
+	if 	p.shieldscale == skins[p.mo.skin].shieldscale
+	and p.shieldscale == FRACUNIT then
+		-- This needs increase!
 		p.shieldscale = tofixed('1.15')
 	end
 

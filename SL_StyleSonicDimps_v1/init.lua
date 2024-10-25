@@ -1,14 +1,14 @@
 local gameString = "gba"
-local packType = '[Sonic GBA Style]'
+local packType = '[Dimps Style] '
 local version = '2.2.14'
 
-/*
-	Sonic 3 Stylized Pack for SRB2
-	@ Contributors: Ace Lite,
-*/
+--[[
+	Dimps Stylized Pack for SRB2
+	@ Contributors: Skydusk
+]]
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
-assert((SUBVERSION > 9), packType.."Mod requires features from "..version.."+")
+assert((SUBVERSION > 13), packType.."Mod requires features from "..version.."+")
 
 freeslot("SKINCOLOR_COMPRESSORGBA", "SKINCOLOR_COMPRESSORGBA2")
 skincolors[freeslot("SKINCOLOR_PITCHBLACK")] = {
@@ -36,22 +36,39 @@ if not tbsrequire then
 	end)
 end
 
--- Shut up and load it in.
+local function iterator_n(array, n) if n < #array then n = $+1 return n, array[n] end end
+local function iterator(array) return iterator_n, array, 0 end
 
-// Oh yeah, it is quite pointless check in grand scheme of things.
-// I just want to minimalize situation, where some genius decides
-// to play this on older version of SRB2.
+local function macro_dofile(prefix, ...)
+	local array = {...}
+	for _,use in iterator(array) do
+		dofile(prefix..'_'..use)
+	end
+end
 
-// Man idiot proofing is so so SOO teadious :earless:
-if VERSION == 202 and SUBVERSION > 12 then
-	print(packType.."As this is WIP version of "..gameString.." pack and UDMF update is not out yet. Game allows to load this pack in "..VERSIONSTRING)
+if VERSION == 202 and SUBVERSION > 13 then
+	local start_metric = getTimeMicros()
+	print(packType.."Loading")
 
 	dofile("libs/sal_lib-customhud-v2-1.lua")
 
-	// Game Assets
-	dofile(gameString.."_misc.lua")
-	dofile(gameString.."_monitor.lua")
-	dofile(gameString.."_hudmanager.lua")
+	macro_dofile(gameString,
+	"misc.lua",
+	"inter.lua",
+	"monitor.lua",
+	"hudmanager.lua",
 
-	dofile(gameString.."_io.lua")
+	"io.lua")
+
+	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
+else
+	-- Notify 'em
+	local function MisVersion_Notification(v)
+		v.drawFill(0, 95, 320, 30, 38)
+		v.drawString(160, 100, "DIMPS STYLE WON'T BE LOADED IN THIS VERSION OF SRB2", V_ORANGEMAP, "thin-center")
+		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.14+ or Nighty Build of SRB2", 0, "thin-center")
+	end
+
+	hud.add(MisVersion_Notification, "title")
+	hud.add(MisVersion_Notification, "game")
 end

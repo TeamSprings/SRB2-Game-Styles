@@ -7,10 +7,13 @@ Contributors: Ace Lite, Demnyx
 
 ]]
 
+freeslot("SPR_DC_MONITOR")
 
 local slope_handler = tbsrequire 'helpers/mo_slope'
+local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 
 local Disable_ItemBox = false
+--local ItemBox_Type = CV_FindVar("dc_itemboxstyle")
 
 addHook("MapLoad", function()
 	Disable_ItemBox = false
@@ -20,8 +23,6 @@ addHook("MapLoad", function()
 end)
 
 local function P_SpawnItemBox(a)
-		if not (a.info.flags & MF_MONITOR) then return end
-
 		local icon = mobjinfo[a.type].damage
 		local icstate = mobjinfo[icon].spawnstate
 		local icsprite = states[icstate].sprite
@@ -45,14 +46,14 @@ local function P_SpawnItemBox(a)
 				a.caps = P_SpawnMobjFromMobj(a, 0,0,0, MT_OVERLAY)
 				a.caps.state = S_INVISIBLE
 				a.caps.target = a
-				a.caps.sprite = SPR_1CAP
+				a.caps.sprite = SPR_DC_MONITOR
 				a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 				a.caps.flags2 = $|MF2_LINKDRAW
 			end
 		end
 
 		a.state = S_INVISIBLE
-		a.sprite = SPR_1CAP
+		a.sprite = SPR_DC_MONITOR
 
 		--a.item.dispoffset = -32*FRACUNIT
 
@@ -216,10 +217,7 @@ local ringboxrandomizer = {
 	MT_SARANDRING_BOX,
 }
 
-addHook("MobjSpawn", P_SpawnItemBox)
-
-
-addHook("MobjThinker", function(a)
+local function P_MonitorThinker(a)
 	if (a and a.valid and a.info.flags & MF_MONITOR) then
 		if not a.originscale then
 			a.originscale = (a.spawnpoint and a.spawnpoint.scale or a.scale)
@@ -379,7 +377,7 @@ addHook("MobjThinker", function(a)
 			end
 		end
 	end
-end)
+end
 
 local function insertPlayerItemToHud(p, sprite, frame)
 	if p and not p.boxdisplay then
@@ -392,7 +390,7 @@ local function insertPlayerItemToHud(p, sprite, frame)
 	table.insert(p.boxdisplay.item, {sprite, frame})
 end
 
-addHook("MobjDeath", function(a, d, s)
+local function P_MonitorDeath(a, d, s)
 	if Disable_ItemBox then return end
 	if a.info.flags & MF_MONITOR then
 		if a.health < 0 and a.once_already then return end
@@ -415,6 +413,19 @@ addHook("MobjDeath", function(a, d, s)
 			boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
 			boxicon.scale = a.item.scale
 			boxicon.target = a.target
+
+			-- Clipped code from Source code for life icons
+			if boxicon.type == MT_1UP_ICON and boxicon.target then
+				// Spawn the lives icon.
+				local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
+				livesico.target = boxicon
+				livesico.color = boxicon.target.player.mo.color
+				livesico.skin = boxicon.target.player.mo.skin
+				livesico.state = S_PLAY_ICON1
+				livesico.dispoffset = 2
+
+				boxicon.state = S_1UP_NICON1
+			end
 		end
 
 		if a.target.player then
@@ -430,7 +441,7 @@ addHook("MobjDeath", function(a, d, s)
 			smuk.fuse = 32
 			smuk.scale = a.scale*8/3
 			a.state = S_INVISIBLE
-			a.sprite = SPR_1CAP
+			a.sprite = SPR_DC_MONITOR
 			a.frame = B
 			P_RemoveMobj(a.item)
 			P_RemoveMobj(a.caps)
@@ -447,9 +458,9 @@ addHook("MobjDeath", function(a, d, s)
 
 		return true
 	end
-end)
+end
 
-addHook("MobjRemoved", function(a, d)
+local function P_MonitorRemoval(a, d)
 	if not (gamestate & GS_LEVEL) then return end
 	if not (a and a.valid) then return end
 	if not (a.info.flags & MF_MONITOR) then return end
@@ -461,7 +472,7 @@ addHook("MobjRemoved", function(a, d)
 	if a.caps and a.caps.valid then
 		P_RemoveMobj(a.caps)
 	end
-end)
+end
 
 addHook("MobjMoveCollide", function(a, mt)
 	if not (mt and mt.valid) then return end
@@ -477,3 +488,47 @@ addHook("MobjMoveCollide", function(a, mt)
 	end
 end, MT_PLAYER)
 
+--
+--	Special 1UP_BOX handling
+--
+
+addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
+addHook("MobjThinker", function(a)
+	P_MonitorThinker(a)
+	if a.health > 0 and a.item then
+		life_up_thinker(a.item)
+	end
+end, MT_1UP_BOX)
+addHook("MobjDeath", P_MonitorDeath, MT_1UP_BOX)
+addHook("MobjRemoved", P_MonitorRemoval, MT_1UP_BOX)
+
+--
+--	Monitor Register (In future, global mobj hooks will be removed. As well this would be much more performant in theory.)
+--
+
+local monitor_database = {}
+monitor_database[MT_1UP_BOX] = 1
+
+local function P_AddMonitor(mobjtype)
+	if not monitor_database[mobjtype] then
+		addHook("MobjSpawn", P_SpawnItemBox, mobjtype)
+		addHook("MobjThinker", P_MonitorThinker, mobjtype)
+		addHook("MobjDeath", P_MonitorDeath, mobjtype)
+		addHook("MobjRemoved", P_MonitorRemoval, mobjtype)
+		monitor_database[mobjtype] = 1
+	end
+end
+
+-- This checks every mobjinfo slot, parameter being start of from where it should search in the Mobjinfo list.
+local function P_CheckNewMonitors(start)
+	for i = start, #mobjinfo do
+		if i == 1675 then break end
+
+		if mobjinfo[i] and mobjinfo[i].flags & MF_MONITOR then
+			P_AddMonitor(i)
+		end
+	end
+end
+
+-- Please, tell me there is better way to do this... I hope my addon loaded hook gets merged...
+P_CheckNewMonitors(MT_BOXSPARKLE);

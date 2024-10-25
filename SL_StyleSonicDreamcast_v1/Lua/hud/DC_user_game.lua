@@ -8,11 +8,12 @@ Contributors: Ace Lite, Demnyx
 ]]
 
 
-
-local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
-local helper = 	tbsrequire 'helpers/lua_hud'
+local worldlib = 	tbslibrary 'lib_sparkeditedw2h'
+local drawlib = 	tbslibrary 'lib_emb_tbsdrawers'
+local helper = 		tbsrequire 'helpers/lua_hud'
 
 local convertPlayerTime = helper.convertPlayerTime
+local translate = worldlib.translate
 local font_drawer = drawlib.draw
 local font_string = 'SA2NUM'
 local font_redstring = 'SA2NUMR'
@@ -63,7 +64,7 @@ end
 --
 
 -- SCORE
-HOOK("score", "sa2hud", function(v, p, t, e)
+HOOK("score", "dchud", function(v, p, t, e)
 	if (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
@@ -73,7 +74,7 @@ HOOK("score", "sa2hud", function(v, p, t, e)
 end, "game")
 
 -- TIME
-HOOK("time", "sa2hud", function(v, p, t, e)
+HOOK("time", "dchud", function(v, p, t, e)
 	if (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
@@ -91,7 +92,7 @@ HOOK("time", "sa2hud", function(v, p, t, e)
 end, "game")
 
 -- RINGS
-HOOK("rings", "sa2hud", function(v, p, t, e)
+HOOK("rings", "dchud", function(v, p, t, e)
 	if (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
@@ -108,14 +109,57 @@ HOOK("rings", "sa2hud", function(v, p, t, e)
 	end
 
 	if token then
-		v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+		if token > 1 or not p.styles_keytouch then
+			v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+		end
+
+		if p.styles_keytouch and p.styles_keytouch.dur > 0 then
+			local ox, oy, oscale, visible = translate({
+					x = p.styles_keytouch.cam_x,
+					y = p.styles_keytouch.cam_y,
+					z = p.styles_keytouch.cam_z,
+					angle = p.styles_keytouch.cam_angle,
+					aiming = p.styles_keytouch.cam_aiming,
+				},
+				{
+					x = p.styles_keytouch.x,
+					y = p.styles_keytouch.y,
+					z = p.styles_keytouch.z,
+				}
+			)
+
+			local winwidth = v.width()
+			local winheight = v.height()
+			local winscale = v.dupy()
+
+			local widthgreenextra = (winwidth/winscale - 320)/2
+			local heightgreenextra = (winheight/winscale - 200)/2
+
+			local dur = p.styles_keytouch.dur
+			local key_sprite = v.getSpritePatch(SPR_SA2K, p.styles_keytouch.frame)
+
+			local scale = 	ease.linear	(dur, font_scale/5, oscale)
+			local x = 		ease.outsine(dur, hudinfo[HUD_RINGS].x-widthgreenextra+78+FixedInt(FixedMul(key_sprite.leftoffset, scale)), ox/FRACUNIT)
+			local y = 		ease.outsine(dur, hudinfo[HUD_RINGS].y-heightgreenextra+9+FixedInt(FixedMul(key_sprite.topoffset, scale)), oy/FRACUNIT+FixedInt(FixedMul(key_sprite.topoffset, scale)))
+
+			v.drawScaled(x*FRACUNIT, y*FRACUNIT, scale, key_sprite, V_PERPLAYER)
+		end
 	end
 
 	return true
 end, "game")
 
+addHook("PlayerThink", function(p)
+	if p.styles_keytouch and p.styles_keytouch.dur > 920 then
+		p.styles_keytouch.dur = p.styles_keytouch.dur-FRACUNIT/18
+		p.styles_keytouch.frame = ((p.styles_keytouch.frame & FF_FRAMEMASK)+2) % 69
+	else
+		p.styles_keytouch = nil
+	end
+end)
+
 -- LIVES
-HOOK("lives", "sa2hud", function(v, p, t, e)
+HOOK("lives", "dchud", function(v, p, t, e)
 	if (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 

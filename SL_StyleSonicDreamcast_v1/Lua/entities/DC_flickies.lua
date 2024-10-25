@@ -83,7 +83,22 @@ local function touchflicky(a, t)
 	end
 
 	table.insert(p.flickies, {mobjtype = a.type, data = Flickydata[a.type]})
-	p.flickies.tics = TICRATE*3
+
+	-- Horrible if-elseif ladder, it would have been easier to do it differently,
+	-- Whatever... Time is resource and this is one-time event.
+	if p.flickies.tics then
+		if p.flickies.tics < TICRATE*3 - 15 and p.flickies.tics > 10 then
+			p.flickies.tics = TICRATE*3 - 16
+		elseif p.flickies.tics <= 10 and p.flickies.tics > 0 then
+			p.flickies.tics = TICRATE*3 - p.flickies.tics
+		elseif p.flickies.tics > TICRATE*3 - 15 then
+			p.flickies.tics = p.flickies.tics
+		else
+			p.flickies.tics = TICRATE*3
+		end
+	else
+		p.flickies.tics = TICRATE*3
+	end
 end
 
 rawset(_G, "SA_BubbleFlickylist", Flickylist)
