@@ -1,6 +1,9 @@
 local finishSectors = {}
 local skiptally
 
+-- Global that should have been exposed! Bruh.
+local TMEF_SKIPTALLY = 1
+
 --
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
 -- Such a horrible unprotected way to do @override
