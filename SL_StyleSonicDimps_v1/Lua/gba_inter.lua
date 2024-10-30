@@ -207,8 +207,6 @@ local function G_StylesTallyBackend(p)
 
 					if p.styles_tallytimer > p.styles_tallyendtime then
 						p.exiting = 1
-						p.styles_tallytimer = nil
-
 						G_ExitLevel()
 						return
 					end
@@ -218,12 +216,16 @@ local function G_StylesTallyBackend(p)
 			if p.exiting == 1 then
 				G_ExitLevel()
 			end
-		else
-			p.styles_tallytimer = nil
 		end
 	else
 		p.styles_tallytimer = nil
 	end
 end
+
+addHook("MapChange", function()
+	for p in players.iterate do
+		p.styles_tallytimer = nil
+	end
+end)
 
 addHook("PlayerThink", G_StylesTallyBackend)
