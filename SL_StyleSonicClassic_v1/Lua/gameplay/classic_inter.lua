@@ -113,7 +113,7 @@ end
 addHook("MapLoad", Hack_SearchCustomExits)
 
 --
--- Setup functions
+-- 	Setup functions
 --
 
 local function G_InteprateStyleSectors(s)
@@ -127,8 +127,32 @@ local function G_InteprateStyleSectors(s)
 	end
 end
 
-local function G_InitiateNewExit()
-	G_SetCustomExitOriginal(nil, 1)
+--
+--	Grant Emerald
+--
+
+local emeralds_set = {
+	EMERALD1,
+	EMERALD2,
+	EMERALD3,
+	EMERALD4,
+	EMERALD5,
+	EMERALD6,
+	EMERALD7,
+}
+
+local function G_StylesGrantEmerald(p)
+	if gamemap >= sstage_start and gamemap < sstage_end then
+		local em_selection = gamemap - sstage_start + 1
+		p.styles_granted = emeralds_set[em_selection]
+
+		emeralds = $ | p.styles_granted
+	elseif gamemap >= smpstage_start and gamemap <= smpstage_end then
+		local em_selection = gamemap - smpstage_start + 1
+		p.styles_granted = emeralds_set[em_selection]
+
+		emeralds = $ | p.styles_granted
+	end
 end
 
 --
@@ -136,10 +160,13 @@ end
 --
 
 local function G_StylesTallyBackend(p)
-	if multiplayer or not end_tallyenabled then return end
+	if (multiplayer and not splitscreen) or not end_tallyenabled then return end
 	if not (p.mo and p.mo.valid) then return end
+	if marathonmode then return end
 
-	if G_GametypeUsesCoopStarposts() and G_GametypeUsesLives() then
+	local specialstage = G_IsSpecialStage(gamemap)
+
+	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
 
 		-- Handles cases with skiptally, hopefully.
 		if not p.urhudon then
@@ -148,13 +175,15 @@ local function G_StylesTallyBackend(p)
 			if spacial_sec and finishSectors[spacial_sec] then
 				G_InteprateStyleSectors(spacial_sec)
 			end
-
-			G_InitiateNewExit()
 		end
 
 
 		if G_EnoughPlayersFinished() then
 			if not skiptally then
+				if not stagefailed then
+					G_StylesGrantEmerald(p)
+				end
+
 				p.mo.flags = $|MF_NOCLIPTHING
 
 				-- STOP
@@ -203,23 +232,26 @@ local function G_StylesTallyBackend(p)
 
 					if p.styles_tallytimer > p.styles_tallyendtime then
 						p.exiting = 1
-						p.styles_tallytimer = nil
-
-						G_ExitLevel()
+						G_ExitLevel(nil, 1)
 						return
 					end
 				end
 			end
 
 			if p.exiting == 1 then
-				G_ExitLevel()
+				G_ExitLevel(nil, 1)
 			end
-		else
-			p.styles_tallytimer = nil
 		end
 	else
 		p.styles_tallytimer = nil
 	end
 end
+
+addHook("MapChange", function()
+	for p in players.iterate do
+		p.styles_tallytimer = nil
+	end
+end)
+
 
 addHook("PlayerThink", G_StylesTallyBackend)

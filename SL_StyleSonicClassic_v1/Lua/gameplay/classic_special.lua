@@ -1,3 +1,8 @@
+--
+--	While possible to make work in multiplayer, it makes absolutely no sense design wise.
+--	Therefore no multiplayer support, ever. :P
+--
+
 local giantring = freeslot("S_GIANTRING_CLASSIC")
 states[giantring] = {
 	sprite = freeslot("SPR_GIANTRING_CLASSIC"),
@@ -100,7 +105,10 @@ end
 
 local function SP_SaveState(mobj)
 	if All7Emeralds(emeralds) then
-		consoleplayer.rings = $+50
+		if not splitscreen then
+			consoleplayer.rings = $+50
+		end
+
 		P_RemoveMobj(mobj)
 		return
 	end
@@ -113,20 +121,35 @@ local function SP_SaveState(mobj)
 
 	if mapthing then
 		local storage = maps_data[gamemap]
-		storage.x = consoleplayer.mo.x
-		storage.y = consoleplayer.mo.y
-		storage.z = consoleplayer.mo.z
-		storage.angle = consoleplayer.mo.angle
-		storage.scale = consoleplayer.mo.scale
-		storage.starpostx = consoleplayer.starpostx
-		storage.starposty = consoleplayer.starposty
-		storage.starpostz = consoleplayer.starpostz
-		storage.starpostnum = consoleplayer.starpostnum
-		storage.starposttime = consoleplayer.starposttime
-		storage.starpostangle = consoleplayer.starpostangle
-		storage.starpostscale = consoleplayer.starpostscale
+		storage.x = displayplayer.mo.x
+		storage.y = displayplayer.mo.y
+		storage.z = displayplayer.mo.z
+		storage.angle = displayplayer.mo.angle
+		storage.scale = displayplayer.mo.scale
+		storage.starpostx = displayplayer.starpostx
+		storage.starposty = displayplayer.starposty
+		storage.starpostz = displayplayer.starpostz
+		storage.starpostnum = displayplayer.starpostnum
+		storage.starposttime = displayplayer.starposttime
+		storage.starpostangle = displayplayer.starpostangle
+		storage.starpostscale = displayplayer.starpostscale
 
 		storage.leveltime = leveltime
+
+		if splitscreen and secondarydisplayplayer then
+			storage.p2x = secondarydisplayplayer.mo.x
+			storage.p2y = secondarydisplayplayer.mo.y
+			storage.p2z = secondarydisplayplayer.mo.z
+			storage.p2angle = secondarydisplayplayer.mo.angle
+			storage.p2scale = secondarydisplayplayer.mo.scale
+			storage.p2starpostx = secondarydisplayplayer.starpostx
+			storage.p2starposty = secondarydisplayplayer.starposty
+			storage.p2starpostz = secondarydisplayplayer.starpostz
+			storage.p2starpostnum = secondarydisplayplayer.starpostnum
+			storage.p2starposttime = secondarydisplayplayer.starposttime
+			storage.p2starpostangle = secondarydisplayplayer.starpostangle
+			storage.p2starpostscale = secondarydisplayplayer.starpostscale
+		end
 
 		if not maps_data[gamemap].delete then
 			maps_data[gamemap].delete = {}
@@ -151,22 +174,40 @@ local function SP_LoadState(map)
 		local data = maps_data[map]
 
 		if data.delete then
-			if consoleplayer.mo then
-				P_SetOrigin(consoleplayer.mo, data.x, data.y, data.z)
-				consoleplayer.mo.angle = data.angle
-				consoleplayer.mo.scale = data.scale
-				consoleplayer.starpostx = data.starpostx
-				consoleplayer.starposty = data.starposty
-				consoleplayer.starpostz = data.starpostz
-				consoleplayer.starpostnum = data.starpostnum
-				consoleplayer.starposttime = data.starposttime
-				consoleplayer.starpostangle = data.starpostangle
-				consoleplayer.starpostscale = data.starpostscale
+			if displayplayer.mo then
+				P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
+				displayplayer.mo.angle = data.angle
+				displayplayer.mo.scale = data.scale
+				displayplayer.starpostx = data.starpostx
+				displayplayer.starposty = data.starposty
+				displayplayer.starpostz = data.starpostz
+				displayplayer.starpostnum = data.starpostnum
+				displayplayer.starposttime = data.starposttime
+				displayplayer.starpostangle = data.starpostangle
+				displayplayer.starpostscale = data.starpostscale
 
-				consoleplayer.style_additionaltime = data.leveltime
+				displayplayer.style_additionaltime = data.leveltime
 
-				consoleplayer.mo.flags = $ &~ MF_NOTHINK
-				consoleplayer.mo.alpha = FRACUNIT
+				displayplayer.mo.flags = $ &~ MF_NOTHINK
+				displayplayer.mo.alpha = FRACUNIT
+			end
+
+			if splitscreen and secondarydisplayplayer and secondarydisplayplayer.mo then
+				P_SetOrigin(secondarydisplayplayer.mo, data.p2x, data.p2y, data.p2z)
+				secondarydisplayplayer.mo.angle = data.p2angle
+				secondarydisplayplayer.mo.scale = data.p2scale
+				secondarydisplayplayer.starpostx = data.p2starpostx
+				secondarydisplayplayer.starposty = data.p2starposty
+				secondarydisplayplayer.starpostz = data.p2starpostz
+				secondarydisplayplayer.starpostnum = data.p2starpostnum
+				secondarydisplayplayer.starposttime = data.p2starposttime
+				secondarydisplayplayer.starpostangle = data.p2starpostangle
+				secondarydisplayplayer.starpostscale = data.p2starpostscale
+
+				secondarydisplayplayer.style_additionaltime = data.leveltime
+
+				secondarydisplayplayer.mo.flags = $ &~ MF_NOTHINK
+				secondarydisplayplayer.mo.alpha = FRACUNIT
 			end
 
 			for _,v in ipairs(data.delete) do
@@ -179,7 +220,10 @@ local function SP_LoadState(map)
 				end
 			end
 		else
-			consoleplayer.style_additionaltime = 0
+			displayplayer.style_additionaltime = 0
+			if splitscreen and secondarydisplayplayer then
+				secondarydisplayplayer.style_additionaltime = 0
+			end
 		end
 	end
 end
@@ -221,14 +265,14 @@ end)
 --
 
 addHook("MapThingSpawn", function(a)
-	if multiplayer then return end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance == 3 then return end
 
 	P_RemoveMobj(a)
 end, MT_TOKEN)
 
 addHook("MapThingSpawn", function(a)
-	if multiplayer then return end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 1 then return end
 
 	if not All7Emeralds(emeralds) then
@@ -238,7 +282,7 @@ addHook("MapThingSpawn", function(a)
 end, MT_SIGN)
 
 addHook("MobjThinker", function(a)
-	if multiplayer then return end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 1 then return end
 
 	if a.ring and a.ring.valid then
@@ -251,7 +295,7 @@ addHook("MobjThinker", function(a)
 end, MT_SIGN)
 
 addHook("MobjSpawn", function(a)
-	if multiplayer then return end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
 	a.state = All7Emeralds(emeralds) and giantring_hyper or giantring
 	a.flags = $|MF_SPECIAL
@@ -259,13 +303,13 @@ addHook("MobjSpawn", function(a)
 end, MT_TOKEN)
 
 addHook("TouchSpecial", function(a, k)
-	if multiplayer then return end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
 	return true
 end, MT_TOKEN)
 
 addHook("MobjCollide", function(a, k)
-	if multiplayer then return false end
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return false end
 	if not k.player then return false end
 

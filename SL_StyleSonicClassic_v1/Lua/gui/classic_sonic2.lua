@@ -16,6 +16,9 @@ local trx1, trx2, try
 
 return{
 	titlecard = function(v, p, t, e)
+		if t > e-1 then return end
+		if p == secondarydisplayplayer then return end -- remove this once adjusted
+
 		local lvlt = string.lower(""..mapheaderinfo[gamemap].lvlttl)
 		local act = ''..mapheaderinfo[gamemap].actnum
 		local rightflg = v.levelTitleWidth(lvlt)
@@ -59,20 +62,20 @@ return{
 			v.drawFill(0-extscrw/2, 0-try-extscrh, screenw+extscrw/2, screenh, (skins_colors[pskin] or 153))
 			v.drawFill(trx1-extscrw/2, 136, screenw+extscrw/2, 64+extscrh, 74)
 			v.drawFill(-trx1-extscrw/2-23, -extscrh, 111, screenh+extscrh, 37)
-			v.draw(88-trx1-extscrw/2, -extscrh, v.cachePatch('S2TTCOR'), V_PERPLAYER)
-			v.draw(138+trx1-extscrw/2, 144, v.cachePatch('S2TTANAM'), V_PERPLAYER)
-			v.drawLevelTitle(287+trx2-rightflg, 51, lvlt, V_PERPLAYER)
+			v.draw(88-trx1-extscrw/2, -extscrh, v.cachePatch('S2TTCOR'), 0)
+			v.draw(138+trx1-extscrw/2, 144, v.cachePatch('S2TTANAM'), 0)
+			v.drawLevelTitle(287+trx2-rightflg, 51, lvlt, 0)
 			local offset_x = max(rightflg, 164)
 
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				v.drawLevelTitle(382-trx2-offset_x, 76, 'zone', V_PERPLAYER)
+				v.drawLevelTitle(382-trx2-offset_x, 76, 'zone', 0)
 			end
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(382-trx2-offset_x+zonelenght)*FRACUNIT, 80*FRACUNIT, FRACUNIT, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'TTL0',(382-trx2-offset_x+zonelenght)*FRACUNIT, 80*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
-			v.drawString(160-trx1, 105, mapheaderinfo[gamemap].subttl, V_PERPLAYER|V_ALLOWLOWERCASE, "center")
+			v.drawString(160-trx1, 105, mapheaderinfo[gamemap].subttl, V_ALLOWLOWERCASE, "center")
 
 			return true
 		end

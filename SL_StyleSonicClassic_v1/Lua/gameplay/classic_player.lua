@@ -90,7 +90,7 @@ addHook("PlayerThink", function(p)
 	end
 
 	if springtwalk_cv.value then
-		if p.mo.state == S_PLAY_SPRING then
+		if (p.mo.state == S_PLAY_SPRING) then
 			p.styles_spronk = true
 		elseif p.styles_spronk and (p.mo.state == S_PLAY_FALL
 		or (p.style_falling and p.mo.state == S_PLAY_WALK)) then

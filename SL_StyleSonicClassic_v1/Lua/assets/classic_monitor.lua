@@ -49,6 +49,13 @@ local monitor_cv = CV_RegisterVar{
 	PossibleValue = {sonic1=1, sonic3=2, blast3d=3, mania=4}
 }
 
+local monitor_jump_cv = CV_RegisterVar{
+	name = "classic_monitormaniajump",
+	defaultvalue = "disabled",
+	flags = CV_NETVAR,
+	PossibleValue = {disabled=0, enabled=1}
+}
+
 local monitor_typesa_cv = CV_RegisterVar{
 	name = "classic_monitordistribution",
 	defaultvalue = "disabled",
@@ -305,6 +312,10 @@ local function P_MonitorDeath(a, d, s)
 		else
 			a.target = P_LookForPlayers(a, FixedMul(64*FRACUNIT, a.scale), yes)
 		end
+	end
+
+	if (monitor_jump_cv.value > 0) then
+		a.momz = $+4*P_MobjFlip(a)*a.scale
 	end
 
 	S_StartSound(a, a.info.deathsound)

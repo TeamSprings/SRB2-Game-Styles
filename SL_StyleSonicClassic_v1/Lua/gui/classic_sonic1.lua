@@ -5,6 +5,9 @@ local fontlen = drawlib.lenght
 return{
 
 	titlecard = function(v, p, t, e)
+		if t > e-1 then return end
+		if p == secondarydisplayplayer then return end -- remove this once adjusted
+
 		local lvlt = string.lower(""..mapheaderinfo[gamemap].lvlttl)
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		local scale = FRACUNIT
@@ -30,22 +33,22 @@ return{
 
 			local mo = p.mo
 			if mo then
-				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), V_PERPLAYER, v.getColormap(mo.skin, mo.color))
+				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(mo.skin, mo.color))
 			else
-				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), V_PERPLAYER, v.getColormap(TC_DEFAULT, p.skincolor))
+				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(TC_DEFAULT, p.skincolor))
 			end
 
-			drawf(v, 'SO1FNT', FixedMul(251*FRACUNIT, scale)-hud.trx-offset, FixedMul(76*FRACUNIT, scale), scale, string.lower(lvlt), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right")
+			drawf(v, 'SO1FNT', FixedMul(251*FRACUNIT, scale)-hud.trx-offset, FixedMul(76*FRACUNIT, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1), "right")
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'SO1FNT', FixedMul(243*FRACUNIT, scale)-hud.trx-offset, FixedMul(96*FRACUNIT, scale), scale, "zone", V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right")
+				drawf(v, 'SO1FNT', FixedMul(243*FRACUNIT, scale)-hud.trx-offset, FixedMul(96*FRACUNIT, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1), "right")
 			end
 
 			if act ~= "0" then
-				v.drawScaled(FixedMul(194*FRACUNIT, scale)+hud.trx-offset, FixedMul(118*FRACUNIT, scale), scale, v.cachePatch('SO1ACT'), V_PERPLAYER)
-				drawf(v, 'S1ANUM', FixedMul(221*FRACUNIT, scale)+hud.trx-offset, FixedMul(97*FRACUNIT, scale), scale, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+				v.drawScaled(FixedMul(194*FRACUNIT, scale)+hud.trx-offset, FixedMul(118*FRACUNIT, scale), scale, v.cachePatch('SO1ACT'))
+				drawf(v, 'S1ANUM', FixedMul(221*FRACUNIT, scale)+hud.trx-offset, FixedMul(97*FRACUNIT, scale), scale, string.upper(act), 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
-			v.drawString(160-hud.trx, 135, mapheaderinfo[gamemap].subttl, V_PERPLAYER|V_ALLOWLOWERCASE, "center")
+			v.drawString(160-hud.trx, 135, mapheaderinfo[gamemap].subttl, V_ALLOWLOWERCASE, "center")
 
 			return true
 		end
@@ -91,5 +94,25 @@ return{
 			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
 			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 66*FRACUNIT, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
+	end,
+
+	tallyspecial = function(v, p, offsetx, color, color2)
+		local mo = p.mo
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+
+		v.draw(136-offsetx, 43, v.cachePatch('SO1SPI'), 0, color)
+		local str = "chaos emeralds"
+
+		if emeralds == All7Emeralds(emeralds) then
+			str = " got them all"
+
+			if mo then
+				str = string.lower(mo.skin)..str
+			else
+				str = "you"..str
+			end
+		end
+
+		drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, str, 0, color2, "center")
 	end,
 }

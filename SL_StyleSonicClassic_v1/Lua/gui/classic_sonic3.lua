@@ -26,6 +26,9 @@ local tryx, tryy = 0, 0
 return{
 
 	titlecard = function(v, p, t, e)
+		if t > e-1 then return end
+		if p == secondarydisplayplayer then return end -- remove this once adjusted
+
 		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		--local scale = FRACUNIT
@@ -49,19 +52,19 @@ return{
 				tryy = $-27*FRACUNIT
 			end
 
-			v.draw(69-(offset/FRACUNIT)/2, tryy/FRACUNIT-10, v.cachePatch('S3KTTCARD'), V_PERPLAYER)
+			v.draw(69-(offset/FRACUNIT)/2, tryy/FRACUNIT-10, v.cachePatch('S3KTTCARD'), 0)
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 104*FRACUNIT, FRACUNIT, "ZONE", V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right")
+				drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 104*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1), "right")
 			end
 
 			if act ~= "0" then
-				v.draw(247+(tryx-offset*3)/FRACUNIT, 131, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), V_PERPLAYER)
-				v.draw(233+(tryx-offset*3)/FRACUNIT, 156, v.cachePatch('S3KTTACTC'), V_PERPLAYER)
-				drawf(v, 'S3KANUM', 258*FRACUNIT+tryx-offset*3, 135*FRACUNIT, FRACUNIT, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+				v.draw(247+(tryx-offset*3)/FRACUNIT, 131, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
+				v.draw(233+(tryx-offset*3)/FRACUNIT, 156, v.cachePatch('S3KTTACTC'), 0)
+				drawf(v, 'S3KANUM', 258*FRACUNIT+tryx-offset*3, 135*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
-			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, V_PERPLAYER|V_ALLOWLOWERCASE, "center")
-			drawf(v, 'S3KTT', (288-tryx)*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right")
+			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, 0|V_ALLOWLOWERCASE, "center")
+			drawf(v, 'S3KTT', (288-tryx)*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1), "right")
 
 			return true
 		end
@@ -97,9 +100,9 @@ return{
 		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
 
 		if act ~= "0" then
-			v.draw(228-offsetx, 52, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), V_PERPLAYER)
-			v.draw(214-offsetx, 77, v.cachePatch('S3KTTACTC'), V_PERPLAYER)
-			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 56*FRACUNIT, FRACUNIT, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+			v.draw(228-offsetx, 52, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
+			v.draw(214-offsetx, 77, v.cachePatch('S3KTTACTC'), 0)
+			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 56*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 }

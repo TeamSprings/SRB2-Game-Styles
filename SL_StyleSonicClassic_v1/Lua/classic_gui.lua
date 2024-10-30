@@ -131,7 +131,7 @@ local red_flashing_timer = TICRATE/4
 local red_flashing_thred = red_flashing_timer/2
 
 HOOK("lives", "classichud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	local mo = p.mo and p.mo or p.realmo
@@ -142,7 +142,7 @@ end, "game")
 local tally_totalcalculation = 0
 
 HOOK("score", "classichud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	local mo = p.mo and p.mo or p.realmo
@@ -183,7 +183,7 @@ end, "game")
 local time_display_settings = CV_FindVar("timerres")
 
 HOOK("time", "classichud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 	local tics = p.realtime
 	local countdown = false
@@ -244,7 +244,7 @@ HOOK("time", "classichud", function(v, p, t, e)
 end, "game")
 
 HOOK("rings", "classichud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	local x_num = ((time_display_settings.value > 1 and hudinfo[HUD_RINGSNUMTICS].x or hudinfo[HUD_RINGSNUM].x) + hide_offset_x)*FRACUNIT
@@ -307,15 +307,44 @@ local fake_perfect = 0
 local true_totalbonus = 0
 local cached_tallyskincolor
 
+local emeralds_set = {
+	EMERALD1,
+	EMERALD2,
+	EMERALD3,
+	EMERALD4,
+	EMERALD5,
+	EMERALD6,
+	EMERALD7,
+}
+
+
 HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	if not p.exiting then return end
+	if p == secondarydisplayplayer then return end
+
 
 	if hud_hide_cv.value == 1
 	or hud_hide_cv.value == 3 then
 		styles_hide_hud = true
 	end
 
-	if p.styles_tallytimer and p.styles_tallytimer == -95 then
+	-- Background stuff
+	local specialstage_delay = 0
+	local specialstage_togg = G_IsSpecialStage(gamemap)
+
+	if p.styles_tallytimer ~= nil and specialstage_togg then
+		local timerfade = 15+min(p.styles_tallytimer+80, 0)
+		if timerfade == 15 then
+			v.fadeScreen(0, 10)
+		else
+			v.fadeScreen(0xFB00, max(min(timerfade*31/15, 31), 0))
+		end
+
+		specialstage_delay = 20
+	end
+
+	-- Fake Calculations
+	if p.styles_tallytimer and p.styles_tallytimer == -93 then
 		fake_timebonus = calc_help.Y_GetTimeBonus(p.realtime)
 		fake_ringbonus = calc_help.Y_GetRingsBonus(p.rings)
 		fake_perfect = calc_help.Y_GetPreCalcPerfectBonus(p.rings)
@@ -372,46 +401,78 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 		end
 	end
 
+	-- Display
 	if p.styles_tallytimer ~= nil then
+		local specialstage_delay = 0
+		local specialstage_togg = G_IsSpecialStage(gamemap)
+
+		local timed = p.styles_tallytimer+specialstage_delay
+
 		tally_totalcalculation = true_totalbonus-fake_timebonus-fake_ringbonus-fake_perfect
-		local tally_x_row1 = 80-min((p.styles_tallytimer+64)*24, 0)
-		local tally_x_row2 = 80-min((p.styles_tallytimer+69)*24, 0)
-		local tally_x_row3 = 80-min((p.styles_tallytimer+74)*24, 0)
-		local tally_x_row4 = 80-min((p.styles_tallytimer+79)*24, 0)
-		local tally_x_row5 = 80-min((p.styles_tallytimer+84)*24, 0)
+		local tally_x_row1 = 80-min((timed+64)*24, 0)
+		local tally_x_row2 = 80-min((timed+69)*24, 0)
+		local tally_x_row3 = 80-min((timed+74)*24, 0)
+		local tally_x_row4 = 80-min((timed+79)*24, 0)
+		local tally_x_row5 = 80-min((timed+84)*24, 0)
 
-		hud_data[tallytitleft].tallytitle(v, p, min((p.styles_tallytimer+89)*24, 0), cached_tallyskincolor)
+		if specialstage_togg then
+			local color = v.getColormap(TC_DEFAULT, SKINCOLOR_YELLOW)
+			local color2 = v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC1_TALLY1")
 
-		v.draw(tally_x_row4+70, 107, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
-		v.draw(tally_x_row3+70, 123, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+			hud_data[min(tallytitleft, 1)].tallyspecial(v, p, min((timed+89)*24, 0), color, color2)
 
-		v.draw(tally_x_row4, 108, v.cachePatch(tallyft..'TTIME'))
-		v.draw(tally_x_row3, 124, v.cachePatch(tallyft..'TRING'))
+			local sprite = emeralds_sprites[get_emerald_sprite.value]
 
-		v.draw(tally_x_row4+40, 108, v.cachePatch(tallyft..'TBONUS'))
-		v.draw(tally_x_row3+40, 124, v.cachePatch(tallyft..'TBONUS'))
+			if (timed % 2) then
+				for i = 1, 7 do
+					if emeralds & emeralds_set[i] then
+						v.draw(50+i*30, 120, v.getSpritePatch(sprite, i-1, 0, 0), 0)
+					end
+				end
+			end
 
-		drawf(v, tallyft..'TNUM', (tally_x_row4+160)*FRACUNIT, 108*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
-		drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 124*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			v.draw(tally_x_row2+29, 139, v.cachePatch(tallyft..'TBICON'), 0, color)
+			v.draw(tally_x_row2, 140, v.cachePatch(tallyft..'TSCORE'), 0, color2)
+			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, p.score+tally_totalcalculation, 0, color2, "right", txtpadding)
 
-		-- Perfect Bleh
-		if fake_perfect > -1 then
-			v.draw(tally_x_row2+82, 139, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
-			v.draw(tally_x_row2-12, 140, v.cachePatch(tallyft..'TPERFC'))
-			v.draw(tally_x_row2+52, 140, v.cachePatch(tallyft..'TBONUS'))
-
-			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, fake_perfect, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
-		end
-
-		-- Total vs Score nonsense
-		if hud_select > 1 and not hud_select ~= 3 then
-			v.draw(tally_x_row1+50, 155, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
-			v.draw(tally_x_row1+21, 156, v.cachePatch(tallyft..'TTOTAL'))
-			drawf(v, tallyft..'TNUM', (tally_x_row1+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			v.draw(tally_x_row3+70, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
+			v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TRING'), 0, color2)
+			v.draw(tally_x_row3+40, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
+			drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
 		else
-			v.draw(tally_x_row5+29, 91, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
-			v.draw(tally_x_row5, 92, v.cachePatch(tallyft..'TSCORE'))
-			drawf(v, tallyft..'TNUM', (tally_x_row5+160)*FRACUNIT, 92*FRACUNIT, FRACUNIT, p.score+tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			hud_data[tallytitleft].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
+
+			v.draw(tally_x_row4+70, 107, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+			v.draw(tally_x_row3+70, 123, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+
+			v.draw(tally_x_row4, 108, v.cachePatch(tallyft..'TTIME'))
+			v.draw(tally_x_row3, 124, v.cachePatch(tallyft..'TRING'))
+
+			v.draw(tally_x_row4+40, 108, v.cachePatch(tallyft..'TBONUS'))
+			v.draw(tally_x_row3+40, 124, v.cachePatch(tallyft..'TBONUS'))
+
+			drawf(v, tallyft..'TNUM', (tally_x_row4+160)*FRACUNIT, 108*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 124*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+
+			-- Perfect Bleh
+			if fake_perfect > -1 then
+				v.draw(tally_x_row2+82, 139, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+				v.draw(tally_x_row2-12, 140, v.cachePatch(tallyft..'TPERFC'))
+				v.draw(tally_x_row2+52, 140, v.cachePatch(tallyft..'TBONUS'))
+
+				drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, fake_perfect, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			end
+
+			-- Total vs Score nonsense
+			if hud_select > 1 and not hud_select ~= 3 then
+				v.draw(tally_x_row1+50, 155, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+				v.draw(tally_x_row1+21, 156, v.cachePatch(tallyft..'TTOTAL'))
+				drawf(v, tallyft..'TNUM', (tally_x_row1+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			else
+				v.draw(tally_x_row5+29, 91, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
+				v.draw(tally_x_row5, 92, v.cachePatch(tallyft..'TSCORE'))
+				drawf(v, tallyft..'TNUM', (tally_x_row5+160)*FRACUNIT, 92*FRACUNIT, FRACUNIT, p.score, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			end
 		end
 	end
 
@@ -436,16 +497,6 @@ HOOK("stagetitle", "classichud", function(v, p, t, e)
 
 	return true
 end, "titlecard")
-
-local emeralds_set = {
-	EMERALD1,
-	EMERALD2,
-	EMERALD3,
-	EMERALD4,
-	EMERALD5,
-	EMERALD6,
-	EMERALD7,
-}
 
 HOOK("coopemeralds", "classichud", function(v)
 	if multiplayer then return end

@@ -4,6 +4,10 @@ local fontlen = drawlib.lenght
 
 local ttlnum = {}
 
+--
+--	Title card by Clone Fighter
+--
+
 ------------------------------
 -- // PREPARATION
 -- These are just handy functions
@@ -62,6 +66,9 @@ end
 return{
 
 	titlecard = function(v, player, tctime, etime)
+		if tctime > etime-1 then return end
+		if p == secondarydisplayplayer then return end -- remove this once adjusted
+
 		if #ttlnum == 0 then
 			for i = 0, 9 do -- preparing ttllnum
 				ttlnum[i] = v.cachePatch("CDTTL"..i)

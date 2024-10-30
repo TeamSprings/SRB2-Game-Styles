@@ -75,8 +75,6 @@ end
 addHook("MapChange", helper.Y_ResetCounters)
 
 function helper.Y_GetTotalCoins(a)
-	local totalrings, perfectbonus
-
 	if (a.type == MT_RING or a.type == MT_COIN or a.type == MT_NIGHTSSTAR) then
 		helper.totalcoinnum = $ + 1
 	end
@@ -91,6 +89,8 @@ function helper.Y_GetTotalCoins(a)
 end
 
 addHook("MapLoad", function()
+	helper.Y_ResetCounters()
+
 	for mobj in mobjs.iterate() do
 		helper.Y_GetTotalCoins(mobj)
 	end
