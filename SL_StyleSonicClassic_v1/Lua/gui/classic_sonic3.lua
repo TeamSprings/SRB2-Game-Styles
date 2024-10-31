@@ -37,10 +37,16 @@ return{
 			tryx = (200*FRACUNIT)
 			tryy = -(200*FRACUNIT)
 		end
+
+		local isSpecialStage = G_IsSpecialStage(gamemap)
+		local fade = isSpecialStage and 0xFB00 or 0xFF00
+		local translation = isSpecialStage and "SPECIALSTAGE_SONIC3_TITLE" or nil
+		local special_gp = isSpecialStage and 'S3KTTCARDSS' or 'S3KTTCARD'
+
 		if t and t <= 3*TICRATE/2 then
-			v.fadeScreen(0xFF00, 31)
+			v.fadeScreen(fade, 31)
 		elseif t <= 3*TICRATE/2+31 and t > 3*TICRATE/2 then
-			v.fadeScreen(0xFF00, 31-(t-3*TICRATE/2))
+			v.fadeScreen(fade, 31-(t-3*TICRATE/2))
 		end
 		if t and t <= 3*TICRATE then
 			if t <= TICRATE/5 then
@@ -52,9 +58,9 @@ return{
 				tryy = $-27*FRACUNIT
 			end
 
-			v.draw(69-(offset/FRACUNIT)/2, tryy/FRACUNIT-10, v.cachePatch('S3KTTCARD'), 0)
+			v.draw(69-(offset/FRACUNIT)/2, tryy/FRACUNIT-10, v.cachePatch(special_gp), 0)
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 104*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1), "right")
+				drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 104*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
 
 			if act ~= "0" then
@@ -64,7 +70,7 @@ return{
 			end
 
 			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, 0|V_ALLOWLOWERCASE, "center")
-			drawf(v, 'S3KTT', (288-tryx)*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1), "right")
+			drawf(v, 'S3KTT', (288-tryx)*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 
 			return true
 		end
@@ -100,9 +106,9 @@ return{
 		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
 
 		if act ~= "0" then
-			v.draw(228-offsetx, 52, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
-			v.draw(214-offsetx, 77, v.cachePatch('S3KTTACTC'), 0)
-			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 56*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
+			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
+			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 55*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 }

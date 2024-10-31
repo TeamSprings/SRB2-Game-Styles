@@ -54,13 +54,20 @@ states[giantring_used] = {
 	var2 = 1,
 }
 
-
+local giantring_endstage = freeslot("S_GIANTRING_ENDSTAGE")
+states[giantring_endstage] = {
+	sprite = freeslot("SPR_GIANTRING_END"),
+	frame = A|FF_ANIMATE|FF_FULLBRIGHT,
+	var1 = 23,
+	var2 = 1,
+}
 
 local original_radius = mobjinfo[MT_TOKEN].radius
 local original_height = mobjinfo[MT_TOKEN].height
 
 local special_entrance = 1
 local change_var = -1
+
 local entrance_cv = CV_RegisterVar{
 	name = "classic_specialentrance",
 	defaultvalue = "sonic1",
@@ -94,19 +101,21 @@ local function P_GiantRingCheck(a)
 			or (abs(a.ceilingz-a.z-a.height) < 128*FRACUNIT)) then
 				return
 			else
-				if a.state ~= giantring_used then
-					a.state = (a.state == giantring and giantring_tiny or giantring_tinyhyper)
+				if a.state ~= giantring_endstage then
+					if a.state ~= giantring_used then
+						a.state = (a.state == giantring and giantring_tiny or giantring_tinyhyper)
+					end
+					a.scale = a.scale/4
 				end
-				a.scale = a.scale/4
 			end
 		end
 	end
 end
 
-local function SP_SaveState(mobj)
+local function SP_SaveState(mobj, toucher)
 	if All7Emeralds(emeralds) then
-		if not splitscreen then
-			consoleplayer.rings = $+50
+		if toucher.player then
+			toucher.player.rings = $+50
 		end
 
 		P_RemoveMobj(mobj)
@@ -297,7 +306,10 @@ end, MT_SIGN)
 addHook("MobjSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
-	a.state = All7Emeralds(emeralds) and giantring_hyper or giantring
+
+	a.state = All7Emeralds(emeralds) and giantring_hyper
+	or (special_entrance == 1 and giantring_endstage or giantring)
+
 	a.flags = $|MF_SPECIAL
 	a.shadowscale = FRACUNIT/4
 end, MT_TOKEN)
@@ -326,19 +338,28 @@ addHook("MobjCollide", function(a, k)
 				k.alpha = 0
 
 				a.levelcountdown = 10
+				a.playertoucher = k
+				k.player.powers[pw_shield] = 0
+				k.player.powers[pw_invulnerability] = 0
+				k.player.powers[pw_sneakers] = 0
+
 				S_StartSound(nil, sfx_s3kb3, k.player)
+				S_FadeMusic(0, MUSICRATE/4, k.player)
 			elseif a.state == giantring_hyper or a.state == giantring_tinyhyper then
 				a.state = giantring_flash
 				P_GivePlayerRings(k.player, 50)
 				S_StartSound(nil, sfx_token, k.player)
 			end
 		elseif special_entrance == 1 then
-			if a.state == giantring or a.state == giantring_tiny then
+			if a.state == giantring_endstage or a.state == giantring_tiny then
 				a.state = giantring_flash
 
-				a.levelcountdown = 10
 				S_StartSound(nil, sfx_s3kb3, k.player)
+				k.player.powers[pw_shield] = 0
+				k.player.powers[pw_invulnerability] = 0
+				k.player.powers[pw_sneakers] = 0
 				k.alpha = 0
+
 				if not token then
 					token = 1
 				end
@@ -361,7 +382,7 @@ addHook("MobjThinker", function(a)
 
 		if not a.levelcountdown then
 			if special_entrance == 3 then
-				SP_SaveState(a)
+				SP_SaveState(a, a.playertoucher)
 				return true
 			else
 				G_ExitLevel()

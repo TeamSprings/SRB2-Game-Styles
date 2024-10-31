@@ -53,15 +53,33 @@ function helper.Y_GetPreCalcPerfectBonus(rings)
 end
 
 function helper.Y_CalculateAllScore(p)
-	local ring_bonus = helper.Y_GetRingsBonus(p.rings)
-	local time_bonus = helper.Y_GetTimeBonus(p.realtime)
-	local perfct_bonus = max(helper.Y_GetPreCalcPerfectBonus(p.rings), 0)
+	if (maptol & TOL_NIGHTS) then
+		return p.totalmarescore
+	elseif G_IsSpecialStage(gamemap) then
+		return helper.Y_GetRingsBonus(p.rings)
+	else
+		local ring_bonus = helper.Y_GetRingsBonus(p.rings)
+		local time_bonus = helper.Y_GetTimeBonus(p.realtime + (p.style_additionaltime or 0))
+		local perfct_bonus = max(helper.Y_GetPreCalcPerfectBonus(p.rings), 0)
 
-	return ring_bonus + time_bonus + perfct_bonus
+		return ring_bonus + time_bonus + perfct_bonus
+	end
+end
+
+function helper.Y_GetDuration(score)
+	return score/222
 end
 
 function helper.Y_GetTimingCalculation(p)
-	return helper.Y_CalculateAllScore(p)/222
+	return helper.Y_GetDuration(helper.Y_CalculateAllScore(p))
+end
+
+function helper.addScore(p, score)
+	if (maptol & TOL_NIGHTS) then
+		p.score = min(p.score + score, 999999999)
+	else
+		P_AddPlayerScore(p, score)
+	end
 end
 
 function helper.Y_ResetCounters()

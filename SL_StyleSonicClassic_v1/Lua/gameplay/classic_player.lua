@@ -114,6 +114,21 @@ addHook("PlayerThink", function(p)
 		end
 	end
 
+	if (p.mo.eflags & MFE_JUSTHITFLOOR) then
+		if p.style_springroll then
+			p.mo.rollangle = 0
+			p.style_springroll = nil
+		end
+
+
+		if p.styles_spronk then
+			p.styles_spronk = false
+			p.mo.springyscale = 0
+		end
+
+		p.style_falling = nil
+	end
+
 	if thok_cv.value then
 		p.thokitem = MT_RAY
 		p.spinitem = MT_RAY
@@ -129,37 +144,33 @@ addHook("PlayerThink", function(p)
 	end
 end)
 
-local spring_database = {}
+--
+--	HOOKS
+--
 
-local function Spring_Check(a, k)
-	if (k.player) then
-		if a.type == MT_STEAM or a.type == MT_FAN then
-			k.player.style_springroll = true
-		else
-			k.style_spring_type = a.info.damage and 1 or 2
-		end
+--local function SpecialPusher_Check(a, k)
+--	if (k.player) then
+--		if a.type == MT_STEAM or a.type == MT_FAN and not k.player.style_springroll then
+--			k.z = $ + P_MobjFlip(k)
+--			k.player.style_springroll = true
+--		else
+--			k.style_spring_type = a.info.damage and 1 or 2
+--		end
+--	end
+--end
+
+local function Spring_Check(a, sp)
+	if not (a.player and a.valid) then return end
+	if not (sp.flags & MF_SPRING) then return end
+
+	if 	sp.z+sp.height > a.z
+	and a.z+a.height > sp.z then
+		a.style_spring_type = sp.info.damage and 1 or 2
 	end
 end
 
-addHook("TouchSpecial", Spring_Check, MT_STEAM)
-addHook("TouchSpecial", Spring_Check, MT_FAN)
+--addHook("TouchSpecial", SpecialPusher_Check, MT_STEAM)
+--addHook("TouchSpecial", SpecialPusher_Check, MT_FAN)
 
-local function P_AddSpring(mobjtype)
-	if not spring_database[mobjtype] then
-		addHook("MobjCollide", Spring_Check, mobjtype)
-		spring_database[mobjtype] = 1
-	end
-end
-
-local function P_CheckNewSpring(start)
-	for i = start, #mobjinfo do
-		if i == 1675 then break end
-
-		if mobjinfo[i] and mobjinfo[i].flags & MF_SPRING then
-			P_AddSpring(i)
-		end
-	end
-end
-
--- Please, tell me there is better way to do this... I hope my addon loaded hook gets merged...
-P_CheckNewSpring(0);
+addHook("MobjCollide", 		Spring_Check, MT_PLAYER)
+addHook("MobjMoveCollide", 	Spring_Check, MT_PLAYER)

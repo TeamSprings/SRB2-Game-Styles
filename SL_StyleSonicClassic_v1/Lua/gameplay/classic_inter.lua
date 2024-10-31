@@ -184,8 +184,6 @@ local function G_StylesTallyBackend(p)
 					G_StylesGrantEmerald(p)
 				end
 
-				p.mo.flags = $|MF_NOCLIPTHING
-
 				-- STOP
 				if p.yusonictable and p.yusonictable.endlvl then
 					p.yusonictable.endlvl = 0
@@ -202,6 +200,7 @@ local function G_StylesTallyBackend(p)
 					S_ChangeMusic("_clear", false, p)
 					p.styles_lasttrack = S_MusicName(p)
 
+					p.mo.flags = $|MF_NOCLIPTHING
 				-- Background Process
 				elseif p.styles_tallytimer ~= nil then
 					p.exiting = 5
@@ -211,12 +210,12 @@ local function G_StylesTallyBackend(p)
 
 						if p.cmd.buttons & BT_SPIN then
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
-							P_AddPlayerScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+							calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
 						else
 							if p.styles_tallytimer < p.styles_tallyfakecounttimer - 1 then
-								P_AddPlayerScore(p, 222)
+								calc_help.addScore(p, 222)
 							else
-								P_AddPlayerScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+								calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
 							end
 						end
 					end

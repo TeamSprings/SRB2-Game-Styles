@@ -18,10 +18,16 @@ return{
 		elseif t > (3*TICRATE+1) then
 			hud.trx = nil
 		end
+
+		local isSpecialStage = G_IsSpecialStage(gamemap)
+		local fade = isSpecialStage and 0xFB00 or 0xFF00
+		local translation = isSpecialStage and "SPECIALSTAGE_SONIC1_TALLY1" or nil
+		local color_choice = isSpecialStage and SKINCOLOR_YELLOW or nil
+
 		if t and t <= 3*TICRATE/2 then
-			v.fadeScreen(0xFF00, 31)
+			v.fadeScreen(fade, 31)
 		elseif t <= 3*TICRATE/2+31 and t > 3*TICRATE/2 then
-			v.fadeScreen(0xFF00, 31-(t-3*TICRATE/2))
+			v.fadeScreen(fade, 31-(t-3*TICRATE/2))
 		end
 		if t and t <= 3*TICRATE then
 			if t <= TICRATE/5 then
@@ -33,14 +39,14 @@ return{
 
 			local mo = p.mo
 			if mo then
-				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(mo.skin, mo.color))
+				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(mo.skin, color_choice or mo.color))
 			else
-				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(TC_DEFAULT, p.skincolor))
+				v.drawScaled(FixedMul(179*FRACUNIT, scale)+hud.trx-offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(TC_DEFAULT, color_choice or p.skincolor))
 			end
 
-			drawf(v, 'SO1FNT', FixedMul(251*FRACUNIT, scale)-hud.trx-offset, FixedMul(76*FRACUNIT, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1), "right")
+			drawf(v, 'SO1FNT', FixedMul(251*FRACUNIT, scale)-hud.trx-offset, FixedMul(76*FRACUNIT, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'SO1FNT', FixedMul(243*FRACUNIT, scale)-hud.trx-offset, FixedMul(96*FRACUNIT, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1), "right")
+				drawf(v, 'SO1FNT', FixedMul(243*FRACUNIT, scale)-hud.trx-offset, FixedMul(96*FRACUNIT, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
 
 			if act ~= "0" then
@@ -92,7 +98,7 @@ return{
 
 		if act ~= "0" then
 			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
-			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 66*FRACUNIT, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 69*FRACUNIT, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 

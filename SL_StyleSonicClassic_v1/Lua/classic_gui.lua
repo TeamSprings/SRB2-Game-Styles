@@ -116,7 +116,7 @@ local hud_hide_cv = CV_RegisterVar{
 	name = "classic_hidehudop",
 	defaultvalue = "0",
 	flags = 0,
-	PossibleValue = {off = 0, intermission = 1, title = 2, intermissiontitle = 3},
+	PossibleValue = {off = 0, tally = 1, title = 2, both = 3},
 }
 
 --
@@ -185,7 +185,7 @@ local time_display_settings = CV_FindVar("timerres")
 HOOK("time", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
-	local tics = p.realtime
+	local tics = p.realtime + (p.style_additionaltime or 0)
 	local countdown = false
 	local show_tic = false
 
@@ -196,8 +196,6 @@ HOOK("time", "classichud", function(v, p, t, e)
 	elseif mapheaderinfo[gamemap].countdown then
 		tics = tonumber(mapheaderinfo[gamemap].countdown) - p.realtime
 		countdown = true
-	elseif consoleplayer.style_additionaltime then
-		tics = $+consoleplayer.style_additionaltime
 	end
 
 	-- time string formatting
@@ -238,7 +236,6 @@ HOOK("time", "classichud", function(v, p, t, e)
 		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x, hudinfo[HUD_TIME].y, v.cachePatch(prefix..'TTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
 		drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 	end
-
 
 	return true
 end, "game")
@@ -303,6 +300,7 @@ end, "game")
 
 local fake_timebonus = 0
 local fake_ringbonus = 0
+local fake_nightsbonus = 0
 local fake_perfect = 0
 local true_totalbonus = 0
 local cached_tallyskincolor
@@ -347,6 +345,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	if p.styles_tallytimer and p.styles_tallytimer == -93 then
 		fake_timebonus = calc_help.Y_GetTimeBonus(p.realtime)
 		fake_ringbonus = calc_help.Y_GetRingsBonus(p.rings)
+		fake_nightsbonus = p.totalmarescore
 		fake_perfect = calc_help.Y_GetPreCalcPerfectBonus(p.rings)
 		true_totalbonus = fake_timebonus+fake_ringbonus+fake_perfect
 		if p.mo then
@@ -357,42 +356,68 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	end
 
 	if p.styles_tallytimer and p.styles_tallytimer > 0 then
-		if fake_timebonus then
-			fake_timebonus = $-222
-			if fake_timebonus < 0 then
-				fake_timebonus = 0
+		if (maptol & TOL_NIGHTS) then
+			if fake_nightsbonus then
+				fake_nightsbonus = $-222
+				if fake_nightsbonus < 0 then
+					fake_nightsbonus = 0
+				end
+
+				if not (p.styles_tallytimer % 3) then
+					S_StartSound(nil, sfx_ptally, p)
+				end
+			end
+		elseif G_IsSpecialStage(gamemap) then
+			if fake_ringbonus then
+				fake_ringbonus = $-222
+				if fake_ringbonus < 0 then
+					fake_ringbonus = 0
+				end
+
+				if not (p.styles_tallytimer % 3) then
+					S_StartSound(nil, sfx_ptally, p)
+				end
+			end
+		else
+			if fake_timebonus then
+				fake_timebonus = $-222
+				if fake_timebonus < 0 then
+					fake_timebonus = 0
+				end
+
+				if not (p.styles_tallytimer % 3) then
+					S_StartSound(nil, sfx_ptally, p)
+				end
 			end
 
-			if not (p.styles_tallytimer % 3) then
-				S_StartSound(nil, sfx_ptally, p)
-			end
-		end
+			if fake_ringbonus and not fake_timebonus then
+				fake_ringbonus = $-222
+				if fake_ringbonus < 0 then
+					fake_ringbonus = 0
+				end
 
-		if fake_ringbonus and not fake_timebonus then
-			fake_ringbonus = $-222
-			if fake_ringbonus < 0 then
-				fake_ringbonus = 0
-			end
-
-			if not (p.styles_tallytimer % 3) then
-				S_StartSound(nil, sfx_ptally, p)
-			end
-		end
-
-		if fake_perfect > 0 and not fake_ringbonus then
-			fake_perfect = $-222
-			if fake_perfect < 0 then
-				fake_perfect = 0
+				if not (p.styles_tallytimer % 3) then
+					S_StartSound(nil, sfx_ptally, p)
+				end
 			end
 
-			if not (p.styles_tallytimer % 3) then
-				S_StartSound(nil, sfx_ptally, p)
+			if fake_perfect > 0 and not fake_ringbonus then
+				fake_perfect = $-222
+				if fake_perfect < 0 then
+					fake_perfect = 0
+				end
+
+				if not (p.styles_tallytimer % 3) then
+					S_StartSound(nil, sfx_ptally, p)
+				end
 			end
 		end
 
 		if p.styles_tallytimer == p.styles_tallyfakecounttimer+1 then
 			fake_timebonus = 0
 			fake_ringbonus = 0
+			fake_nightsbonus = 0
+
 			if fake_perfect > 0 then
 				fake_perfect = 0
 			end
@@ -433,12 +458,19 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 
 			v.draw(tally_x_row2+29, 139, v.cachePatch(tallyft..'TBICON'), 0, color)
 			v.draw(tally_x_row2, 140, v.cachePatch(tallyft..'TSCORE'), 0, color2)
-			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, p.score+tally_totalcalculation, 0, color2, "right", txtpadding)
+			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, p.score, 0, color2, "right", txtpadding)
 
-			v.draw(tally_x_row3+70, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
-			v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TRING'), 0, color2)
-			v.draw(tally_x_row3+40, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
-			drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
+			if (maptol & TOL_NIGHTS) then
+				v.draw(tally_x_row3+86, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
+				v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TNIGHTS'), 0, color2)
+				v.draw(tally_x_row3+56, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
+				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_nightsbonus, 0, color2, "right", txtpadding)
+			else
+				v.draw(tally_x_row3+70, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
+				v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TRING'), 0, color2)
+				v.draw(tally_x_row3+40, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
+				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
+			end
 		else
 			hud_data[tallytitleft].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
 
