@@ -234,7 +234,7 @@ end, "scores")
 
 HOOK("stagetitle", "gbahud", function(v, p, t, e)
 	if skins["modernsonic"] then return end	-- whyyyy
-	if t > 3*TICRATE then return end
+	if t > e-1 then return end
 
 	-- setup name
 	local name = string.upper(""..mapheaderinfo[gamemap].lvlttl) .. ((mapheaderinfo[gamemap].levelflags & LF_NOZONE) and "" or " ZONE")
