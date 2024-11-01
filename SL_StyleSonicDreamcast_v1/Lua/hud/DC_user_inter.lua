@@ -210,7 +210,7 @@ end, "game")
 sfxinfo[freeslot("sfx_advtts")].caption = "titlecard"
 
 HOOK("stagetitle", "dchud", function(v, p, t, et)
-	if t > et then return end
+	if t > et-1 then return end
 
 	local namezone = mapheaderinfo[gamemap].lvlttl..""
 	local subtitle = mapheaderinfo[gamemap].subttl..""
@@ -224,7 +224,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 	if #split > 1 then
 		for i = 2,#split do
-			if #split[i] < 6 and (not split[i-1] or #split[i-1] < 9) then
+			if split[i] and #split[i] < 6 and (not split[i-1] or #split[i-1] < 9) then
 				split[i-1] = $+" "..split[i]
 				table.remove(split, i)
 			end
