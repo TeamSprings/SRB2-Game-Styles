@@ -98,7 +98,7 @@ return{
 
 		if act ~= "0" then
 			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
-			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 69*FRACUNIT, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 67*FRACUNIT+FRACUNIT/2, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 

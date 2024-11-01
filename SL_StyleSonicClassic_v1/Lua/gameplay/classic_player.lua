@@ -53,6 +53,20 @@ addHook("PlayerThink", function(p)
 		p.mo.state = S_PLAY_ROLL
 	end
 
+	if thok_cv.value then
+		p.thokitem = MT_RAY
+		p.spinitem = MT_RAY
+		p.revitem = MT_RAY
+
+		p.styles_swappedthok = true
+	elseif p.styles_swappedthok then
+		p.thokitem = skins[p.mo.skin].thokitem
+		p.spinitem = skins[p.mo.skin].spinitem
+		p.revitem = skins[p.mo.skin].revitem
+
+		p.styles_swappedthok = nil
+	end
+
 	--if P_IsObjectOnGround(p.mo) then
 	--	if grounding_cv.value == 1 then
 	--		slope_handler.slopeRotationGenesis(p.mo)
@@ -127,20 +141,7 @@ addHook("PlayerThink", function(p)
 		end
 
 		p.style_falling = nil
-	end
-
-	if thok_cv.value then
-		p.thokitem = MT_RAY
-		p.spinitem = MT_RAY
-		p.revitem = MT_RAY
-
-		p.styles_swappedthok = true
-	elseif p.styles_swappedthok then
-		p.thokitem = skins[p.mo.skin].thokitem
-		p.spinitem = skins[p.mo.skin].spinitem
-		p.revitem = skins[p.mo.skin].revitem
-
-		p.styles_swappedthok = nil
+		p.mo.style_spring_type = nil
 	end
 end)
 
