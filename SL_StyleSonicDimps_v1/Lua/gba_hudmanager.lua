@@ -131,7 +131,7 @@ end)
 --
 
 HOOK("lives", "gbahud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	-- Lives
@@ -140,7 +140,7 @@ HOOK("lives", "gbahud", function(v, p, t, e)
 end, "game")
 
 HOOK("score", "gbahud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	-- Due to draw order, it has to be here...
@@ -178,14 +178,14 @@ HOOK("score", "gbahud", function(v, p, t, e)
 end, "game")
 
 HOOK("time", "gbahud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 	hud_data[hud_select].time(v, p, t, e, font_type)
 	return true
 end, "game")
 
 HOOK("rings", "gbahud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	hud_data[hud_select].rings(v, p, t, e, font_type)
@@ -193,7 +193,7 @@ HOOK("rings", "gbahud", function(v, p, t, e)
 end, "game")
 
 HOOK("advancekey", "gbahud", function(v, p, t, e)
-	if (maptol & TOL_NIGHTS) then return end
+	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 	hud_data[hud_select].key(v, p, t, e, font_type)
 	return true

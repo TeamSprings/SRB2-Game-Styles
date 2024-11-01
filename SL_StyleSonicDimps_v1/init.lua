@@ -11,6 +11,7 @@ assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
 assert((SUBVERSION > 13), packType.."Mod requires features from "..version.."+")
 
 freeslot("SKINCOLOR_COMPRESSORGBA", "SKINCOLOR_COMPRESSORGBA2")
+freeslot("SKINCOLOR_COMPRESSORGBAP2", "SKINCOLOR_COMPRESSORGBA2P2")
 skincolors[freeslot("SKINCOLOR_PITCHBLACK")] = {
 	name = "Pitch Black",
 	ramp = {31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31},

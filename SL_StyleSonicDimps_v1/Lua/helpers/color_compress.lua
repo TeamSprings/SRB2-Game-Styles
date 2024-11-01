@@ -43,11 +43,18 @@ return {
 		return approximations[skincolor]
 	end,
 
-	advance2 = function(id, skincolor)
-		local pl = id > 1 and SKINCOLOR_COMPRESSORGBA2 or SKINCOLOR_COMPRESSORGBA
-		local ax = skincolors[skincolor].ramp[6]
-		skincolors[pl].ramp = {ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax}
-		return pl
+	advance2 = function(id, skincolor, p)
+		if p == displayplayer then
+			local pl = id > 1 and SKINCOLOR_COMPRESSORGBA2 or SKINCOLOR_COMPRESSORGBA
+			local ax = skincolors[skincolor].ramp[6]
+			skincolors[pl].ramp = {ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax}
+			return pl
+		else
+			local pl = id > 1 and SKINCOLOR_COMPRESSORGBA2P2 or SKINCOLOR_COMPRESSORGBAP2
+			local ax = skincolors[skincolor].ramp[6]
+			skincolors[pl].ramp = {ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax, ax}
+			return pl
+		end
 	end,
 
 	rush = function(id, skincolor)
