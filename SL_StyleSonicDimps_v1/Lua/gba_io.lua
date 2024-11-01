@@ -2,15 +2,20 @@ addHook("GameQuit", function(quit)
 	if not quit then return end
 	local finalpos = 0
 	local forced_variables = {
-		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		"gba_hud",
-		"gba_monitorstyle",
-		"gba_eggmanvoice",
 		"gba_iconstyle",
 		"gba_hudfont",
 		"gba_borders",
+		"gba_itemdisplay",
+
+		"gba_monitorstyle",
+		"gba_eggmanvoice",
+
 		"gba_endtally",
 		"gba_sign_movement",
+		"gba_springroll",
+		"gba_thok"
 	}
 
 	local check = io.openlocal("bluespring/styles/gba_config.dat", "r+")

@@ -190,6 +190,21 @@ local function P_MonitorThinker(a)
 	end
 end
 
+--
+--	Monitor Display stuff
+--
+
+local function P_InsertItemToHud(p, sprite, frame)
+	if p and not p.boxdisplay then
+		p.boxdisplay = {}
+	end
+	if p and not p.boxdisplay.item then
+		p.boxdisplay.item = {}
+	end
+	p.boxdisplay.timer = TICRATE*3
+	table.insert(p.boxdisplay.item, {sprite, frame})
+end
+
 local function P_MonitorDeath(a, d, s)
 	if Disable_ItemBox then return end
 	if a.health < 0 and a.once_already then return end
@@ -225,6 +240,10 @@ local function P_MonitorDeath(a, d, s)
 
 			boxicon.state = S_1UP_NICON1
 		end
+	end
+
+	if d.player and boxicon then
+		P_InsertItemToHud(d.player, boxicon.sprite, boxicon.frame)
 	end
 
 	if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY then

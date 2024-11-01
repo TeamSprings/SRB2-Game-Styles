@@ -56,6 +56,7 @@ if VERSION == 202 and SUBVERSION > 13 then
 	"misc.lua",
 	"inter.lua",
 	"monitor.lua",
+	"player.lua",
 	"hudmanager.lua",
 
 	"io.lua")
