@@ -1,9 +1,9 @@
 --[[
 
-		Sonic Adventure Style's Item Box
+		Adventure Item Box
 
-Contributors: Ace Lite, Demnyx
-@Team Blue Spring 2022-2024
+Contributors: Skydusk, Demnyx
+@Team Blue Spring 2022-2025
 
 ]]
 

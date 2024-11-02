@@ -1,3 +1,12 @@
+--[[
+
+	I/O Config script
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 addHook("GameQuit", function(quit)
 	if not quit then return end
 	local finalpos = 0

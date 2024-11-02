@@ -1,15 +1,11 @@
-/*
-		Pipe Kingdom Zone's Collectibles
+--[[
 
-Description:
-Scripts needed on collectible side
+	State Swaps for sprite options
 
-Contributors: Ace Lite, Krabs(Checkpoints)
-@Team Blue Spring 2022
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
 
-Contains:
-	SMS Alfredo - Shelmet; Mushroom Movement Thinker
-*/
+]]
 
 --
 -- Checkpoint Switching!

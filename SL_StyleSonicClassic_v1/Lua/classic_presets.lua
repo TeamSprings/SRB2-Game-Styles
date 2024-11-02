@@ -1,6 +1,11 @@
---
--- Presets
---
+--[[
+
+	Presets
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
 
 local presets = {
 	-- SONIC 1

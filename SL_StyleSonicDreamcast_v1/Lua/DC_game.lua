@@ -1,3 +1,13 @@
+--[[
+
+		Sonic Adventure Style's Game Stuff
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+
 local finishSectors = {}
 local skiptally
 

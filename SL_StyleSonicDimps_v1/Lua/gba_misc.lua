@@ -1,15 +1,9 @@
-/*
-		Pipe Kingdom Zone's Collectibles
+--[[
 
-Description:
-Scripts needed on collectible side
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
 
-Contributors: Ace Lite, Krabs(Checkpoints)
-@Team Blue Spring 2022
-
-Contains:
-	SMS Alfredo - Shelmet; Mushroom Movement Thinker
-*/
+]]
 
 freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAERADUMMY", "S_DUMMYMONITOR", "S_ERASMOKE1", "S_ERASMOKE2", "S_ERADEBREE1", "S_ERADEBREE2", "S_ERADEBREE3", "SPR_CA1D", "SPR_CA2D", "SPR_1CAP", "SPR_ADVANCEKEY", "SPR_CHE0", "SPR_1MOA")
 

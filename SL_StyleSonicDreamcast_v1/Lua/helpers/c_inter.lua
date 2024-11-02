@@ -1,3 +1,13 @@
+--[[
+
+		Conversion and Adjusting of SRB2's Tally Calculation
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+
 local helper = {}
 
 -- Helper Variables

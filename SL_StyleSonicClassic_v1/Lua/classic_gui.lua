@@ -1,3 +1,13 @@
+--[[
+
+	GUI Manager
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local calc_help = tbsrequire 'helpers/c_inter'
 

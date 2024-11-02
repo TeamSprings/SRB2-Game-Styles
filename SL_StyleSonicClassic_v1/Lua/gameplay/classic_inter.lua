@@ -1,3 +1,12 @@
+--[[
+
+	Intermission Backend
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local finishSectors = {}
 local calc_help = tbsrequire 'helpers/c_inter'
 

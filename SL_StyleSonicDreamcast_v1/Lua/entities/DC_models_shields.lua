@@ -1,3 +1,12 @@
+--[[
+
+		Shields
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 states[S_PITY1] = {
 	sprite = SPR_PITY,
 	frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|B,

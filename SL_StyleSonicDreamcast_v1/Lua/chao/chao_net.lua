@@ -1,3 +1,12 @@
+--[[
+
+		Never to be used Chao Net code
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local net = {}
 
 local sending_chao_data = false

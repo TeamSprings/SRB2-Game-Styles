@@ -1,3 +1,12 @@
+--[[
+
+		Player-object related additions
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
 --

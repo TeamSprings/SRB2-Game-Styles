@@ -1,7 +1,14 @@
---
---	While possible to make work in multiplayer, it makes absolutely no sense design wise.
---	Therefore no multiplayer support, ever. :P
---
+--[[
+
+		Special Stage Entrance Handler
+
+	While possible to make work in multiplayer, it makes absolutely no sense design wise.
+	Therefore no multiplayer support, ever. :P
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
 
 local giantring = freeslot("S_GIANTRING_CLASSIC")
 states[giantring] = {

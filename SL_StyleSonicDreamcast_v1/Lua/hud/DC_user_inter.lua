@@ -2,8 +2,8 @@
 
 		User Interfaces inspired by Sonic Adventure 2.
 
-Contributors: Ace Lite, Demnyx
-@Team Blue Spring 2022-2024
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
 
 ]]
 

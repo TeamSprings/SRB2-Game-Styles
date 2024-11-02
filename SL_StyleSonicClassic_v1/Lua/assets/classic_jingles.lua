@@ -1,3 +1,12 @@
+--[[
+
+	Music/Jingles Replacer
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local invincibilitytheme_cv = CV_RegisterVar{
 	name = "classic_invintheme",
 	defaultvalue = "sonic1",

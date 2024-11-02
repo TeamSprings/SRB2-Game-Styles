@@ -1,3 +1,10 @@
+--[[
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local helper = {}
 
 function helper.convertPlayerTime(time)

@@ -1,3 +1,11 @@
+--[[
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+
 return {
 	ngage = function(v, x, y, width, height, color, color2)
 		v.drawFill(x, y, width/2, height, color-2)

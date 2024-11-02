@@ -1,9 +1,9 @@
 --[[
 
-		Sonic Adventure Style's Common Objects
+		Common Objects
 
-Contributors: Ace Lite
-@Team Blue Spring 2022-2024
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
 
 ]]
 

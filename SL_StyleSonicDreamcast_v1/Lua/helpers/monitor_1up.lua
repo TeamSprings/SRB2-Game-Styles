@@ -1,4 +1,12 @@
--- Snippet from source code
+--[[
+
+		C->Lua Translation & Recreation of 1UP Monitor Box
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 freeslot("S_PLAY_NBX1", "S_1UP_NICON1", "S_1UP_NICON2")
 states[S_PLAY_NBX1] = {
 	sprite = SPR_PLAY,

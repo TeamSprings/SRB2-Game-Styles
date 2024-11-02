@@ -1,3 +1,12 @@
+--[[
+
+		Flicky Behavior
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 sfxinfo[freeslot("sfx_advaap")].caption = "Flicky Appears!"
 
 states[S_SA2FLICKYBUBBLE] = {

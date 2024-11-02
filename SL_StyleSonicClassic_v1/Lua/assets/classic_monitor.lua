@@ -1,9 +1,9 @@
 --[[
 
-		Sonic Adventure Style's Item Box
+	Monitors
 
-Contributors: Ace Lite, Demnyx
-@Team Blue Spring 2022-2024
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
 
 ]]
 

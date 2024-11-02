@@ -4,7 +4,7 @@
 		Lite version of Common Library - LIB_TBS_lite.lua
 
 Contributors: Skydusk
-@Team Blue Spring 2024
+@Team Blue Spring 2025
 
 ]]
 

@@ -1,3 +1,11 @@
+--[[
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+
 local approximations = {}
 local advance3_colors = {
 	"Advance3_Gray",

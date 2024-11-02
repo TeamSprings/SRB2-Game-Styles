@@ -1,3 +1,14 @@
+--[[
+
+	Slope Handler
+
+	Originally contributed for Mystic Realms: Community Edition
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 local helper = {}
 
 -- Taken from MRCELibs, still Skydusk's work, merely borrowing my own functions xd

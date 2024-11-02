@@ -1,5 +1,9 @@
 local gameString = "gba"
-local packType = '[Dimps Style] '
+
+local packVersion = '2.0'
+rawset(_G, "Style_DimpsVersion", 200)
+
+local packType = '[Dimps Style '..packVersion..'] '
 local version = '2.2.14'
 
 --[[
@@ -47,7 +51,7 @@ local function macro_dofile(prefix, ...)
 	end
 end
 
-if VERSION == 202 and SUBVERSION > 13 then
+if VERSION == 202 and SUBVERSION > 13 and not Style_ClassicVersion and not Style_AdventureVersion then
 	local start_metric = getTimeMicros()
 	print(packType.."Loading")
 
@@ -63,6 +67,16 @@ if VERSION == 202 and SUBVERSION > 13 then
 	"io.lua")
 
 	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
+elseif Style_ClassicVersion or Style_AdventureVersion then
+	-- Notify 'em
+	local function ErrorPack_Notification(v)
+		v.drawFill(0, 95, 320, 30, 38)
+		v.drawString(160, 100, "DIFFERENT STYLE MOD DETECTED, DIMPS STYLE WON'T BE LOADED.", V_ORANGEMAP, "thin-center")
+		v.drawString(160, 110, "PLEASE RESET THE GAME AND LOAD ONLY ONE STYLE PER SESSION.", 0, "thin-center")
+	end
+
+	hud.add(ErrorPack_Notification, "title")
+	hud.add(ErrorPack_Notification, "game")
 else
 	-- Notify 'em
 	local function MisVersion_Notification(v)

@@ -1,3 +1,10 @@
+--[[
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
 return {
 	[1] = function(v, x, y, width, flags)
 		local cache = v.cachePatch("GBA_MENU_TR1")
