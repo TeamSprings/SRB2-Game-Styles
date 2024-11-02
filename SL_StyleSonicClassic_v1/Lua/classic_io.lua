@@ -50,7 +50,7 @@ addHook("GameQuit", function(quit)
 		"classic_drowntheme",
 	}
 
-	local check = io.openlocal("bluespring/styles/classic_config.dat", "r+")
+	local check = io.openlocal("bluespring/styles/classic_cvars.dat", "r+")
 	if check then
 		for line in check:lines() do
 			local w = line:match("^([%w]+)")
@@ -64,7 +64,7 @@ addHook("GameQuit", function(quit)
 		check:close()
 	end
 
-    local file = io.openlocal("bluespring/styles/classic_config.dat", "w")
+    local file = io.openlocal("bluespring/styles/classic_cvars.dat", "w")
 	if file then
 		for k,v in ipairs(forced_variables) do
 			file:seek("set", forced_variables.index[k] == 1 and finalpos or forced_variables.index[k]-2)
@@ -75,7 +75,7 @@ addHook("GameQuit", function(quit)
 end)
 
 local function LoadConfig()
-	local loadfile = io.openlocal("bluespring/styles/classic_config.dat", "r+")
+	local loadfile = io.openlocal("bluespring/styles/classic_cvars.dat", "r+")
 
 	if loadfile then
 		loadfile:seek("set", 0)
