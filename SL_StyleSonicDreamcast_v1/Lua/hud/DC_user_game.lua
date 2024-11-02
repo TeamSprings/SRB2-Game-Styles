@@ -164,22 +164,29 @@ HOOK("lives", "dchud", function(v, p, t, e)
 	if skins["modernsonic"] then return end	-- whyyyy
 
 	if not G_GametypeUsesLives() then return false end
-	local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
+	if not p.mo then return end
 
-	local pos = {{-2,0}, {2,0}, {0,2}, {0,-2}}
-	if p.mo.skin == "adventuresonic" then
-		pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
+	local patch_name = "STYLES_ADVLIFE_"..string.upper(skins[p.mo.skin].name)
+
+	if v.patchExists(patch_name) then
+		v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+	else
+		local pos = {{-2,0}, {2,0}, {0,2}, {0,-2}}
+		if p.mo.skin == "adventuresonic" then
+			pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
+		end
+
+		-- white outline
+		for i = 1, 4 do
+			v.draw((hudinfo[HUD_LIVES].x+20+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
+		end
+
+		-- icon
+		v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 	end
-
-	-- white outline
-	for i = 1, 4 do
-		v.draw((hudinfo[HUD_LIVES].x+20+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
-	end
-
-	-- icon
-	v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 
 	-- number
+	local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
 	font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+54)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 
 	return true
