@@ -311,14 +311,22 @@ end
 
 -- This checks every mobjinfo slot, parameter being start of from where it should search in the Mobjinfo list.
 local function P_CheckNewMonitors(start)
+	local count = 0
+
 	for i = start, #mobjinfo do
 		if i == 1675 then break end
 
 		if mobjinfo[i] and mobjinfo[i].flags & MF_MONITOR then
 			P_AddMonitor(i)
+			count = $ + 1
 		end
+	end
+
+	if count then
+		print("[Monitor Checker] "..count.." Monitors Types Found!")
 	end
 end
 
--- Please, tell me there is better way to do this... I hope my addon loaded hook gets merged...
-P_CheckNewMonitors(MT_BOXSPARKLE); addHook("MapLoad", function() P_CheckNewMonitors(MT_YELLOWBRICKDEBRIS) end)
+addHook("AddonLoaded", function()
+	P_CheckNewMonitors(MT_BOXSPARKLE)
+end)
