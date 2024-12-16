@@ -20,14 +20,14 @@ if not tbsrequire then
 	rawset(_G, "tbsrequire", function(path)
 		local path = path .. ".lua"
 		if cache_lib[path] then
-			return cache_lib[path]()
+			return cache_lib[path]
 		else
 			local func, err = loadfile(path)
 			if not func then
 				error("error loading module '"..path.."': "..err)
 			else
-				cache_lib[path] = func
-				return func()
+				cache_lib[path] = func()
+				return cache_lib[path]
 			end
 		end
 	end)
