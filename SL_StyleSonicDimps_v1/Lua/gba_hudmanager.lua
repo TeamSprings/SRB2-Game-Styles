@@ -143,6 +143,10 @@ HOOK("lives", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	-- Lives
 	hud_data[hud_select].lives(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 	return true
@@ -151,6 +155,10 @@ end, "game")
 HOOK("score", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	-- Due to draw order, it has to be here...
 	-- Borders
@@ -189,6 +197,11 @@ end, "game")
 HOOK("time", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	hud_data[hud_select].time(v, p, t, e, font_type)
 	return true
 end, "game")
@@ -197,6 +210,10 @@ HOOK("rings", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	hud_data[hud_select].rings(v, p, t, e, font_type)
 	return true
 end, "game")
@@ -204,6 +221,11 @@ end, "game")
 HOOK("advancekey", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	hud_data[hud_select].key(v, p, t, e, font_type)
 	return true
 end, "game")
@@ -225,6 +247,10 @@ local emeralds_set = {
 HOOK("coopemeralds", "gbahud", function(v)
 	if multiplayer then return end
 
+	if mrce then
+		return
+	end
+
 	for i = 1, 7 do
 		local x = 8+i*38
 
@@ -243,6 +269,11 @@ end, "scores")
 
 HOOK("stagetitle", "gbahud", function(v, p, t, e)
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	if t > e-1 then return end
 
 	-- setup name
@@ -307,7 +338,6 @@ HOOK("stagetitle", "gbahud", function(v, p, t, e)
 
 	return true
 end, "titlecard")
-
 
 --
 -- TALLY

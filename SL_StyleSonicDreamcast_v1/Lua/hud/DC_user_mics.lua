@@ -44,6 +44,11 @@ addHook("MapThingSpawn", function(a, mt)
 end)
 
 HOOK("bossmeter", "dchud", function(v, p, t, e)
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
+
 	if Bosses and Bosses[1] and P_CheckSight(Bosses[1], p.mo) then
 		local boss = Bosses[1]
 
@@ -304,6 +309,10 @@ local emerald = {EMERALD1, EMERALD2, EMERALD3, EMERALD4, EMERALD5, EMERALD6, EME
 
 -- random rotating rocks + add there damn 8th Peaceful Ruby.
 HOOK("coopemeralds", "dchud", function(v)
+	if mrce then
+		return
+	end
+
 	if multiplayer then
 		return false
 	else

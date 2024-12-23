@@ -2,6 +2,7 @@ local gameString = "classic"
 
 local packVersion = '2.0'
 rawset(_G, "Style_ClassicVersion", 200)
+rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Classic Style '..packVersion..'] '
 local version = '2.2.14' -- Currently 2.2.10. UDMF support comes with 2.2.12

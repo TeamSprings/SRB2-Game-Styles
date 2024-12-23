@@ -144,6 +144,10 @@ HOOK("lives", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	local mo = p.mo and p.mo or p.realmo
 	hud_data[lifeicon].lives(v, p, t, e, prefix, mo, hide_offset_x)
 	return true
@@ -157,6 +161,10 @@ HOOK("score", "classichud", function(v, p, t, e)
 
 	local mo = p.mo and p.mo or p.realmo
 	if not mo then return end
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	if debugmode_coordinates.value then
 		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x, hudinfo[HUD_SCORE].y, v.cachePatch(prefix..'TSCODB'), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
@@ -195,6 +203,11 @@ local time_display_settings = CV_FindVar("timerres")
 HOOK("time", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	local tics = p.realtime + (p.style_additionaltime or 0)
 	local countdown = false
 	local show_tic = false
@@ -253,6 +266,10 @@ end, "game")
 HOOK("rings", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	local x_num = ((time_display_settings.value > 1 and hudinfo[HUD_RINGSNUMTICS].x or hudinfo[HUD_RINGSNUM].x) + hide_offset_x)*FRACUNIT
 
@@ -526,6 +543,10 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 end, "game")
 
 HOOK("stagetitle", "classichud", function(v, p, t, e)
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	if hud_hide_cv.value > 1 then
 		local check = hud_data[min(hud_select, 4)].titlecard(v, p, t, e)
 
@@ -542,6 +563,10 @@ end, "titlecard")
 
 HOOK("coopemeralds", "classichud", function(v)
 	if multiplayer then return end
+
+	if mrce then
+		return
+	end
 
 	local sprite = emeralds_sprites[get_emerald_sprite.value]
 

@@ -212,6 +212,10 @@ sfxinfo[freeslot("sfx_advtts")].caption = "titlecard"
 HOOK("stagetitle", "dchud", function(v, p, t, et)
 	if t > et-1 then return end
 
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	local namezone = mapheaderinfo[gamemap].lvlttl..""
 	local subtitle = mapheaderinfo[gamemap].subttl..""
 	local actnum = mapheaderinfo[gamemap].actnum..""
@@ -303,7 +307,11 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 		v.draw((75+#lenght*10)-easespinspin+easespout, 75, spinGraphic, V_PERPLAYER, v.getColormap(TC_DEFAULT, p.skincolor))
 
-		font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+		if mapheaderinfo[gamemap].styles_dc_stagenum then
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+		else
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+		end
 
 		-- SUBTITLE
 

@@ -32,7 +32,7 @@ rawset(_G, "G_SetCustomExitVars", function(...)
 			skiptally = false
 		end
 
-		args[2] = true
+		args[2] = 1
 	end
 
 	G_SetCustomExitOriginal(
@@ -115,6 +115,11 @@ end
 local function G_StylesTallyBackend(p)
 	if multiplayer then return end
 	if not (p.mo and p.mo.valid) then return end
+	if marathonmode then return end
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	if G_GametypeUsesCoopStarposts() and G_GametypeUsesLives() then
 

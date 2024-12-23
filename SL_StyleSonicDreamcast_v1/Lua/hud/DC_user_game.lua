@@ -68,6 +68,10 @@ HOOK("score", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
 
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
 	V_ScoreDrawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, font_scale, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
 
 	return true
@@ -77,6 +81,10 @@ end, "game")
 HOOK("time", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	local mint, sect, cent
 
@@ -95,6 +103,10 @@ end, "game")
 HOOK("rings", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	local numrings = (p.rings > 99  and p.rings or (p.rings < 10 and '00'..p.rings or '0'..p.rings))
 
@@ -162,6 +174,10 @@ end)
 HOOK("lives", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
 
 	if not G_GametypeUsesLives() then return false end
 	if not p.mo then return end
