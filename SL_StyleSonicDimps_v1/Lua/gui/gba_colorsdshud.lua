@@ -45,6 +45,8 @@ return {
 	end,
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
+		if p.lives == INFLIVES or p.spectator then return end
+
 		local lives = p.lives > 9 and p.lives or "0"..p.lives
 
 		if icon_style and bot_existance then

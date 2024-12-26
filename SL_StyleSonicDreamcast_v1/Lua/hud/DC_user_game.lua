@@ -174,6 +174,7 @@ end)
 HOOK("lives", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
 	if skins["modernsonic"] then return end	-- whyyyy
+	if p.lives == INFLIVES or p.spectator then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -182,9 +183,13 @@ HOOK("lives", "dchud", function(v, p, t, e)
 	if not G_GametypeUsesLives() then return false end
 	if not p.mo then return end
 
-	local patch_name = "STYLES_ADVLIFE_"..string.upper(skins[p.mo.skin].name)
+	local skin_name = string.upper(skins[p.mo.skin].name)
+	local patch_name = "STYLES_ADVLIFE_"..skin_name
+	local patch_s_name = "STYLES_SADVLIFE_"..skin_name
 
-	if v.patchExists(patch_name) then
+	if v.patchExists(patch_s_name) and p.powers[pw_super] then
+		v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+	elseif v.patchExists(patch_name) then
 		v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 	else
 		local pos = {{-2,0}, {2,0}, {0,2}, {0,-2}}

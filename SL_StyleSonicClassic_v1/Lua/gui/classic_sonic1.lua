@@ -96,7 +96,9 @@ return{
 
 
 		if mo then
-			drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 43*FRACUNIT, FRACUNIT, string.lower(mo.skin.." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
+			local skin_name = skins[mo.skin].realname
+
+			drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 43*FRACUNIT, FRACUNIT, string.lower(skin_name.." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
 		else
 			drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 43*FRACUNIT, FRACUNIT, "you have", 0, v.getColormap(TC_DEFAULT, 1), "center")
 		end

@@ -92,7 +92,9 @@ return{
 		local mo = p.mo
 
 		if mo then
-			v.drawLevelTitle(96-offsetx, 48, mo.skin.." got", 0)
+			local skin_name = skins[mo.skin].realname
+
+			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", 0)
 		else
 			v.drawLevelTitle(72-offsetx, 48, "you got", 0)
 		end

@@ -47,6 +47,8 @@ return {
 	end,
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
+		if p.lives == INFLIVES or p.spectator then return end
+
 		if icon_style and bot_existance and bot_existance.valid then
 			v.draw(hudinfo[HUD_LIVES].x+3, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
 			v.draw(hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), v.getColormap(TC_DEFAULT, bot_color))
