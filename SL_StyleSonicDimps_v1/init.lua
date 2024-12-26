@@ -59,6 +59,7 @@ if VERSION == 202 and SUBVERSION > 13 and not Style_ClassicVersion and not Style
 	dofile("libs/sal_lib-customhud-v2-1.lua")
 
 	macro_dofile(gameString,
+	"assets.lua",
 	"misc.lua",
 	"inter.lua",
 	"monitor.lua",
