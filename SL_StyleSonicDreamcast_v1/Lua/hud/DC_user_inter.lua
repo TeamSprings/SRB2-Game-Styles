@@ -282,18 +282,29 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 			v.fadeScreen(0xFF00|V_PERPLAYER, 31-(easegoout*31/93))
 		end
 
+		local color = p.skincolor
+
+		if mapheaderinfo[gamemap].styles_titlecard_color then
+			local ttcl = tostring(mapheaderinfo[gamemap].styles_titlecard_color)
+
+			if _G[ttcl] and skincolors[ttcl] then
+				color = _G[ttcl]
+			end
+		end
+
+
 		local lenght = split[#split]
 
 		local SRB2tagsideline = v.cachePatch("SA2TTNAM")
 
-		v.draw(0-easegoout,0, v.cachePatch("SA2TTBAR"), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, p.skincolor))
+		v.draw(0-easegoout,0, v.cachePatch("SA2TTBAR"), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, color))
 
 		if easetransparency2 ~= 9 then
-			v.drawScaled(FixedDiv(41*easescaleout, easescaleout),FixedDiv(-50*easescaleout, easescaleout), easescaleout, SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency2 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
+			v.drawScaled(FixedDiv(41*easescaleout, easescaleout),FixedDiv(-50*easescaleout, easescaleout), easescaleout, SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency2 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
 		end
 
 		if easetransparency1 ~= 9 then
-			v.draw(41,-50-(t % SRB2tagsideline.height), SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency1 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
+			v.draw(41,-50-(t % SRB2tagsideline.height), SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency1 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
 		end
 
 		-- SPEEEEN
@@ -302,10 +313,10 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 		local spinGraphic = v.cachePatch("SA2TTSPIN")
 
 		if easetranp ~= 9 then
-			v.drawScaled((75+#lenght*10+spinGraphic.width/2)*FRACUNIT, (75+spinGraphic.height/2)*FRACUNIT, easescale, spinGhost, V_ADD|V_PERPLAYER|(easetranp << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, p.skincolor))
+			v.drawScaled((75+#lenght*10+spinGraphic.width/2)*FRACUNIT, (75+spinGraphic.height/2)*FRACUNIT, easescale, spinGhost, V_ADD|V_PERPLAYER|(easetranp << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
 		end
 
-		v.draw((75+#lenght*10)-easespinspin+easespout, 75, spinGraphic, V_PERPLAYER, v.getColormap(TC_DEFAULT, p.skincolor))
+		v.draw((75+#lenght*10)-easespinspin+easespout, 75, spinGraphic, V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 
 		if mapheaderinfo[gamemap].styles_dc_stagenum then
 			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
@@ -317,7 +328,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 		if subtitle and subtitle ~= "" then
 			for i = 1, 2 do
-				v.drawScaled(FixedDiv(84*FRACUNIT, easesubtit), FixedDiv(140*FRACUNIT, easesubtit), easesubtit, v.cachePatch("SA2TTSUB"..i), ((i == 2 and easetransparency4 or easetransparency3) << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.skincolor))
+				v.drawScaled(FixedDiv(84*FRACUNIT, easesubtit), FixedDiv(140*FRACUNIT, easesubtit), easesubtit, v.cachePatch("SA2TTSUB"..i), ((i == 2 and easetransparency4 or easetransparency3) << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 			end
 
 			if t > TICRATE then
