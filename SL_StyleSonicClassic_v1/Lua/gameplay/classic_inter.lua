@@ -69,15 +69,7 @@ rawset(_G, "G_SetCustomExitVars", function(...)
 		args[2] = 1
 	end
 
-	G_SetCustomExitOriginal(
-		args[1],
-		args[2],
-		args[3],
-		args[4],
-		args[5],
-		args[6],
-		args[7]
-	)
+	G_SetCustomExitOriginal(unpack(args))
 end)
 
 --
