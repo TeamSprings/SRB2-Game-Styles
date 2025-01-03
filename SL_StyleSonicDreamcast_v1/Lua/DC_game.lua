@@ -15,6 +15,35 @@ local skiptally
 local TMEF_SKIPTALLY = 1
 
 --
+--	Console Variable
+--
+
+local end_tallyenabled = 1
+local change_var = -1
+
+local endtally_cv = CV_RegisterVar{
+	name = "dc_endtally",
+	defaultvalue = "enabled",
+	flags = CV_CALL,
+	func = function(var)
+		if multiplayer then
+			CONS_Printf(consoleplayer, "[Adventure Style] This console variable has no use in multiplayer.")
+		end
+
+		change_var = var.value
+	end,
+	PossibleValue = {disabled=0, enabled=1}
+}
+
+addHook("PlayerSpawn", function(p)
+	if change_var > -1 then
+		end_tallyenabled = change_var
+		change_var = -1
+	end
+end)
+
+
+--
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
 -- Such a horrible unprotected way to do @override
 --
@@ -35,15 +64,7 @@ rawset(_G, "G_SetCustomExitVars", function(...)
 		args[2] = 1
 	end
 
-	G_SetCustomExitOriginal(
-		args[1],
-		args[2],
-		args[3],
-		args[4],
-		args[5],
-		args[6],
-		args[7]
-	)
+	G_SetCustomExitOriginal(unpack(args))
 end)
 
 

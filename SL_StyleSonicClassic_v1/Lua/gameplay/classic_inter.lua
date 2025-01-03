@@ -26,7 +26,7 @@ local endtally_cv = CV_RegisterVar{
 	flags = CV_CALL,
 	func = function(var)
 		if multiplayer then
-			CONS_Printf(consoleplayer, "[Classic Styles] This console variable has no use in multiplayer.")
+			CONS_Printf(consoleplayer, "[Classic Style] This console variable has no use in multiplayer.")
 		end
 
 		change_var = var.value
