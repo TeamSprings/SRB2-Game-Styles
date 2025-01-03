@@ -199,7 +199,7 @@ HOOK("lives", "dchud", function(v, p, t, e)
 
 		-- white outline
 		for i = 1, 4 do
-			v.draw((hudinfo[HUD_LIVES].x+20+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_ALLWHITE))
+			v.draw((hudinfo[HUD_LIVES].x+20+pos[i][1]), (hudinfo[HUD_LIVES].y+6+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "GrayoutWhite"))
 		end
 
 		-- icon
