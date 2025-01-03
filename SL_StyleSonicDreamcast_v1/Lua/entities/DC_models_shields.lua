@@ -32,19 +32,6 @@ states[S_MAGN13] = {
 	nextstate = S_MAGN1,
 }
 
-states[S_FIRS1] = {
-	sprite = SPR_FIRS,
-	frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|A,
-	tics = 60,
-	var1 = 59,
-	var2 = 1,
-	nextstate = S_FIRS1,
-}
-
-states[S_FIRS10].frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|60
-
-
-
 freeslot("S_MAGN14")
 
 -- Shocks
