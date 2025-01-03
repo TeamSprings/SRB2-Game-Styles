@@ -226,7 +226,7 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+38*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+45*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 			for id,bulb in ipairs(a.bulb) do
@@ -235,15 +235,14 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(bulb,
 				a.base[id].x-57*cos(bulb.angle)+height*cos(bulb.angle),
 				a.base[id].y-57*sin(bulb.angle)+height*sin(bulb.angle),
-				a.z+(34+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+(36+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 		end
 
 		if a.angv == 110 then
-			if a.stick[1].frame ~= G or (a.stick[2] and a.stick[2].frame ~= G) then
+			if (a.stick[1].frame & FF_PAPERSPRITE) or (a.stick[2] and a.stick[2].frame & FF_PAPERSPRITE) then
 				for id,stick in ipairs(a.stick) do
-					stick.rollangle = 0
-					stick.frame = G
+					stick.frame = I &~ FF_PAPERSPRITE
 				end
 			end
 
