@@ -32,7 +32,7 @@ local supertheme_cv = CV_RegisterVar{
 local supertheme_select = {
 	"_SUPS2",
 	"_SUPS3",
-	"_SUPS3U",
+	"_SUPSU",
 }
 
 local lifeuptheme_cv = CV_RegisterVar{
