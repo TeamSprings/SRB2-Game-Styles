@@ -242,8 +242,9 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 	-- Sound Effects / Music
 
 	if (leveltime <= et) then
-		hud.p = p
+
 		hud.sa2musicstop = (t <= (2*TICRATE+9) and 1 or 0)
+
 		if hud.sa2musicstop then
 			S_SetInternalMusicVolume(0, p)
 		end
