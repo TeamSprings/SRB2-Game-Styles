@@ -14,12 +14,14 @@ local version = '2.2.14' -- Currently 2.2.10. UDMF support comes with 2.2.12
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
 
+---@diagnostic disable-next-line
 skincolors[freeslot("SKINCOLOR_PITCHBLACK")] = {
 	name = "Pitch Black",
 	ramp = {31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31},
 	accessible = false,
 }
 
+---@diagnostic disable-next-line
 skincolors[freeslot("SKINCOLOR_PURPLEMANIAHUD")] = {
 	name = "Purple Mania",
 	ramp = {172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172, 172},

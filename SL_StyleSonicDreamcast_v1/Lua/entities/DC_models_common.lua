@@ -27,6 +27,7 @@ end)
 --
 --
 
+---@diagnostic disable-next-line
 mobjinfo[MT_EXTRAERADUMMY] = {
 	spawnhealth = 1,
 	reactiontime = 1,
@@ -37,6 +38,7 @@ mobjinfo[MT_EXTRAERADUMMY] = {
 	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 }
 
+---@diagnostic disable-next-line
 mobjinfo[MT_BACKERADUMMY] = {
 	spawnhealth = 1,
 	reactiontime = 1,
@@ -48,6 +50,7 @@ mobjinfo[MT_BACKERADUMMY] = {
 	dispoffset = -256
 }
 
+---@diagnostic disable-next-line
 mobjinfo[MT_BACKTIERADUMMY] = {
 	spawnhealth = 1,
 	reactiontime = 1,
@@ -59,6 +62,7 @@ mobjinfo[MT_BACKTIERADUMMY] = {
 	dispoffset = -2
 }
 
+---@diagnostic disable-next-line
 mobjinfo[MT_FRONTERADUMMY] = {
 	spawnhealth = 1,
 	reactiontime = 1,
@@ -70,7 +74,7 @@ mobjinfo[MT_FRONTERADUMMY] = {
 	dispoffset = 2
 }
 
-
+---@diagnostic disable-next-line
 mobjinfo[MT_ROTATEOVERLAY] = {
 	spawnhealth = 1,
 	reactiontime = 1,
@@ -81,6 +85,15 @@ mobjinfo[MT_ROTATEOVERLAY] = {
 	flags = MF_NOGRAVITY|MF_SCENERY|MF_NOCLIP|MF_NOCLIPHEIGHT
 }
 
+---@class mobj_t
+---@field alpha fixed_t
+
+---@class rotovrmobj_t : mobj_t
+---@field bubble 	boolean?
+---@field shield 	boolean?
+---@field scaleup 	fixed_t?
+
+---@param a rotovrmobj_t
 addHook("MobjThinker", function(a)
 	if a.target then
 		if not a.shield then
@@ -121,6 +134,7 @@ addHook("MobjThinker", function(a)
 				if a.floorz < 16*FRACUNIT then
 					a.target.momz = 3*a.scale
 				else
+					---@diagnostic disable-next-line
 					a.target.momz = 3*sin(2*ANG1*leveltime)
 				end
 				a.target.fuse = a.extravalue2
@@ -154,6 +168,7 @@ end, MT_ROTATEOVERLAY)
 -- 	Animated Smoke
 --
 
+---@diagnostic disable-next-line
 states[S_ERASMOKE1] = {
 	sprite = SPR_CA2D,
 	frame = FF_ANIMATE|FF_TRANS40|A,
@@ -162,6 +177,7 @@ states[S_ERASMOKE1] = {
 	var2 = 4
 }
 
+---@diagnostic disable-next-line
 states[S_ERASMOKE2] = {
 	sprite = SPR_CA1D,
 	frame = FF_ANIMATE|A,
@@ -182,6 +198,7 @@ states[S_XPLD_FLICKY].sprite = SPR_CA3D
 states[S_XPLD_FLICKY].frame = A|FF_TRANS30
 states[S_XPLD_FLICKY].nextstate = S_XPLDADVENTURE_1
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_1] = {
 	sprite = SPR_CA3D,
 	frame = A|FF_TRANS40,
@@ -194,6 +211,7 @@ end,
 	nextstate = S_XPLDADVENTURE_2
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_2] = {
 	sprite = SPR_CA3D,
 	frame = B|FF_TRANS40,
@@ -201,6 +219,7 @@ states[S_XPLDADVENTURE_2] = {
 	nextstate = S_XPLDADVENTURE_3
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_3] = {
 	sprite = SPR_CA3D,
 	frame = C|FF_TRANS40,
@@ -208,6 +227,7 @@ states[S_XPLDADVENTURE_3] = {
 	nextstate = S_XPLDADVENTURE_4
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_4] = {
 	sprite = SPR_CA3D,
 	frame = D|FF_TRANS40,
@@ -215,7 +235,7 @@ states[S_XPLDADVENTURE_4] = {
 	nextstate = S_XPLDADVENTURE_5
 }
 
-
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_5] = {
 	sprite = SPR_CA3D,
 	frame = E|FF_TRANS40,
@@ -223,6 +243,7 @@ states[S_XPLDADVENTURE_5] = {
 	nextstate = S_XPLDADVENTURE_6
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_6] = {
 	sprite = SPR_CA3D,
 	frame = F|FF_TRANS40,
@@ -230,6 +251,7 @@ states[S_XPLDADVENTURE_6] = {
 	nextstate = S_XPLDADVENTURE_7
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_7] = {
 	sprite = SPR_CA3D,
 	frame = G|FF_TRANS40,
@@ -237,7 +259,7 @@ states[S_XPLDADVENTURE_7] = {
 	nextstate = S_XPLDADVENTURE_8
 }
 
-
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_8] = {
 	sprite = SPR_CA3D,
 	frame = H|FF_TRANS40,
@@ -245,6 +267,7 @@ states[S_XPLDADVENTURE_8] = {
 	nextstate = S_XPLDADVENTURE_9
 }
 
+---@diagnostic disable-next-line
 states[S_XPLDADVENTURE_9] = {
 	sprite = SPR_CA3D,
 	frame = I|FF_TRANS40,
@@ -260,6 +283,7 @@ end, MT_SONIC3KBOSSEXPLODE)
 --	Chaos Emeralds
 --
 
+---@diagnostic disable-next-line
 states[S_CEMG1] = {
 	sprite = SPR_GEM1,
 	frame = FF_ANIMATE|FF_TRANS10|A,
@@ -269,6 +293,7 @@ states[S_CEMG1] = {
 	nextstate = S_CEMG1,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG2] = {
 	sprite = SPR_GEM1,
 	frame = FF_ANIMATE|FF_TRANS10|E,
@@ -278,6 +303,7 @@ states[S_CEMG2] = {
 	nextstate = S_CEMG2,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG3] = {
 	sprite = SPR_GEM1,
 	frame = FF_ANIMATE|FF_TRANS10|I,
@@ -287,6 +313,7 @@ states[S_CEMG3] = {
 	nextstate = S_CEMG3,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG4] = {
 	sprite = SPR_GEM1,
 	frame = FF_ANIMATE|FF_TRANS10|M,
@@ -296,6 +323,7 @@ states[S_CEMG4] = {
 	nextstate = S_CEMG4,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG5] = {
 	sprite = SPR_GEM2,
 	frame = FF_ANIMATE|FF_TRANS10|A,
@@ -305,6 +333,7 @@ states[S_CEMG5] = {
 	nextstate = S_CEMG5,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG6] = {
 	sprite = SPR_GEM2,
 	frame = FF_ANIMATE|FF_TRANS10|E,
@@ -314,6 +343,7 @@ states[S_CEMG6] = {
 	nextstate = S_CEMG6,
 }
 
+---@diagnostic disable-next-line
 states[S_CEMG7] = {
 	sprite = SPR_GEM2,
 	frame = FF_ANIMATE|FF_TRANS10|I,
@@ -329,6 +359,7 @@ states[S_CEMG7] = {
 
 freeslot("SPR_SA2K")
 
+---@diagnostic disable-next-line
 states[S_TOKEN] = {
 	sprite = SPR_SA2K,
 	frame = FF_ANIMATE|A,
@@ -484,11 +515,13 @@ local goalring_state = freeslot("S_SA2_GOALRING_NORMAL")
 
 sfxinfo[freeslot("sfx_goalrn")].caption = "Goal Ring Ambience"
 
+---@diagnostic disable-next-line
 mobjinfo[goalring] = {
 	spawnstate = goalring_state,
 	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP,
 }
 
+---@diagnostic disable-next-line
 states[goalring_state] = {
 	sprite = freeslot("SPR_SA2_GOALRING"),
 	frame = FF_ANIMATE,

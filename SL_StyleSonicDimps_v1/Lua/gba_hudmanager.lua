@@ -317,7 +317,7 @@ HOOK("stagetitle", "gbahud", function(v, p, t, e)
 
 	v.fadeScreen(0xFF00, max(32-t/3, 0))
 
-	while (height/scale > fill)
+	while (height/scale > fill) do
 		v.draw(bg_x, fill, bg, V_SNAPTOTOP|V_SNAPTOLEFT, player_c)
 		fill = $ + bg.height
 	end

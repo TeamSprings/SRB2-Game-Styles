@@ -116,7 +116,7 @@ return{
 
 			v.drawFill(-500, interpolate(131, 250, FRACUNIT-fractime), 9999, 9, 31|V_SNAPTOTOP)
 			local subttl = "Sonic Robo Blast CD"
-			if mapheaderinfo[gamemap].subttl != "" then subttl = mapheaderinfo[gamemap].subttl end
+			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
 			v.drawString(interpolate(-v.stringWidth(subttl), 63, fractime), interpolate(132, 251, FRACUNIT-fractime),
 			subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 
@@ -132,9 +132,9 @@ return{
 			end
 			v.draw(interpolate(iiiW, iiiW+360, FRACUNIT-fractime), 80, iii, V_SNAPTOTOP)
 
-			if mapheaderinfo[gamemap].actnum != 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
+			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(-48, 104, fractime), 147, zonegr) end
-			if mapheaderinfo[gamemap].actnum != 0 then
+			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
 					actw = 134
@@ -147,14 +147,14 @@ return{
 			v.drawString(-999, -999, "Zone") -- Draw nothing to hide it
 
 			return true
-		elseif tctime > etime-11 -- Slide out
+		elseif tctime > etime-11 then -- Slide out
 			local fractime = (etime-tctime-1)*FRACUNIT/10
 
 			v.draw(30, interpolate(-168, 0, fractime), back, V_SNAPTOTOP)
 
 			v.drawFill(-500, interpolate(-10, 131, fractime), 9999, 9, 31|V_SNAPTOTOP)
 			local subttl = "Sonic Robo Blast CD"
-			if mapheaderinfo[gamemap].subttl != "" then subttl = mapheaderinfo[gamemap].subttl end
+			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
 			v.drawString(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime),
 			subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 
@@ -170,9 +170,9 @@ return{
 			end
 			v.draw(interpolate(iiiW, iiiW+360, FRACUNIT-fractime), 80, iii, V_SNAPTOTOP)
 
-			if mapheaderinfo[gamemap].actnum != 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
+			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(104, 320, FRACUNIT-fractime), 147, zonegr) end
-			if mapheaderinfo[gamemap].actnum != 0 then
+			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
 					actw = 134
@@ -186,7 +186,7 @@ return{
 
 			v.drawFill(-500, 131, 9999, 9, 31|V_SNAPTOTOP)
 			local subttl = "Sonic Robo Blast 2 CD"
-			if mapheaderinfo[gamemap].subttl != "" then subttl = mapheaderinfo[gamemap].subttl end
+			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
 			v.drawString(63, 132, subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 
 			V_DrawTitle(v, 40, 80, superstr, V_SNAPTOTOP)
@@ -201,9 +201,9 @@ return{
 			end
 			v.draw(iiiW, 80, iii, V_SNAPTOTOP)
 
-			if mapheaderinfo[gamemap].actnum != 0 then v.draw(142, 150, gear) end
+			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, 150, gear) end
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(104, 147, zonegr) end
-			if mapheaderinfo[gamemap].actnum != 0 then
+			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
 					actw = 134

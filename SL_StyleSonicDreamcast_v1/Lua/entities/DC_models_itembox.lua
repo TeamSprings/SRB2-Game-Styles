@@ -297,7 +297,7 @@ local function P_MonitorThinker(a)
 
 				-- Golden Monitors
 				if a.info.flags & MF_GRENADEBOUNCE and (leveltime % 4)/3 then
-					A_GoldMonitorSparkle(a)
+					A_GoldMonitorSparkle(a, nil, nil)
 					a.goldentimer = nil
 				end
 
@@ -416,7 +416,7 @@ local function P_MonitorDeath(a, d, s)
 
 			-- Clipped code from Source code for life icons
 			if boxicon.type == MT_1UP_ICON and boxicon.target then
-				// Spawn the lives icon.
+				-- Spawn the lives icon.
 				local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
 				livesico.target = boxicon
 				livesico.color = boxicon.target.player.mo.color

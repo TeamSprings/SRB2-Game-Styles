@@ -32,8 +32,8 @@ local sphereplayer = {
 	}
 }
 
-// This whole thing gives me errors if I don't give it some order.
-// 1) mapload done. 2) playerset 3)item spawn done 4) done
+-- This whole thing gives me errors if I don't give it some order.
+-- 1) mapload done. 2) playerset 3)item spawn done 4) done
 local loadingorder = 0
 
 states[S_S3KBSPHERES] = {
@@ -112,7 +112,7 @@ addHook("MapLoad", function()
 				player.mo.angle = sphereplayer.lastpos.angle
 				player.starpostnum = sphereplayer.lastpos.powerup
 				realtime = sphereplayer.lastpos.leveltime
-				if sphereplayer.lastpos.powerup ~= 0
+				if sphereplayer.lastpos.powerup ~= 0 then
 					player.powers[pw_shield] = sphereplayer.lastpos.powerup
 				end
 			end
@@ -281,26 +281,26 @@ local dir = {{1,0}, {1,1}, {0,1}, {1, -1}, {1, -1}, {-1, -1}, {-1,0}, {0,-1}}
 
 -- S3K Air's assembly addresser was kinda inspiration for this thing. You could call it translation from lemon but not really, as my set up just doesn't allow me straight up 'copy it'.
 -- so only thing I am taking is logic behind it. -- Sonic 3 Air by Eukaryot
-/*
-local function P_CheckS3KBalls(x, y)
-	local balls = P_CheckS3KBallsStack(x, y)
-	if balls == nil then return end
 
-	for k,v in ipairs(balls) do
-		if S3KSS_Current[v[2]][v[1]] == SB or S3KSS_Current[v[2]][v[1]] == RS then
-			S3KSS_Current[v[2]][v[1]] = CS
-			if S3KSS_Current[v[2]][v[1]] == SB then
-				sphereplayer.spheres = $-1
-			end
-		end
-	end
-end
-		*/
+--local function P_CheckS3KBalls(x, y)
+--	local balls = P_CheckS3KBallsStack(x, y)
+--	if balls == nil then return end
+--
+--	for k,v in ipairs(balls) do
+--		if S3KSS_Current[v[2]][v[1]] == SB or S3KSS_Current[v[2]][v[1]] == RS then
+--			S3KSS_Current[v[2]][v[1]] = CS
+--			if S3KSS_Current[v[2]][v[1]] == SB then
+--				sphereplayer.spheres = $-1
+--			end
+--		end
+--	end
+--end
 
-//local 4dir = {{1,0}, {0,1}, {-1,0}, {0,-1}}
-//local dax = {-0x01, -0x20, 0x01, 0x20, -0x01, -0x20}
 
-/*
+--local 4dir = {{1,0}, {0,1}, {-1,0}, {0,-1}}
+--local dax = {-0x01, -0x20, 0x01, 0x20, -0x01, -0x20}
+
+--[[
 local function P_CheckS3KBallsStack(x, y)
 	local turned = {}
 	local counter, counterx, countery, yl = 0,0,0,0
@@ -315,12 +315,12 @@ local function P_CheckS3KBallsStack(x, y)
 
 		repeat
 			yl = $ + 1
-		    counterx = $+1
+			counterx = $+1
 		until (S3KSS_Current[(((x + yl) % 32) + 1)][y] == eS)
 		yl = 0
 		repeat
 			y = $ - 1
-		    counterx = $+1
+			counterx = $+1
 		until (S3KSS_Current[((x + yl) % 32) + 1)][y] == eS)
 		yl = 0
 		counterx = $+1
@@ -329,12 +329,12 @@ local function P_CheckS3KBallsStack(x, y)
 
 		repeat
 			yl = $ + 1
-		    countery = $+1
+			countery = $+1
 		until (S3KSS_Current[x][((y + yl) % 32) + 1)] == eS)
 		yl = 0
 		repeat
 			yl = $ - 1
-		    countery = $+1
+			countery = $+1
 		until (S3KSS_Current[x][((y + yl) % 32) + 1)] == eS)
 		yl = 0
 		countery = $+1
@@ -425,7 +425,7 @@ local function P_CheckS3KBallsStack(x, y)
 
 		end
 end
-		*/
+--]]
 
 
 local function P_RotateS3KPlayer(p, amount)
@@ -525,7 +525,7 @@ addHook("PlayerThink", function(p)
 		--elseif P_IsObjectOnGround(p.mo) and p.mo.rotcooldown == nil then
 			--p.panim = PA_IDLE
 		else
-			if p.mo.state ~= S_PLAY_JUMP
+			if p.mo.state ~= S_PLAY_JUMP then
 				p.mo.state = S_PLAY_JUMP
 				p.mo.anim_duration = 4
 			end
@@ -555,14 +555,14 @@ addHook("PlayerThink", function(p)
 			fakeangle = 0
 		end
 
-		if sphereplayer.x >= 32*inbdistance-inbdistance/128
+		if sphereplayer.x >= 32*inbdistance-inbdistance/128 then
 			sphereplayer.x = inbdistance/16
-		elseif sphereplayer.x <= inbdistance/128
+		elseif sphereplayer.x <= inbdistance/128 then
 			sphereplayer.x = 32*inbdistance-inbdistance/16
 		end
-		if sphereplayer.y >= 32*inbdistance-inbdistance/128
+		if sphereplayer.y >= 32*inbdistance-inbdistance/128 then
 			sphereplayer.y = inbdistance/16
-		elseif sphereplayer.y <= inbdistance/128
+		elseif sphereplayer.y <= inbdistance/128 then
 			sphereplayer.y = 32*inbdistance-inbdistance/16
 		end
 		--print(sphereplayer.x/inbdistance..":X Y:"..sphereplayer.y/inbdistance.." Angle: "..sphereplayer.angle/ANG1.." Timer: ")
@@ -587,14 +587,14 @@ local function numfont(d, font, x, y, scale, value)
 		val = string.sub(str, i,i)
 		if val ~= nil and val ~= ' ' and val ~= '' then
 			patch = d.cachePatch(font..''..val)
- 		else
+		else
 			patch = d.cachePatch(font..''..0)
 		end
 		d.drawScaled(x+((patch.width+2)*(i-1))*FRACUNIT, y, scale, patch)
 	end
 end
 
-/*
+--[[
 hud.add(function(v, p, c)
 	local xpos, ypos, pspRS, frame
 
@@ -615,4 +615,4 @@ hud.add(function(v, p, c)
 	v.draw(160, 50, FRACUNIT, pspr)
 
 end, "game")
-*/
+--]]

@@ -229,7 +229,7 @@ addHook("MobjThinker", function(a)
 end, MT_SIGN)
 
 -- ... this wouldn't be necessary if for some damn reason certain part of code didn't think this was part of "Hud rendering code"
-addHook("ThinkFrame", do
+addHook("ThinkFrame", function()
 	if switch then
 		-- Checkpoint
 

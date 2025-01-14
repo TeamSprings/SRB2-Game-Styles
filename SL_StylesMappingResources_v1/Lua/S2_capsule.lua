@@ -1,4 +1,4 @@
-/* 
+--[[
 		Pipe Kingdom Zone's Collectibles
 
 Description:
@@ -9,7 +9,7 @@ Contributors: Ace Lite, Krabs(Checkpoints)
 
 Contains:
 	SMS Alfredo - Shelmet; Mushroom Movement Thinker
-*/
+==]]
 
 freeslot("SPR_S2CA")
 

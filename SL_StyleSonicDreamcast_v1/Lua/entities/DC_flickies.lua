@@ -9,6 +9,7 @@ Contributors: Skydusk
 
 sfxinfo[freeslot("sfx_advaap")].caption = "Flicky Appears!"
 
+---@diagnostic disable-next-line
 states[S_SA2FLICKYBUBBLE] = {
 	sprite = SPR_FLB9,
 	frame = FF_ANIMATE|FF_ADD|FF_TRANS20|A,

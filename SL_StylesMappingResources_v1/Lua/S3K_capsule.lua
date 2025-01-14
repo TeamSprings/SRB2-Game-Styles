@@ -141,7 +141,7 @@ addHook("MobjThinker", function(a)
 		end
 	end
 	
-	if a.disty == 0
+	if a.disty == 0 then
 		a.activatable = true
 	end
 	
@@ -157,7 +157,7 @@ addHook("MobjThinker", function(a)
 				local y = a.y + FixedMul(cos(fa), ns)
 
 				local mo2 = P_SpawnMobj(x, y, z, MT_EXPLODE)
-				mo2.state = S_XPLD_EGGTRAP // so the flickies don't lose their target if they spawn
+				mo2.state = S_XPLD_EGGTRAP -- so the flickies don't lose their target if they spawn
 				ns = 2*FRACUNIT
 				mo2.momx = FixedMul(sin(fa), ns)
 				mo2.momy = FixedMul(cos(fa), ns)
