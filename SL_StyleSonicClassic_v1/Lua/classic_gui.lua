@@ -620,7 +620,7 @@ local classic_menu_vars = {
 	"PLAYER",
 	{name = "SPIN TRAIL", cv = CV_FindVar("classic_thok")},
 	{name = "SPINDASH", cv = CV_FindVar("classic_spindash")},
-	{name = "SPRING TWIRK", cv = CV_FindVar("classic_springtwirk")},
+	{name = "SPRING TWIRL", cv = CV_FindVar("classic_springtwirl")},
 	{name = "SPRING ROLL", cv = CV_FindVar("classic_springroll")},
 	{name = "FALL AIRWALK", cv = CV_FindVar("classic_springairwalk")},
 	"EYECANDY",

@@ -8,6 +8,21 @@ Contributors: Skydusk
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 
+local function drawLifeIcon(v, x, y, patch, flags, p, color, skin)
+	local skin_name = string.upper(skins[skin].name)
+	local patch_name = "STYLES_SADV1LIFE_"..skin_name
+	local patch_s_name = "STYLES_SSADV1LIFE_"..skin_name
+
+	if v.patchExists(patch_s_name) and p.powers[pw_super] then
+		v.draw(x, y, v.cachePatch(patch_s_name), flags, color)
+	elseif v.patchExists(patch_name) then
+		v.draw(x, y, v.cachePatch(patch_name), flags, color)
+	else
+		v.draw(x, y, patch, flags, color)
+	end
+end
+
+
 return {
 	score = function(v, p, t, e, font_type)
 		drawf(v, font_type,
@@ -50,16 +65,22 @@ return {
 		if p.lives == INFLIVES or p.spectator then return end
 
 		if icon_style and bot_existance and bot_existance.valid then
-			v.draw(hudinfo[HUD_LIVES].x+3, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
-			v.draw(hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), v.getColormap(TC_DEFAULT, bot_color))
-			drawf(v, font_type, (hudinfo[HUD_LIVES].x+14)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			drawLifeIcon(v, hudinfo[HUD_LIVES].x+3, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p, v.getColormap(TC_DEFAULT, p.mo.color), p.mo.skin)
+			drawLifeIcon(hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), bot_existance.player or p, v.getColormap(TC_DEFAULT, bot_color), bot_skin)
+
+			if G_GametypeUsesLives() then
+				drawf(v, font_type, (hudinfo[HUD_LIVES].x+14)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			end
 		else
 			if bot_existance and not bot_existance.valid then
 				bot_existance = nil
 			end
 
-			v.draw(hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
-			drawf(v, font_type, (hudinfo[HUD_LIVES].x+5)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			drawLifeIcon(v, hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p, v.getColormap(TC_DEFAULT, p.mo.color), p.mo.skin)
+
+			if G_GametypeUsesLives() then
+				drawf(v, font_type, (hudinfo[HUD_LIVES].x+5)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			end
 		end
 	end,
 

@@ -9,7 +9,6 @@ Contributors: Skydusk
 
 
 local finishSectors = {}
-local skiptally
 
 -- Global that should have been exposed! Bruh.
 local TMEF_SKIPTALLY = 1
@@ -42,6 +41,8 @@ addHook("PlayerSpawn", function(p)
 	end
 end)
 
+local skiptally = false
+local customexit = nil
 
 --
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
@@ -53,20 +54,47 @@ local G_SetCustomExitOriginal = G_SetCustomExitVars
 rawset(_G, "G_SetCustomExitVars", function(...)
 	local args = {...}
 
+	local skip = args[2]
+
 	-- Force skip true
-	if not end_tallyenabled then
-		if args[2] then
+	if end_tallyenabled then
+		if skip then
 			skiptally = true
 		else
 			skiptally = false
 		end
 
-		args[2] = 1
+		skip = 1
 	end
 
-	G_SetCustomExitOriginal(unpack(args))
+	customexit = args[1]
+	G_SetCustomExitOriginal(args[1], skip, args[3], args[4], args[5], args[6], args[7])
 end)
 
+local G_ExitLevelOriginal = G_ExitLevel
+
+rawset(_G, "G_ExitLevel", function(...)
+	local args = {...}
+
+	local skip = args[2]
+
+	-- Force skip true
+	if end_tallyenabled then
+		if skip then
+			skiptally = true
+		else
+			skiptally = false
+		end
+
+		skip = 1
+	end
+
+	G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
+
+	if customexit then
+		customexit = nil
+	end
+end)
 
 addHook("PlayerSpawn", function(p)
 	p.startscore = p.score
@@ -215,7 +243,7 @@ local function G_StylesTallyBackend(p)
 					else
 						p.exiting = 2*TICRATE+9
 					end
-					if p.cmd.buttons & BT_SPIN and p.tallytimer > 4*TICRATE then
+					if p.cmd.buttons & BT_SPIN and p.tallytimer > 4*TICRATE+1 then
 						p.tallytimer = 4*TICRATE
 						-- I wanted to do it but whatever, Demnyx you have this one
 						S_StopMusic(p)
@@ -270,4 +298,8 @@ addHook("KeyDown", function(key)
 		end
 		return true
 	end
+end)
+
+addHook("MapChange", function()
+	customexit = nil
 end)

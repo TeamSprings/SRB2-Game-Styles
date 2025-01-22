@@ -7,6 +7,88 @@ Contributors: Skydusk
 
 ]]
 
+local Disable_Miscs = false
+local Disable_Shields = false
+
+local function copyState(state)
+	return {
+		sprite = state.sprite,
+		frame = state.frame,
+		tics = state.tics,
+		var1 = state.var1,
+		var2 = state.var2,
+		nextstate = state.nextstate
+	}
+end
+
+local function assignState(state, new)
+	if state.sprite then
+		state.sprite = new.sprite
+	end	
+	
+	if state.frame then
+		state.frame = new.frame
+	end
+	
+	if state.tics then
+		state.tics = new.tics
+	end
+	
+	if state.var1 then
+		state.var1 = new.var1
+	end
+	
+	if state.var2 then	
+		state.var2 = new.var2
+	end
+	
+	if state.nextstate then
+		state.nextstate = new.nextstate
+	end
+end
+
+local ogS_PITY1 = copyState(states[S_PITY1])
+local ogS_MAGN1 = copyState(states[S_MAGN1])
+local ogS_MAGN13 = copyState(states[S_MAGN13])
+
+addHook("MapChange", function()
+	Disable_Miscs = false
+	if CV_FindVar("dc_miscassets").value == 0 then
+		Disable_Miscs = true
+	end
+
+	if CV_FindVar("dc_shields") == 0 then
+		Disable_Shields = true
+		assignState(states[S_PITY1], 	ogS_PITY1)
+		assignState(states[S_MAGN1], 	ogS_MAGN1)
+		assignState(states[S_MAGN13], 	ogS_MAGN13)
+	else
+		Disable_Shields = false
+		assignState(states[S_PITY1], {
+			sprite = SPR_PITY,
+			frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|B,
+			tics = 136,
+			var1 = 67,
+			var2 = 2,
+			nextstate = S_PITY1,
+		})
+		assignState(states[S_MAGN1], {
+			sprite = SPR_MAGN,
+			frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|A,
+			tics = 182,
+			var1 = 91,
+			var2 = 2,
+			nextstate = S_MAGN1,
+		})
+		assignState(states[S_MAGN13], {
+			sprite = SPR_MAGN,
+			frame = FF_TRANS20|FF_SEMIBRIGHT|92,
+			tics = 2,
+			nextstate = S_MAGN1,
+		})
+	end
+end)
+
 states[S_PITY1] = {
 	sprite = SPR_PITY,
 	frame = FF_ANIMATE|FF_ADD|FF_SEMIBRIGHT|B,
@@ -170,7 +252,7 @@ local mid_index = amount_rays + 1
 local angle_div = 360*FRACUNIT/amount_rays
 
 local function invincibilityModel(a, p)
-	if Disable_Miscs then return end
+	if Disable_Shields then return end
 	if not a.raylist and p.powers[pw_invulnerability] then
 		a.raylist = {}
 
@@ -224,12 +306,12 @@ local function invincibilityModel(a, p)
 end
 
 addHook("PlayerThink", function(p)
-	if Disable_Miscs then return end
+	if Disable_Shields then return end
 	invincibilityModel(p.mo, p)
 end)
 
 addHook("MobjThinker", function(a)
-	if Disable_Miscs then return end
+	if Disable_Shields then return end
 	local transparency = 4 << FF_TRANSSHIFT
 	if a.transparencytimer then
 		a.transparencytimer = $-1
@@ -245,6 +327,28 @@ addHook("MobjThinker", function(a)
 end, MT_EXTRAINVRAY)
 
 addHook("MobjThinker", function(a)
-	if Disable_Miscs then return end
+	if Disable_Shields then return end
 	P_RemoveMobj(a)
 end, MT_IVSP)
+
+--
+-- Power up timers
+--
+
+function A_SuperSneakers(mo, var1, var2)
+	super(mo, var1, var2)
+
+	if mo.target and mo.target.player then
+		local player = mo.target.player
+		player.powers[pw_sneakers] = $ - 6 * TICRATE - TICRATE/2 - 1
+	end
+end
+
+function A_Invincibility(mo, var1, var2)
+	super(mo, var1, var2)
+
+	if mo.target and mo.target.player then
+		local player = mo.target.player
+		player.powers[pw_invulnerability] = $ + TICRATE/2 + TICRATE/8 - 3
+	end
+end

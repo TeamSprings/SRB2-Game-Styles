@@ -14,7 +14,7 @@ freeslot("MT_BACKERADUMMY", "MT_BACKTIERADUMMY", "MT_FRONTERADUMMY", "MT_EXTRAER
 
 local Disable_Miscs = false
 
-addHook("MapLoad", function()
+addHook("MapChange", function()
 	Disable_Miscs = false
 	if CV_FindVar("dc_miscassets").value == 0 then
 		Disable_Miscs = true
@@ -424,6 +424,7 @@ addHook("MapThingSpawn", function(a, mt)
 end, MT_REDBOOSTER)
 
 local function boost_sound(mo, mop)
+	if Disable_Miscs then return end	
 	if mop.player and mop.z + mop.height > mo.z
 	and mo.z + mo.height > mop.z and not S_SoundPlaying(mop, mo.info.painsound) then
 		S_StartSound(mop, mo.info.painsound)
@@ -530,14 +531,15 @@ states[goalring_state] = {
 }
 
 addHook("MobjSpawn", function(mo)
+	if Disable_Miscs then return end
 	local gr = P_SpawnMobjFromMobj(mo, 0, 0, 0, goalring)
 	gr.scale = $+FRACUNIT/4
 	P_RemoveMobj(mo)
 end, MT_SIGN)
 
 addHook("MobjThinker", function(a)
+	if Disable_Miscs then return end
 	if not consoleplayer then return end
-
 
 	if consoleplayer.exiting and a.spritexscale then
 		a.spriteyscale = 138*a.spriteyscale/128

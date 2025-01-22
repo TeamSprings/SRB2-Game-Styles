@@ -5,6 +5,7 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
+	TODO: Think better algorithm for getting bosses (perhaps blockmap search)
 ]]
 
 local drawlib = tbslibrary 'lib_emb_tbsdrawers'
@@ -72,6 +73,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 
 	if hud.skiptallysa then
 		S_FadeOutStopMusic(MUSICRATE, p)
+		S_StopSoundByID(nil, sfx_advtal)
 	end
 
 	-- rank sound
@@ -279,7 +281,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 	-- Actual Title Card Drawer
 	if t < et then
 
-		if leveltime <= et and displayplayer == p then
+		if not mapheaderinfo[gamemap].styles_titlecard_nofade and leveltime <= et and displayplayer == p then
 			v.fadeScreen(0xFF00|V_PERPLAYER, 31-(easegoout*31/93))
 		end
 
@@ -288,8 +290,10 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 		if mapheaderinfo[gamemap].styles_titlecard_color then
 			local ttcl = tostring(mapheaderinfo[gamemap].styles_titlecard_color)
 
-			if _G[ttcl] and skincolors[ttcl] then
+			if _G[ttcl] and skincolors[_G[ttcl]] then
 				color = _G[ttcl]
+			else
+				print("Warning: Wrong color index in Lua.styles_titlecard_color")
 			end
 		end
 

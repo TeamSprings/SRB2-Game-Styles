@@ -130,8 +130,11 @@ local function P_MonitorThinker(a)
 				else
 					a.frame = monitor_style
 				end
+
+				local flip = (P_MobjFlip(a) < 0) or false
+
 				-- Static Behavior
-				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * 14)*a.item.spriteyscale)
+				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * (14 + (flip and -16 or 0)))*a.item.spriteyscale)
 				slope_handler.slopeRotation(a)
 				a.item.rollangle = a.rollangle
 
@@ -257,11 +260,10 @@ local function P_MonitorDeath(a, d, s)
 		P_RemoveMobj(a.item)
 	end
 
-	local itemrespawnvalue = CV_FindVar("respawndelay").value
+	local itemrespawnvalue = CV_FindVar("respawnitemtime").value
 
 	if (itemrespawnvalue and G_GametypeHasSpectators()) then
 		a.fuse = itemrespawnvalue*TICRATE + 2
-		a.item.fuse = itemrespawnvalue*TICRATE + 2
 	end
 
 	a.once_already = true

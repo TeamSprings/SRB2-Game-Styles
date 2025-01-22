@@ -20,8 +20,8 @@ local spindash_cv = CV_RegisterVar{
 	PossibleValue = {genesis=0, soniccd=1}
 }
 
-local springtwirk_cv = CV_RegisterVar{
-	name = "classic_springtwirk",
+local springtwirl_cv = CV_RegisterVar{
+	name = "classic_springtwirl",
 	defaultvalue = "disabled",
 	flags = 0,
 	PossibleValue = {disabled=0, soniccd=1}
@@ -89,17 +89,17 @@ addHook("PlayerThink", function(p)
 
 	if p.mo.style_spring_type == nil then return end
 
-	if springtwirk_cv.value and p.mo.style_spring_type == 2
-	and (p.mo.state == S_PLAY_SPRING or p.cd_springtwirk) and not p.style_springroll then
+	if springtwirl_cv.value and p.mo.style_spring_type == 2
+	and (p.mo.state == S_PLAY_SPRING or p.cd_springtwirl) and not p.style_springroll then
 		p.drawangle = leveltime*ANG1*16
-		p.cd_springtwirk = true
-	elseif p.mo.state ~= S_PLAY_SPRING and p.cd_springtwirk then
+		p.cd_springtwirl = true
+	elseif p.mo.state ~= S_PLAY_SPRING and p.cd_springtwirl then
 		p.drawangle = p.mo.angle
-		p.cd_springtwirk = nil
+		p.cd_springtwirl = nil
 	end
 
 	if ((springtroll_cv.value == 2 or (springtroll_cv.value == 1 and p.mo.style_spring_type == 1))
-	and not p.cd_springtwirk and p.mo.state == S_PLAY_SPRING
+	and not p.cd_springtwirl and p.mo.state == S_PLAY_SPRING
 	or (p.style_springroll and not P_IsObjectOnGround(p.mo))) then
 
 		if p.mo.state ~= S_PLAY_WALK then
@@ -121,7 +121,7 @@ addHook("PlayerThink", function(p)
 				p.mo.rollangle = 0
 				p.style_springroll = false
 			end
-			p.cd_springtwirk = false
+			p.cd_springtwirl = false
 			p.style_falling = true
 
 			if p.mo.state ~= S_PLAY_WALK then

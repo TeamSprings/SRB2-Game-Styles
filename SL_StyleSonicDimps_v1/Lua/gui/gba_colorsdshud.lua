@@ -14,11 +14,21 @@ local life_xyz = {{2,0},{0,2},{-2,0},{0,-2},{1,-2},{-1,2},{1,0},{0,1},{-1,0},{0,
 local function draw_lifeicon(v, x, y, patch, flags, colormap, p)
 	if not (colormap and colormap[1] and colormap[2]) then return end
 
-	for i = 1,10 do
-		v.draw(x+life_xyz[i][1], y+life_xyz[i][2], patch, flags, i < 7 and v.getColormap(TC_ALLWHITE, SKINCOLOR_WHITE) or v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
-	end
+	local skin_name = string.upper(skins[p.mo and p.mo.skin or p.skin].name)
+	local patch_name = "STYLES_COLORDSLIFE_"..skin_name
+	local patch_s_name = "STYLES_SCOLORDSLIFE_"..skin_name
 
-	v.draw(x, y, patch, flags, v.getColormap(TC_DEFAULT, colorcmp.advance2(colormap[1], colormap[2], p), "Advance2ColorCompress"))
+	if v.patchExists(patch_s_name) and p.powers[pw_super] then
+		v.draw(x, y, v.cachePatch(patch_s_name), flags, colormap)
+	elseif v.patchExists(patch_name) then
+		v.draw(x, y, v.cachePatch(patch_name), flags, colormap)
+	else
+		for i = 1,10 do
+			v.draw(x+life_xyz[i][1], y+life_xyz[i][2], patch, flags, i < 7 and v.getColormap(TC_ALLWHITE, SKINCOLOR_WHITE) or v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
+		end
+
+		v.draw(x, y, patch, flags, v.getColormap(TC_DEFAULT, colorcmp.advance2(colormap[1], colormap[2], p), "Advance2ColorCompress"))
+	end
 end
 
 return {
@@ -53,15 +63,25 @@ return {
 			if bot_existance.valid then
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x+11, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and 0 or V_FLIP), {2, bot_color}, p)
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x-4, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style == nil and 0 or V_FLIP), {1, p.mo.color}, p)
-				drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+7)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+
+				if G_GametypeUsesLives() then
+					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+7)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+				end
 			else
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x-2, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style == nil and 0 or V_FLIP), {1, p.mo.color}, p)
-				drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+
 				bot_existance = nil
+
+				if G_GametypeUsesLives() then
+					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+				end
 			end
 		else
 			draw_lifeicon(v, hudinfo[HUD_LIVES].x-2, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style == nil and 0 or V_FLIP), {1, p.mo.color}, p)
-			drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+
+			if G_GametypeUsesLives() then
+				drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+			end
 		end
 	end,
 

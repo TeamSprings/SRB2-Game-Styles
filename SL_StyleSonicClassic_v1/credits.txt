@@ -1,0 +1,21 @@
+Contributors:
+
+    "Skydusk",
+    "Clone Fighter",
+
+Libraries:
+
+    "TehRealSal",
+
+Audio Sources:
+
++ https://sonicfangameshq.com/forums/showcase/sonic-advance-2-sound-effects.450/
++ https://soahcity.com/sonic-music/sonic-advance-2001-music/
++ Internet Archive
++ Cutting Room Floor
+
+Special Thanks:
+
+    "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
+    "Team Blue Spring"
+    "STJR"

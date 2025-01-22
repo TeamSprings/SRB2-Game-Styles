@@ -10,9 +10,6 @@ local drawf = drawlib.draw
 local fontlen = drawlib.lenght
 
 rawset(_G, "S3K_graphic_lvl_icon", {
-	assign = function(self, zone_name, gfx)
-		self[zone_name] = gfx
-	end,
 	["GREENFLOWER"] = 	"S3KBGGFZ";
 	["TECHNO HILL"] = 	"S3KBGTHZ";
 	["DEEP SEA"] = 		"S3KBGDSZ";
@@ -22,6 +19,15 @@ rawset(_G, "S3K_graphic_lvl_icon", {
 	["EGG ROCK"] 	= 	"S3KBGEGZ";
 	["BLACK CORE"] 	= 	"S3KBGEGZ";
 })
+
+local function drawS3KTXT(v, x, y, scale, value, flags, color1, color2, alligment, padding, leftadd, symbol)
+	drawf(v, "S3KIL1FNT", x, y, scale, value, flags, color1, alligment, padding, leftadd, symbol)
+	drawf(v, "S3KIL2FNT", x, y, scale, value, flags, color2, alligment, padding, leftadd, symbol)
+end
+
+function S3K_graphic_lvl_icon:assign(name, gfx)
+	self[name] = gfx
+end
 
 if S3K_graphic_lvl_icon then
 	S3K_graphic_lvl_icon:assign("ANGEL ISLAND", "S3KBGAIZ")
@@ -94,13 +100,26 @@ return{
 
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
 
-			v.draw(lives_x, hudinfo[HUD_LIVES].y, v.cachePatch('S3LIVBLANK1'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
-			v.draw(lives_x+22, hudinfo[HUD_LIVES].y+10, v.cachePatch('S3CROSS'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
-			v.draw(lives_x+8, hudinfo[HUD_LIVES].y+12, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_FLIP|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
-			v.draw(lives_x, hudinfo[HUD_LIVES].y, v.cachePatch('S3LIVBLANK2'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+			local skin_name = string.upper(skins[p.mo.skin].name)
+			local patch_name = "STYLES_S3LIFE_"..skin_name
+			local patch_s_name = "STYLES_SS3LIFE_"..skin_name
+
+			if v.patchExists(patch_s_name) and p.powers[pw_super] then
+				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+12, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			elseif v.patchExists(patch_name) then
+				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+12, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			else
+				v.draw(lives_x, hudinfo[HUD_LIVES].y, v.cachePatch('S3LIVBLANK1'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+12, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_FLIP|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x, hudinfo[HUD_LIVES].y, v.cachePatch('S3LIVBLANK2'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+			end
 
 			drawf(v, 'HUS3NAM', (lives_x+17)*FRACUNIT, (hudinfo[HUD_LIVES].y+1)*FRACUNIT, FRACUNIT, string.upper(''..skins[p.mo.skin].hudname), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), 0, 1)
-			drawf(v, 'LIF3NUM', (lives_x+17+lifenamelenght)*FRACUNIT, (hudinfo[HUD_LIVES].y+9)*FRACUNIT, FRACUNIT, (p.lives == 127 and string.char(30) or p.lives), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", 1)
+
+			if G_GametypeUsesLives() then
+				v.draw(lives_x+22, hudinfo[HUD_LIVES].y+10, v.cachePatch('S3CROSS'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				drawf(v, 'LIF3NUM', (lives_x+17+lifenamelenght)*FRACUNIT, (hudinfo[HUD_LIVES].y+9)*FRACUNIT, FRACUNIT, (p.lives == 127 and string.char(30) or p.lives), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", 1)
+			end
 		end
 	end,
 
@@ -111,6 +130,22 @@ return{
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
+
+		if mo and mo.valid then
+			local skin = skins[p.mo.skin or p.skin]
+
+			local skin_name = string.gsub(string.upper(skin.realname), "%d", "")
+			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
+			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
+
+			drawS3KTXT(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+		else
+			local skin_name = "YOU"
+			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
+			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
+
+			drawS3KTXT(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+		end
 
 		if act ~= "0" then
 			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)

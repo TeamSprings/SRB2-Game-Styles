@@ -26,7 +26,7 @@ addHook("GameQuit", function(quit)
 		-- Player
 		"classic_thok",
 		"classic_spindash",
-		"classic_springtwirk",
+		"classic_springtwirl",
 		"classic_springroll",
 		"classic_springairwalk",
 		-- Assets

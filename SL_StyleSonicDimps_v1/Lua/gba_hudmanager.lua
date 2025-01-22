@@ -435,6 +435,7 @@ end, "game")
 
 HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 	if not itemdisplay_cv.value then return end
+	if G_RingSlingerGametype() then return end
 
 	if p.boxdisplay and p.boxdisplay.timer and p.boxdisplay.item then
 		local lenght = p.boxdisplay.item

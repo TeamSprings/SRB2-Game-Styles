@@ -1,0 +1,21 @@
+Contributors:
+
+    "Skydusk",
+    "Demnyx",
+
+Libraries:
+
+    "TehRealSal",
+    "Sprkizard"
+
+Audio Sources:
+
++ https://archive.org/details/sonic-adventure-2-utimate-soundtrack
++ https://sonicfangameshq.com/forums/showcase/sonic-adventure-2-dc-multiconsole-sound-effects-and-jp-vocals.447/
++ https://sonicfangameshq.com/forums/showcase/sonic-adventure-1-dreamcast-gcn-pc-sound-effects.445/
+
+Special Thanks:
+
+    "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
+    "Team Blue Spring"
+    "STJR"

@@ -15,7 +15,7 @@ local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 local Disable_ItemBox = false
 --local ItemBox_Type = CV_FindVar("dc_itemboxstyle")
 
-addHook("MapLoad", function()
+addHook("MapChange", function()
 	Disable_ItemBox = false
 	if CV_FindVar("dc_itembox").value == 0 then
 		Disable_ItemBox = true
@@ -23,6 +23,8 @@ addHook("MapLoad", function()
 end)
 
 local function P_SpawnItemBox(a)
+		if Disable_ItemBox then return end
+
 		local icon = mobjinfo[a.type].damage
 		local icstate = mobjinfo[icon].spawnstate
 		local icsprite = states[icstate].sprite
@@ -218,6 +220,8 @@ local ringboxrandomizer = {
 }
 
 local function P_MonitorThinker(a)
+	if Disable_ItemBox then return end
+
 	if (a and a.valid and a.info.flags & MF_MONITOR) then
 		if not a.originscale then
 			a.originscale = (a.spawnpoint and a.spawnpoint.scale or a.scale)
@@ -447,11 +451,10 @@ local function P_MonitorDeath(a, d, s)
 			P_RemoveMobj(a.caps)
 		end
 
-		local itemrespawnvalue = CV_FindVar("respawndelay").value
+		local itemrespawnvalue = CV_FindVar("respawnitemtime").value
 
 		if (itemrespawnvalue and G_GametypeHasSpectators()) then
 			a.fuse = itemrespawnvalue*TICRATE + 2
-			a.item.fuse = itemrespawnvalue*TICRATE + 2
 		end
 
 		a.once_already = true
@@ -461,6 +464,7 @@ local function P_MonitorDeath(a, d, s)
 end
 
 local function P_MonitorRemoval(a, d)
+	if Disable_ItemBox then return end
 	if not (gamestate & GS_LEVEL) then return end
 	if not (a and a.valid) then return end
 	if not (a.info.flags & MF_MONITOR) then return end
@@ -475,6 +479,7 @@ local function P_MonitorRemoval(a, d)
 end
 
 addHook("MobjMoveCollide", function(a, mt)
+	if Disable_ItemBox then return end
 	if not (mt and mt.valid) then return end
 	if not (mt.flags & MF_MONITOR) then return end
 
@@ -494,6 +499,8 @@ end, MT_PLAYER)
 
 addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
 addHook("MobjThinker", function(a)
+	if Disable_ItemBox then return end
+
 	P_MonitorThinker(a)
 	if a.health > 0 and a.item then
 		life_up_thinker(a.item)

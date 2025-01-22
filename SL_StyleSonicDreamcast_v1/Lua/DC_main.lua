@@ -52,11 +52,10 @@ CV_RegisterVar({
 CV_RegisterVar({
 	name = "dc_itembox",
 	defaultvalue = "On",
-	flags = CV_NETVAR|CV_NOINIT|CV_CALL,
+	flags = CV_NETVAR,
 	PossibleValue = CV_OnOff,
 	category = "Adventure Style - Eyecandy",
 	displayname = "Item Boxes",
-	func = disable_assets_as_well_cvar,
 })
 
 --CV_RegisterVar({
@@ -70,31 +69,30 @@ CV_RegisterVar({
 CV_RegisterVar({
 	name = "dc_checkpoints",
 	defaultvalue = "On",
-	flags = CV_NETVAR|CV_NOINIT|CV_CALL,
+	flags = CV_NETVAR,
 	PossibleValue = CV_OnOff,
 	category = "Adventure Style - Eyecandy",
 	displayname = "Checkpoints",
-	func = disable_assets_as_well_cvar,
+	--func = disable_assets_as_well_cvar,
 })
 
 CV_RegisterVar({
-	name = "dc_capsule",
+	name = "dc_shields",
 	defaultvalue = "On",
-	flags = CV_NETVAR|CV_NOINIT|CV_CALL,
+	flags = CV_NETVAR,
 	PossibleValue = CV_OnOff,
-	category = "Adventure Style - Eyecandy",
-	displayname = "Item Capsule",
-	func = disable_assets,
+	category = "Adventure Style - Gameplay",
+	displayname = "Adventure Shields"
 })
 
 CV_RegisterVar({
 	name = "dc_miscassets",
 	defaultvalue = "On",
-	flags = CV_NETVAR|CV_NOINIT|CV_CALL,
+	flags = CV_NETVAR,
 	PossibleValue = CV_OnOff,
 	category = "Adventure Style - Eyecandy",
 	displayname = "Misc Assets",
-	func = disable_assets,
+	--func = disable_assets,
 })
 
 CV_RegisterVar({

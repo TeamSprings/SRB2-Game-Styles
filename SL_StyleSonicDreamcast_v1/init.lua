@@ -1,7 +1,7 @@
 local gameString = "DC"
 
-local packVersion = '3.002'
-rawset(_G, "Style_AdventureVersion", 3002)
+local packVersion = '3.010'
+rawset(_G, "Style_AdventureVersion", 3010)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Adventure Style '..packVersion..'] '
@@ -72,6 +72,8 @@ if VERSION == 202 and SUBVERSION > 13 and not Style_DimpsVersion and not Style_C
 		"user_game.lua",
 		"user_inter.lua",
 		"user_mics.lua")
+
+	macro_dofile(gameString, "save.lua")
 
 	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
 elseif Style_DimpsVersion or Style_ClassicVersion then

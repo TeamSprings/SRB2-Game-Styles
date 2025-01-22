@@ -31,15 +31,18 @@ end
 -- BOSS DISPLAY
 --
 
+local Boss_found = false
 local Bosses = {}
 
 addHook("MapChange", function()
+	Boss_found = false
 	Bosses = {}
 end)
 
 addHook("MapThingSpawn", function(a, mt)
 	if a.info.flags & MF_BOSS then
 		table.insert(Bosses, a)
+		Boss_found = true
 	end
 end)
 
@@ -48,28 +51,37 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 		return
 	end
 
-
-	if Bosses and Bosses[1] and P_CheckSight(Bosses[1], p.mo) then
+	if Bosses and Bosses[1] and Bosses[1].valid then
 		local boss = Bosses[1]
 
-		local curhealth = (boss.health and boss.health or 0)
+		local curhealth = boss and (boss.health and boss.health or 0) or 0
 		local maxhealth = boss.info.spawnhealth or 1
 		local onehealth = FixedDiv(67*FRACUNIT, maxhealth*FRACUNIT)
 		local prchealth = (curhealth == 0 and 0 or (FixedMul(FixedDiv(curhealth*FRACUNIT, maxhealth*FRACUNIT), 67*FRACUNIT)))
-		if hud.bossbardecrease == nil then
-			hud.bossbardecrease = 0
+
+		if (not boss.valid or curhealth < 1) and Bosses[2] then
+			hud.bosshealthcountersmooth = 0
+
+			table.remove(Bosses, 1)
+		else
+			if hud.bossbardecrease == nil then
+				hud.bossbardecrease = 0
+			end
+
+			if not hud.bosshealthcountersmooth and (hud.bosshealth == nil or hud.bosshealth > curhealth) and hud.bossbardecrease == 0 then
+				hud.bosshealthcountersmooth = hud.bosshealthcountersmooth and $+35 or 35
+				hud.bosshealth = curhealth
+			elseif hud.bosshealthcountersmooth ~= nil and hud.bosshealthcountersmooth > 0 then
+				hud.bosshealthcountersmooth = $-1
+			end
+
+			if hud.bosshealthcountersmooth < 2 and curhealth == 0 and hud.bossbardecrease < 67*FRACUNIT then
+				hud.bossbardecrease = $+3*FRACUNIT
+			end
 		end
 
-		if not hud.bosshealthcountersmooth and (hud.bosshealth == nil or hud.bosshealth > curhealth) and hud.bossbardecrease == 0 then
-			hud.bosshealthcountersmooth = hud.bosshealthcountersmooth and $+35 or 35
-			hud.bosshealth = curhealth
-		elseif hud.bosshealthcountersmooth ~= nil and hud.bosshealthcountersmooth > 0 then
-			hud.bosshealthcountersmooth = $-1
-		end
+		if not Bosses[1].target then return end
 
-		if hud.bosshealthcountersmooth < 2 and curhealth == 0 and hud.bossbardecrease < 67*FRACUNIT then
-			hud.bossbardecrease = $+3*FRACUNIT
-		end
 
 		if hud.bossbardecrease < 67*FRACUNIT then
 
@@ -83,6 +95,11 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 			v.cachePatch((curhealth > maxhealth/5 and "SA2BOBAR2" or "SA2BOBAR1" )), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
 
 		end
+	elseif Boss_found and #Bosses then
+		table.sort(Bosses)
+		table.remove(Bosses, 1)
+
+		hud.bosshealthcountersmooth = 0
 	end
 end, "game")
 
@@ -92,6 +109,8 @@ end, "game")
 --
 
 HOOK("monitordisplay", "dchud", function(v, p, t, e)
+	if G_RingSlingerGametype() then return end
+
 	if p.boxdisplay and p.boxdisplay.timer and p.boxdisplay.item then
 		local lenght = p.boxdisplay.item
 		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FRACUNIT/(TICRATE/5)
@@ -276,7 +295,7 @@ HOOK("flickies", "dchud", function(v, p, t, e)
 
 			v.drawScaled((x + sprite.width/3) * FRACUNIT - movscale,
 			(flickies_y + sprite.height/3 + sprite.height/4) * FRACUNIT - movscale,
-			flicky_scale+movscale,
+			flicky_scale + movscale / sprite.height,
 			sprite,
 			flicky_flags)
 

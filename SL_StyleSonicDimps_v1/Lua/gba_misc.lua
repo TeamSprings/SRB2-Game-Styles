@@ -294,7 +294,9 @@ addHook("PlayerThink", function(p)
 		end
 	else
 		if p.advance_shine_fol then
-			P_RemoveMobj(p.advance_shine_fol)
+			if p.advance_shine_fol.valid then
+				P_RemoveMobj(p.advance_shine_fol)
+			end
 			p.advance_shine_fol = nil
 		end
 	end

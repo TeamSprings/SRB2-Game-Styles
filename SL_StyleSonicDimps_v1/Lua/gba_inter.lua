@@ -47,6 +47,7 @@ end)
 --
 
 local skiptally = false
+local customexit = nil
 
 --
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
@@ -58,18 +59,46 @@ local G_SetCustomExitOriginal = G_SetCustomExitVars
 rawset(_G, "G_SetCustomExitVars", function(...)
 	local args = {...}
 
+	local skip = args[2]
+
 	-- Force skip true
-	if not end_tallyenabled then
-		if args[2] then
+	if end_tallyenabled then
+		if skip then
 			skiptally = true
 		else
 			skiptally = false
 		end
 
-		args[2] = 1
+		skip = 1
 	end
 
-	G_SetCustomExitOriginal(unpack(args))
+	customexit = args[1]
+	G_SetCustomExitOriginal(args[1], skip, args[3], args[4], args[5], args[6], args[7])
+end)
+
+local G_ExitLevelOriginal = G_ExitLevel
+
+rawset(_G, "G_ExitLevel", function(...)
+	local args = {...}
+
+	local skip = args[2]
+
+	-- Force skip true
+	if end_tallyenabled then
+		if skip then
+			skiptally = true
+		else
+			skiptally = false
+		end
+
+		skip = 1
+	end
+
+	G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
+
+	if customexit then
+		customexit = nil
+	end
 end)
 
 --
@@ -232,6 +261,8 @@ addHook("MapChange", function()
 	for p in players.iterate do
 		p.styles_tallytimer = nil
 	end
+
+	customexit = nil
 end)
 
 addHook("PlayerThink", G_StylesTallyBackend)

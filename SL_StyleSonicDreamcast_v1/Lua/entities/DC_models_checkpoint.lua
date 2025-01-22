@@ -11,14 +11,12 @@ local MapthingCheckpoints = {thg = {}; dis = {};}
 
 local Disable_Checkpoints = false
 
-addHook("MapLoad", function()
+addHook("MapChange", function()
 	Disable_Checkpoints = false
 	if CV_FindVar("dc_checkpoints").value == 0 then
 		Disable_Checkpoints = true
 	end
-end)
 
-addHook("MapChange", function()
 	MapthingCheckpoints.thg = {}
 	MapthingCheckpoints.dis = {}
 end)
@@ -130,6 +128,8 @@ sfxinfo[freeslot("sfx_advche")].caption = "Checkpoint"
 mobjinfo[MT_STARPOST].painsound = sfx_advche
 
 addHook("MobjThinker", function(a)
+	if Disable_Checkpoints then return end
+
 	if not (a.base and a.base[1]) then
 		P_SpawnCheckPoint(a)
 		a.ohnomorecheckpoints = nil
@@ -313,7 +313,16 @@ local rewards = {
 		insertPlayerItemToHud(p, SPR_TVER, A)
 	end;
 	[4] = function(p)
-		p.powers[pw_sneakers] = 20*TICRATE
+		p.powers[pw_sneakers] = sneakertics + 6 * TICRATE - TICRATE/2 - 1
+
+		if consoleplayer == p and not p.powers[pw_super] then
+			if S_SpeedMusic(0) and mapheaderinfo[gamemap].levelflags & LF_SPEEDMUSIC then
+				S_SpeedMusic(FRACUNIT + 4*FRACUNIT/10)
+			else
+				P_PlayJingle(p, JT_SHOES)
+			end
+		end
+
 		insertPlayerItemToHud(p, SPR_TVSS, C)
 	end;
 	[5] = function(p)
@@ -334,13 +343,11 @@ local rewards = {
 }
 
 addHook("TouchSpecial", function(a,t)
-	if Disable_Checkpoints then return end
-
 	if t.player and t.player.starposttime < leveltime then
 
 		t.player.checkpointtime = TICRATE*3
 
-		if not a.giveaway then
+		if not (Disable_Checkpoints or a.giveaway) then
 			if t.player.rings > 19 then
 				local rewardsplit = t.player.rings/20
 				if rewardsplit < 5 then
@@ -352,11 +359,9 @@ addHook("TouchSpecial", function(a,t)
 			a.giveaway = 1
 		end
 	end
-end,  MT_STARPOST)
+end, MT_STARPOST)
 
 addHook("PlayerThink", function(p)
-	if Disable_Checkpoints then return end
-
 	if not p.boxdisplay or not p.boxdisplay.timer then
 		p.boxdisplay = {}
 	end

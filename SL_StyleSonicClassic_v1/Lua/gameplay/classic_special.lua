@@ -100,12 +100,12 @@ local function P_GiantRingCheck(a)
 	if not special_entrance then return end
 
 	if a.type == MT_TOKEN or a.type == MT_GFZFLOWER2 then
+		local height = a.height * P_MobjFlip(a)
 
 		-- Mappers can disable it's size changes
 		if not (a.spawnpoint and a.spawnpoint.args[3]) then
-			if (a.ceilingz-a.z) > a.height
-			and ((abs(a.z-a.floorz) < 128*FRACUNIT)
-			or (abs(a.ceilingz-a.z-a.height) < 128*FRACUNIT)) then
+			if (a.ceilingz - a.z) >= height
+			and (a.z - a.floorz) < height then
 				return
 			else
 				if a.state ~= giantring_endstage then
@@ -247,7 +247,7 @@ end
 addHook("MapLoad", function()
 	if last_map then
 		G_SetCustomExitVars(last_map, 0)
-		last_map = 0
+		last_map = nil
 	end
 
 	if maps_data[gamemap] then
@@ -387,7 +387,7 @@ addHook("MobjThinker", function(a)
 	if a.levelcountdown then
 		a.levelcountdown = $-1
 
-		if not a.levelcountdown then
+		if a.levelcountdown == 1 then
 			if special_entrance == 3 then
 				SP_SaveState(a, a.playertoucher)
 				return true

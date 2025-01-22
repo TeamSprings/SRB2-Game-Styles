@@ -235,8 +235,10 @@ local function P_MonitorThinker(a)
 			if a.item and a.item.valid then
 				a.flags = $|MF_SOLID
 
+				local flip = (P_MobjFlip(a) < 0) or false
+
 				-- Static Behavior
-				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * icon_height)*a.item.spriteyscale)
+				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * (icon_height + (flip and -16 or 0)))*a.item.spriteyscale)
 				a.item.rollangle = a.rollangle
 
 				-- Static Animation
@@ -262,7 +264,7 @@ local function P_MonitorThinker(a)
 
 				-- Squash in tiny spaces
 				local height = 64*a.scale
-				local funny =  P_MobjFlip(a) < 0 and FixedDiv(a.ceilingz - a.floorz, height) or FixedDiv(a.ceilingz - a.z, height)
+				local funny = flip and FixedDiv(a.ceilingz - a.floorz, height) or FixedDiv(a.ceilingz - a.z, height)
 
 				if funny < FRACUNIT then
 					a.spriteyscale = funny
@@ -354,7 +356,7 @@ local function P_MonitorDeath(a, d, s)
 		P_RemoveMobj(a.item)
 	end
 
-	local itemrespawnvalue = CV_FindVar("respawndelay").value
+	local itemrespawnvalue = CV_FindVar("respawnitemtime").value
 
 	if (itemrespawnvalue and G_GametypeHasSpectators()) then
 		a.fuse = itemrespawnvalue*TICRATE + 2
