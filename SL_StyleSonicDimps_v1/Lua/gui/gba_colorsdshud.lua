@@ -52,7 +52,7 @@ return {
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 		if p.lives == INFLIVES or p.spectator then return end
-		if not (p.mo or p.mo.valid) then return end
+		if not (p.mo and p.mo.valid) then return end
 
 		local lives = p.lives > 9 and p.lives or "0"..p.lives
 

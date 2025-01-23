@@ -67,7 +67,7 @@ return {
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 		if p.lives == INFLIVES or p.spectator then return end
-		if not (p.mo or p.mo.valid) then return end
+		if not (p.mo and p.mo.valid) then return end
 
 		if icon_style and bot_existance and bot_existance.valid then
 			draw_lifeicon(v, hudinfo[HUD_LIVES].x+9, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), {1, p.mo.color}, p)

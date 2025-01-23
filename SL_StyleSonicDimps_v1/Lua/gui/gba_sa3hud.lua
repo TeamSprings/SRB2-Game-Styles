@@ -64,7 +64,7 @@ return {
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 		if p.lives == INFLIVES or p.spectator then return end
-		if not (p.mo or p.mo.valid) then return end
+		if not (p.mo and p.mo.valid) then return end
 
 		if icon_style and bot_existance then
 			if bot_existance.valid then
