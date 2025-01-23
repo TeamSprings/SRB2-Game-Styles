@@ -74,17 +74,39 @@ local original_height = mobjinfo[MT_TOKEN].height
 
 local special_entrance = 1
 local change_var = -1
+local init = true
+local anotherlvl = nil
 
 local entrance_cv = CV_RegisterVar{
 	name = "classic_specialentrance",
 	defaultvalue = "sonic1",
 	flags = CV_CALL|CV_NETVAR,
 	func = function(var)
-		if multiplayer then
-			CONS_Printf(consoleplayer, "[Classic Styles] This console variable has no use in multiplayer.")
-		end
+		if init then
+			special_entrance = var.value
 
-		change_var = var.value
+			if special_entrance then
+				mobjinfo[MT_TOKEN].radius = 89*FRACUNIT
+				mobjinfo[MT_TOKEN].height = 128*FRACUNIT
+			else
+				mobjinfo[MT_TOKEN].radius = original_radius
+				mobjinfo[MT_TOKEN].height = original_height
+			end
+
+			init = nil
+		else
+			if multiplayer then
+				CONS_Printf(consoleplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
+			else
+				-- first of many cheating measures
+				if change_var == -1 or anotherlvl then
+					print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
+					anotherlvl = nil
+				end
+			end
+
+			change_var = var.value
+		end
 	end,
 	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, sonic3=3}
 }
@@ -253,9 +275,14 @@ addHook("MapLoad", function()
 	if maps_data[gamemap] then
 		SP_LoadState(gamemap)
 	end
+
+	anotherlvl = true
 end)
 
-addHook("MapChange", function()
+addHook("GameQuit", function()
+	maps_data = {}
+	last_map = 0
+
 	if change_var > -1 then
 		special_entrance = change_var
 
@@ -269,11 +296,6 @@ addHook("MapChange", function()
 
 		change_var = -1
 	end
-end)
-
-addHook("GameQuit", function()
-	maps_data = {}
-	last_map = 0
 end)
 
 --

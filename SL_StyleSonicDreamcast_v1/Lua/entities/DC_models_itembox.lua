@@ -23,59 +23,65 @@ addHook("MapChange", function()
 end)
 
 local function P_SpawnItemBox(a)
-		if Disable_ItemBox then return end
+	if Disable_ItemBox then return end
 
-		local icon = mobjinfo[a.type].damage
-		local icstate = mobjinfo[icon].spawnstate
-		local icsprite = states[icstate].sprite
-		local icframe = states[icstate].frame
+	local icon = mobjinfo[a.type].damage
+	local icstate = mobjinfo[icon].spawnstate
+	local icsprite = states[icstate].sprite
+	local icframe = states[icstate].frame
 
-		if a.health > 0 then
-			if not a.item then
-				a.item = P_SpawnMobjFromMobj(a, 0,0,25*FRACUNIT, MT_BACKTIERADUMMY)
-				a.item.state = S_INVISIBLE
-				a.item.target = a
-				a.item.icsprite = icsprite
-				a.item.icframe = icframe
-				a.item.sprite = icsprite
-				a.item.frame = icframe|FF_PAPERSPRITE
-				a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-				a.item.flags2 = $|MF2_LINKDRAW &~ MF2_OBJECTFLIP
-				a.item.tfl = 1
-			end
-
-			if not a.caps then
-				a.caps = P_SpawnMobjFromMobj(a, 0,0,0, MT_OVERLAY)
-				a.caps.state = S_INVISIBLE
-				a.caps.target = a
-				a.caps.sprite = SPR_DC_MONITOR
-				a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
-				a.caps.flags2 = $|MF2_LINKDRAW
-			end
+	if a.health > 0 then
+		if not a.item then
+			a.item = P_SpawnMobjFromMobj(a, 0,0,25*FRACUNIT, MT_BACKTIERADUMMY)
+			a.item.state = S_INVISIBLE
+			a.item.target = a
+			a.item.icsprite = icsprite
+			a.item.icframe = icframe
+			a.item.sprite = icsprite
+			a.item.frame = icframe|FF_PAPERSPRITE
+			a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+			a.item.flags2 = $|MF2_LINKDRAW &~ MF2_OBJECTFLIP
+			a.item.tfl = 1
 		end
 
-		a.state = S_INVISIBLE
-		a.sprite = SPR_DC_MONITOR
+		if not a.caps then
+			a.caps = P_SpawnMobjFromMobj(a, 0,0,0, MT_OVERLAY)
+			a.caps.state = S_INVISIBLE
+			a.caps.target = a
+			a.caps.sprite = SPR_DC_MONITOR
+			a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+			a.caps.flags2 = $|MF2_LINKDRAW
+		end
+	end
 
-		--a.item.dispoffset = -32*FRACUNIT
+	a.state = S_INVISIBLE
+	a.sprite = SPR_DC_MONITOR
 
-		if a.info.flags & MF_GRENADEBOUNCE then
-			a.color = SKINCOLOR_GOLD
-			a.goldenmonitor = true
+	--a.item.dispoffset = -32*FRACUNIT
+
+	if a.info.flags & MF_GRENADEBOUNCE then
+		a.color = SKINCOLOR_GOLD
+		a.goldenmonitor = true
+	else
+		if a.info.spawnstate == S_RING_BLUEBOX1 then
+			a.color = SKINCOLOR_SAPPHIRE
+		elseif a.info.spawnstate == S_RING_REDBOX1 then
+			a.color = SKINCOLOR_RUBY
 		else
-			if a.info.spawnstate == S_RING_BLUEBOX1 then
-				a.color = SKINCOLOR_SAPPHIRE
-			elseif a.info.spawnstate == S_RING_REDBOX1 then
-				a.color = SKINCOLOR_RUBY
-			else
-				a.color = SKINCOLOR_RED
-				if not (a.type == MT_RING_BOX and a.randomring) then
-					a.randomring = P_RandomKey(16)
-				end
+			a.color = SKINCOLOR_RED
+
+			if not (a.type == MT_RING_BOX and a.randomring) then
+				a.randomring = P_RandomKey(16)
 			end
 		end
+	end
 
-		mobjinfo[a.type].deathsound = sfx_advite
+	mobjinfo[a.type].deathsound = sfx_advite
+end
+
+local function P_InitItemBox(a)
+	P_SpawnItemBox(a)
+	a.settedup = nil
 end
 
 --	Item Box Switcher is a function switcing between "float" type or "ground" type capsule
@@ -85,6 +91,7 @@ local function itemBoxSwitching(a, typem)
 	if typem == 1 then
 		a.flags = $ &~ (MF_SOLID|MF_NOGRAVITY)
 		a.caps.frame = C|FF_TRANS50
+
 		if a.info.flags & MF_GRENADEBOUNCE then
 			a.frame = H
 		else
@@ -99,7 +106,6 @@ local function itemBoxSwitching(a, typem)
 		a.frame = D
 		a.caps.frame = E|FF_TRANS50
 	end
-	a.settedup = true
 end
 
 local function angleway(angle)
@@ -231,10 +237,13 @@ local function P_MonitorThinker(a)
 			-- Alive state
 
 			--	Segment for calling Item Box switch.
-			if not a.settedup then
-				if leveltime then
+			if a.settedup == nil then
+				if leveltime > 2 then
 					a.dctypemonitor = 2
-					if a.floorz > a.z-25*FRACUNIT or (a.flags2 & MF2_OBJECTFLIP and a.ceilingz > a.z+25*FRACUNIT) then
+
+					if P_IsObjectOnGround(a)
+					or (a.floorz + 30*FRACUNIT >= a.z + 4*FRACUNIT
+					or (P_MobjFlip(a) < 0 and a.ceilingz - 30*FRACUNIT >= a.z + 4*FRACUNIT)) then
 						a.dctypemonitor = 1
 					end
 
@@ -462,16 +471,16 @@ local function P_MonitorDeath(a, d, s)
 		end
 
 		a.once_already = true
+		a.settedup = nil
 
 		return true
 	end
 end
 
-local function P_MonitorRemoval(a, d)
+local function P_MonitorFuse(a)
 	if Disable_ItemBox then return end
 	if not (gamestate & GS_LEVEL) then return end
 	if not (a and a.valid) then return end
-	if not (a.info.flags & MF_MONITOR) then return end
 
 	if a.item and a.item.valid then
 		P_RemoveMobj(a.item)
@@ -480,6 +489,25 @@ local function P_MonitorRemoval(a, d)
 	if a.caps and a.caps.valid then
 		P_RemoveMobj(a.caps)
 	end
+
+	a.settedup = nil
+end
+
+
+local function P_MonitorRemoval(a, d)
+	if Disable_ItemBox then return end
+	if not (gamestate & GS_LEVEL) then return end
+	if not (a and a.valid) then return end
+
+	if a.item and a.item.valid then
+		P_RemoveMobj(a.item)
+	end
+
+	if a.caps and a.caps.valid then
+		P_RemoveMobj(a.caps)
+	end
+
+	a.settedup = nil
 end
 
 addHook("MobjMoveCollide", function(a, mt)
@@ -501,7 +529,7 @@ end, MT_PLAYER)
 --	Special 1UP_BOX handling
 --
 
-addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
+addHook("MobjSpawn", P_InitItemBox, MT_1UP_BOX)
 addHook("MobjThinker", function(a)
 	if Disable_ItemBox then return end
 
@@ -510,14 +538,17 @@ addHook("MobjThinker", function(a)
 		life_up_thinker(a.item)
 	end
 end, MT_1UP_BOX)
+addHook("MobjFuse", P_MonitorFuse, MT_1UP_BOX)
 addHook("MobjDeath", P_MonitorDeath, MT_1UP_BOX)
 addHook("MobjRemoved", P_MonitorRemoval, MT_1UP_BOX)
+
+
 
 --
 --	Special Random Monitor handling
 --
 
-addHook("MobjSpawn", P_SpawnItemBox, MT_MYSTERY_BOX)
+addHook("MobjSpawn", P_InitItemBox, MT_MYSTERY_BOX)
 addHook("MobjThinker", function(a)
 	if Disable_ItemBox then return end
 
@@ -527,6 +558,7 @@ addHook("MobjThinker", function(a)
 		a.item.frame = C|(a.item.frame &~ FF_FRAMEMASK)
 	end
 end, MT_MYSTERY_BOX)
+addHook("MobjFuse", P_MonitorFuse, MT_MYSTERY_BOX)
 addHook("MobjDeath", P_MonitorDeath, MT_MYSTERY_BOX)
 addHook("MobjRemoved", P_MonitorRemoval, MT_MYSTERY_BOX)
 
@@ -540,8 +572,9 @@ monitor_database[MT_MYSTERY_BOX] = 1
 
 local function P_AddMonitor(mobjtype)
 	if not monitor_database[mobjtype] then
-		addHook("MobjSpawn", P_SpawnItemBox, mobjtype)
+		addHook("MobjSpawn", P_InitItemBox, mobjtype)
 		addHook("MobjThinker", P_MonitorThinker, mobjtype)
+		addHook("MobjFuse", P_MonitorFuse, mobjtype)
 		addHook("MobjDeath", P_MonitorDeath, mobjtype)
 		addHook("MobjRemoved", P_MonitorRemoval, mobjtype)
 		monitor_database[mobjtype] = 1
