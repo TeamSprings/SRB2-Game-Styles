@@ -11,6 +11,7 @@ Contributors: Skydusk, Demnyx
 local worldlib = 	tbslibrary 'lib_sparkeditedw2h'
 local drawlib = 	tbslibrary 'lib_emb_tbsdrawers'
 local helper = 		tbsrequire 'helpers/lua_hud'
+local gettime = 	tbsrequire 'helpers/game_ingametime'
 
 local convertPlayerTime = helper.convertPlayerTime
 local translate = worldlib.translate
@@ -86,15 +87,17 @@ HOOK("time", "dchud", function(v, p, t, e)
 		return
 	end
 
+	local time_string = ""
 	local mint, sect, cent
 
 	if p.gammaTimerRan ~= nil then
 		mint, sect, cent = convertPlayerTime(p.gammaTime)
+		time_string = mint..':'..sect..':'..cent
 	else
-		mint, sect, cent = convertPlayerTime(p.realtime)
+		time_string = gettime(p)
 	end
 
-	font_drawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, font_scale, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
+	font_drawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, font_scale, time_string, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
 
 	return true
 end, "game")

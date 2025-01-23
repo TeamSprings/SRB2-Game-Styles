@@ -5,6 +5,7 @@ Contributors: Skydusk
 
 ]]
 
+local timeget = tbsrequire 'helpers/game_ingametime'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local colorcmp = tbsrequire 'helpers/color_compress'
 local drawf = drawlib.draw
@@ -15,8 +16,8 @@ local function draw_lifeicon(v, x, y, patch, flags, colormap, p)
 	if not (colormap and colormap[1] and colormap[2]) then return end
 
 	local skin_name = string.upper(skins[p.mo and p.mo.skin or p.skin].name)
-	local patch_name = "STYLES_SRUSHADLIFE_"..skin_name
-	local patch_s_name = "STYLES_SSRUSHADLIFE_"..skin_name
+	local patch_name = "STYLES_RHADLIFE_"..skin_name
+	local patch_s_name = "STYLES_SRHADLIFE_"..skin_name
 
 	if v.patchExists(patch_s_name) and p.powers[pw_super] then
 		v.draw(x, y, v.cachePatch(patch_s_name), flags, colormap)
@@ -37,13 +38,8 @@ return {
 	end,
 
 	time = function(v, p, t, e, font_type)
-		local mint = G_TicsToMinutes(p.realtime, true)
-		local sect = G_TicsToSeconds(p.realtime)
-		local cent = G_TicsToCentiseconds(p.realtime)
-		sect = (sect < 10 and '0'..sect or sect)
-		cent = (cent < 10 and '0'..cent or cent)
-
-		drawf(v, font_type, 313*FRACUNIT, (hudinfo[HUD_SECONDS].y-20)*FRACUNIT, FRACUNIT, "T"..mint.."'"..sect..'"'..cent, (hudinfo[HUD_RINGS].f|V_PERPLAYER|V_SNAPTORIGHT) &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
+		local timestr = timeget(p)
+		drawf(v, font_type, 313*FRACUNIT, (hudinfo[HUD_SECONDS].y-20)*FRACUNIT, FRACUNIT, "T"..timestr, (hudinfo[HUD_RINGS].f|V_PERPLAYER|V_SNAPTORIGHT) &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 	end,
 
 	rings = function(v, p, t, e, font_type)
@@ -56,6 +52,7 @@ return {
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 		if p.lives == INFLIVES or p.spectator then return end
+		if not (p.mo or p.mo.valid) then return end
 
 		local lives = p.lives > 9 and p.lives or "0"..p.lives
 

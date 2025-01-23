@@ -5,13 +5,14 @@ Contributors: Skydusk
 
 ]]
 
+local timeget = tbsrequire 'helpers/game_ingametime'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 
 local function drawLifeIcon(v, x, y, patch, flags, p, color, skin)
 	local skin_name = string.upper(skins[skin].name)
-	local patch_name = "STYLES_SADV1LIFE_"..skin_name
-	local patch_s_name = "STYLES_SSADV1LIFE_"..skin_name
+	local patch_name = "STYLES_ADV1LIFE_"..skin_name
+	local patch_s_name = "STYLES_SADV1LIFE_"..skin_name
 
 	if v.patchExists(patch_s_name) and p.powers[pw_super] then
 		v.draw(x, y, v.cachePatch(patch_s_name), flags, color)
@@ -37,13 +38,8 @@ return {
 	end,
 
 	time = function(v, p, t, e, font_type)
-		local mint = G_TicsToMinutes(p.realtime, true)
-		local sect = G_TicsToSeconds(p.realtime)
-		local cent = G_TicsToCentiseconds(p.realtime)
-		sect = (sect < 10 and '0'..sect or sect)
-		cent = (cent < 10 and '0'..cent or cent)
-
-		drawf(v, font_type, (hudinfo[HUD_SECONDS].x-72)*FRACUNIT, (hudinfo[HUD_SECONDS].y-11)*FRACUNIT, FRACUNIT, mint..':'..sect..':'..cent, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+		local timestr = timeget(p)
+		drawf(v, font_type, (hudinfo[HUD_SECONDS].x-72)*FRACUNIT, (hudinfo[HUD_SECONDS].y-11)*FRACUNIT, FRACUNIT, timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 	end,
 
 	rings = function(v, p, t, e, font_type)
@@ -63,6 +59,7 @@ return {
 
 	lives = function(v, p, t, e, font_type, icon_style, bot_existance, bot_skin, bot_color)
 		if p.lives == INFLIVES or p.spectator then return end
+		if not (p.mo or p.mo.valid) then return end
 
 		if icon_style and bot_existance and bot_existance.valid then
 			drawLifeIcon(v, hudinfo[HUD_LIVES].x+3, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p, v.getColormap(TC_DEFAULT, p.mo.color), p.mo.skin)

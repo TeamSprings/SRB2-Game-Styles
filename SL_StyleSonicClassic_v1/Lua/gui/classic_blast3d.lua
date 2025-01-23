@@ -28,8 +28,6 @@ return{
 				v.draw(lives_x, hudinfo[HUD_LIVES].y-1, v.cachePatch('3BLIVBLANK2'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 
-
-
 			if G_GametypeUsesLives() then
 				drawf(v, prefix..'TNUM', (lives_x+18)*FRACUNIT, (hudinfo[HUD_LIVES].y+1)*FRACUNIT, FRACUNIT, 'X'..p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
 			end

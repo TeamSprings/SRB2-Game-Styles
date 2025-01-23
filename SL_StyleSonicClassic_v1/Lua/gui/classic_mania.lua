@@ -17,8 +17,8 @@ return{
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
 
 			local skin_name = string.upper(skins[p.mo.skin].name)
-			local patch_name = "STYLES_SMALIFE_"..skin_name
-			local patch_s_name = "STYLES_SSMALIFE_"..skin_name
+			local patch_name = "STYLES_MALIFE_"..skin_name
+			local patch_s_name = "STYLES_SMALIFE_"..skin_name
 
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
 				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
