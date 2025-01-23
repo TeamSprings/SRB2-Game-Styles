@@ -227,21 +227,25 @@ local function P_MonitorDeath(a, d, s)
 	if P_MarioExistsThink(a.item) then
 		A_MonitorPop(a, 0, 0)
 	else
-		boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
-		boxicon.scale = a.item.scale
-		boxicon.target = a.target
+		if mobjinfo[a.type].damage == MT_UNKNOWN then
+			A_MonitorPop(a, 0, 0)
+		else
+			boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
+			boxicon.scale = a.item.scale
+			boxicon.target = a.target
 
-		-- Clipped code from Source code for life icons
-		if boxicon.type == MT_1UP_ICON and boxicon.target then
-			-- Spawn the lives icon.
-			local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
-			livesico.target = boxicon
-			livesico.color = boxicon.target.player.mo.color
-			livesico.skin = boxicon.target.player.mo.skin
-			livesico.state = S_PLAY_ICON1
-			livesico.dispoffset = 2
+			-- Clipped code from Source code for life icons
+			if boxicon.type == MT_1UP_ICON and boxicon.target then
+				-- Spawn the lives icon.
+				local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
+				livesico.target = boxicon
+				livesico.color = boxicon.target.player.mo.color
+				livesico.skin = boxicon.target.player.mo.skin
+				livesico.state = S_PLAY_ICON1
+				livesico.dispoffset = 2
 
-			boxicon.state = S_1UP_NICON1
+				boxicon.state = S_1UP_NICON1
+			end
 		end
 	end
 
@@ -295,11 +299,29 @@ addHook("MobjDeath", P_MonitorDeath, MT_1UP_BOX)
 addHook("MobjRemoved", P_MonitorRemoval, MT_1UP_BOX)
 
 --
---	Monitor Register (In future, global mobj hooks will be removed. As well this would be much more performant in theory.)
+--	Special Random Monitor handling
+--
+
+addHook("MobjSpawn", P_SpawnItemBox, MT_MYSTERY_BOX)
+addHook("MobjThinker", function(a)
+	if Disable_ItemBox then return end
+
+	P_MonitorThinker(a)
+	if a.item and a.item.valid then
+		a.item.sprite = SPR_TVMY
+		a.item.frame = C|(a.item.frame &~ FF_FRAMEMASK)
+	end
+end, MT_MYSTERY_BOX)
+addHook("MobjDeath", P_MonitorDeath, MT_MYSTERY_BOX)
+addHook("MobjRemoved", P_MonitorRemoval, MT_MYSTERY_BOX)
+
+--
+--	Monitor Register
 --
 
 local monitor_database = {}
 monitor_database[MT_1UP_BOX] = 1
+monitor_database[MT_MYSTERY_BOX] = 1
 
 local function P_AddMonitor(mobjtype)
 	if not monitor_database[mobjtype] then
