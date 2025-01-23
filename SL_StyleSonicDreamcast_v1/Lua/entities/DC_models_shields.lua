@@ -24,24 +24,24 @@ end
 local function assignState(state, new)
 	if state.sprite then
 		state.sprite = new.sprite
-	end	
-	
+	end
+
 	if state.frame then
 		state.frame = new.frame
 	end
-	
+
 	if state.tics then
 		state.tics = new.tics
 	end
-	
+
 	if state.var1 then
 		state.var1 = new.var1
 	end
-	
-	if state.var2 then	
+
+	if state.var2 then
 		state.var2 = new.var2
 	end
-	
+
 	if state.nextstate then
 		state.nextstate = new.nextstate
 	end
@@ -146,6 +146,8 @@ end, MT_ATTRACT_ORB)
 
 
 addHook("PlayerThink", function(p)
+	if not (p.mo and p.mo.valid) then return end
+
 	if 	p.shieldscale == skins[p.mo.skin].shieldscale
 	and p.shieldscale == FRACUNIT then
 		-- This needs increase!
@@ -253,6 +255,7 @@ local angle_div = 360*FRACUNIT/amount_rays
 
 local function invincibilityModel(a, p)
 	if Disable_Shields then return end
+	if not (p.mo and p.mo.valid) then return end
 	if not a.raylist and p.powers[pw_invulnerability] then
 		a.raylist = {}
 
