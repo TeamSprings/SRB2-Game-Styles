@@ -141,7 +141,7 @@ end)
 
 HOOK("lives", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
+	if modeattacking then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -154,7 +154,6 @@ end, "game")
 
 HOOK("score", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -196,7 +195,6 @@ end, "game")
 
 HOOK("time", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -208,7 +206,6 @@ end, "game")
 
 HOOK("rings", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -220,7 +217,6 @@ end, "game")
 
 HOOK("advancekey", "gbahud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -268,7 +264,6 @@ end, "scores")
 --
 
 HOOK("stagetitle", "gbahud", function(v, p, t, e)
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return

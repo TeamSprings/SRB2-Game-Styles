@@ -142,7 +142,7 @@ local red_flashing_thred = red_flashing_timer/2
 
 HOOK("lives", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
+	if modeattacking then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -157,7 +157,6 @@ local tally_totalcalculation = 0
 
 HOOK("score", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	local mo = p.mo and p.mo or p.realmo
 	if not mo then return end
@@ -202,7 +201,6 @@ local time_display_settings = CV_FindVar("timerres")
 
 HOOK("time", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -265,7 +263,6 @@ end, "game")
 
 HOOK("rings", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -346,7 +343,6 @@ local emeralds_set = {
 HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	if not p.exiting then return end
 	if p == secondarydisplayplayer then return end
-
 
 	if hud_hide_cv.value == 1
 	or hud_hide_cv.value == 3 then

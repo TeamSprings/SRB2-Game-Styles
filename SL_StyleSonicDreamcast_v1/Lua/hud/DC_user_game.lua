@@ -67,7 +67,6 @@ end
 -- SCORE
 HOOK("score", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -81,7 +80,6 @@ end, "game")
 -- TIME
 HOOK("time", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -105,7 +103,6 @@ end, "game")
 -- RINGS
 HOOK("rings", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -176,7 +173,8 @@ end)
 -- LIVES
 HOOK("lives", "dchud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
-	if skins["modernsonic"] then return end	-- whyyyy
+	if modeattacking then return end
+
 	if p.lives == INFLIVES or p.spectator then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
