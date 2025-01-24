@@ -497,7 +497,7 @@ end
 local function P_MonitorRemoval(a, d)
 	if Disable_ItemBox then return end
 	if not (gamestate & GS_LEVEL) then return end
-	if not (a and a.valid) then return end
+	if not a then return end
 
 	if a.item and a.item.valid then
 		P_RemoveMobj(a.item)
