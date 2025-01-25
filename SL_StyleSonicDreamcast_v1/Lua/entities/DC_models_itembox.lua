@@ -68,7 +68,11 @@ local function P_SpawnItemBox(a)
 		elseif a.info.spawnstate == S_RING_REDBOX1 then
 			a.color = SKINCOLOR_RUBY
 		else
-			a.color = SKINCOLOR_RED
+			if G_GametypeHasTeams() then
+				a.color = SKINCOLOR_APPLE
+			else
+				a.color = SKINCOLOR_RED
+			end
 
 			if not (a.type == MT_RING_BOX and a.randomring) then
 				a.randomring = P_RandomKey(16)
