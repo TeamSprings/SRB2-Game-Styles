@@ -26,7 +26,7 @@ local endtally_cv = CV_RegisterVar{
 	flags = CV_CALL,
 	func = function(var)
 		if multiplayer then
-			CONS_Printf(consoleplayer, "[Classic Style] This console variable has no use in multiplayer.")
+			CONS_Printf(consoleplayer, "[Classic Style] This console variable is disabled in multiplayer.")
 		end
 
 		change_var = var.value
@@ -39,6 +39,8 @@ addHook("PlayerSpawn", function(p)
 		end_tallyenabled = change_var
 		change_var = -1
 	end
+
+	p.styles_tallytimer = nil
 end)
 
 
