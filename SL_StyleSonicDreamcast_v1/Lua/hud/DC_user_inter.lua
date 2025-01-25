@@ -31,6 +31,8 @@ sfxinfo[freeslot("sfx_rank")].caption = "rank drop!"
 sfxinfo[freeslot("sfx_advchi")].caption = "cha-ching!"
 sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
+local interm_size = FRACUNIT-3*FRACUNIT/8
+
 HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if not (p.exiting and p.tallytimer) then return true end
 	-- Ease and timing
@@ -40,7 +42,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	local xcnt = {}
 
 	for i = 1,5 do
-		textscaling[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), FRACUNIT-3*FRACUNIT/8, 3*FRACUNIT)
+		textscaling[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), interm_size, 3*FRACUNIT)
 		transparency[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 1, 9) << V_ALPHASHIFT
 	end
 
@@ -211,6 +213,16 @@ end, "game")
 
 sfxinfo[freeslot("sfx_advtts")].caption = "titlecard"
 
+local SubToTagLUT = {
+	["SPECIAL STAGE 1"] = "Special Stage: 01",
+	["SPECIAL STAGE 2"] = "Special Stage: 02",
+	["SPECIAL STAGE 3"] = "Special Stage: 03",
+	["SPECIAL STAGE 4"] = "Special Stage: 04",
+	["SPECIAL STAGE 5"] = "Special Stage: 05",
+	["SPECIAL STAGE 6"] = "Special Stage: 06",
+	["SPECIAL STAGE 7"] = "Special Stage: 07",
+}
+
 HOOK("stagetitle", "dchud", function(v, p, t, et)
 	if t > et-1 then return end
 
@@ -285,7 +297,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 			v.fadeScreen(0xFF00|V_PERPLAYER, 31-(easegoout*31/93))
 		end
 
-		local color = p.skincolor
+		local color = p.skincolor or consoleplayer.skincolor
 
 		if mapheaderinfo[gamemap].styles_titlecard_color then
 			local ttcl = tostring(mapheaderinfo[gamemap].styles_titlecard_color)
@@ -325,7 +337,10 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 		if mapheaderinfo[gamemap].styles_dc_stagenum then
 			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
-		else
+		elseif SubToTagLUT[string.upper(subtitle)] then
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, SubToTagLUT[string.upper(subtitle)], V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			subtitle = nil
+		elseif not (G_RingSlingerGametype() or G_GametypeHasSpectators()) then
 			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
 		end
 
