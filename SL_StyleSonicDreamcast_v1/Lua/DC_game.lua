@@ -9,6 +9,7 @@ Contributors: Skydusk
 
 
 local finishSectors = {}
+local helper = 	tbsrequire 'helpers/c_inter'
 
 -- Global that should have been exposed! Bruh.
 local TMEF_SKIPTALLY = 1
@@ -26,7 +27,7 @@ local endtally_cv = CV_RegisterVar{
 	flags = CV_CALL,
 	func = function(var)
 		if multiplayer then
-			CONS_Printf(consoleplayer, "[Adventure Style] This console variable has no use in multiplayer.")
+			CONS_Printf(consoleplayer, "[Adventure Style] This console variable is disabled in multiplayer.")
 		end
 
 		change_var = var.value
@@ -39,6 +40,9 @@ addHook("PlayerSpawn", function(p)
 		end_tallyenabled = change_var
 		change_var = -1
 	end
+
+	p.tallytimer = nil
+	p.startscore = p.score
 end)
 
 local skiptally = false
@@ -91,13 +95,15 @@ rawset(_G, "G_ExitLevel", function(...)
 
 	G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
 
+	if not (multiplayer or skiptally) then
+		for p in players.iterate do
+			P_AddPlayerScore(p, helper.Y_GetAllBonus(p))
+		end
+	end
+
 	if customexit then
 		customexit = nil
 	end
-end)
-
-addHook("PlayerSpawn", function(p)
-	p.startscore = p.score
 end)
 
 --
