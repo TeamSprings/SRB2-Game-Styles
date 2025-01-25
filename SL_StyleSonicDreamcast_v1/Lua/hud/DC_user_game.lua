@@ -209,7 +209,7 @@ HOOK("lives", "dchud", function(v, p, t, e)
 
 	-- number
 	local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
-	font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+54)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+	font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+55)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 
 	return true
 end, "game")
