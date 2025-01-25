@@ -263,7 +263,7 @@ local function P_MonitorThinker(a)
 				a.caps.rollangle = a.rollangle
 
 				local monitor_type = a.dctypemonitor and a.dctypemonitor or 1
-				local questionable = max(P_MobjFlip(a) * 26, -6)
+				local questionable = max(P_MobjFlip(a) * 26, -12)
 				P_SetOrigin(a.item, a.x, a.y, a.z+questionable * a.item.scale)
 
 				-- Mario Monitors
