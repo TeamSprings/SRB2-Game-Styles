@@ -87,8 +87,6 @@ function helper.Y_GetTotalCoins(a)
 
 end
 
-addHook("MobjSpawn", helper.Y_GetTotalCoins)
-
 function helper.RankCounter(p)
 
 	-- Current Score
@@ -125,6 +123,27 @@ function helper.RankCounter(p)
 		return "E"
 	end
 
+end
+
+addHook("MapLoad", function()
+	helper.Y_ResetCounters()
+
+	for mobj in mobjs.iterate() do
+		helper.Y_GetTotalCoins(mobj)
+	end
+end)
+
+function helper.Y_GetAllBonus(p)
+	-- Current Score
+	local secondscore = 0
+
+	if mapheaderinfo[gamemap].bonustype > 0 then
+		secondscore = helper.Y_GetGuardBonus(p.timeshit)
+	else
+		secondscore = helper.Y_GetTimeBonus(p.realtime)
+	end
+
+	return secondscore + helper.Y_GetRingsBonus(p.rings)
 end
 
 return helper
