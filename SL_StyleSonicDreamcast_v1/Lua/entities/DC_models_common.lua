@@ -407,7 +407,7 @@ mobjinfo[MT_REDBOOSTER].painsound = sfx_advdas
 
 sfxinfo[freeslot("sfx_advite")].caption = "Pop"
 
-addHook("MapThingSpawn", function(a, mt)
+addHook("MobjSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
@@ -415,7 +415,7 @@ addHook("MapThingSpawn", function(a, mt)
 	return true
 end, MT_YELLOWBOOSTER)
 
-addHook("MapThingSpawn", function(a, mt)
+addHook("MobjSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
@@ -424,7 +424,7 @@ addHook("MapThingSpawn", function(a, mt)
 end, MT_REDBOOSTER)
 
 local function boost_sound(mo, mop)
-	if Disable_Miscs then return end	
+	if Disable_Miscs then return end
 	if mop.player and mop.z + mop.height > mo.z
 	and mo.z + mo.height > mop.z and not S_SoundPlaying(mop, mo.info.painsound) then
 		S_StartSound(mop, mo.info.painsound)
