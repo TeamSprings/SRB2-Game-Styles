@@ -119,6 +119,7 @@ local function P_SpawnCheckPoint(a)
 				bulb.frame = E
 				bulb.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 				bulb.flags2 = $|MF2_LINKDRAW
+				bulb.dispoffset = 16
 				table.insert(a.bulb, bulb)
 			end
 		end
@@ -213,8 +214,8 @@ addHook("MobjThinker", function(a)
 			a.angv = $+5
 		end
 
-		local calcangle = ease.outquad((a.angv*FRACUNIT)/110, 0, -90*ANG1)
-		local decreasespd = ease.outquint((a.angv*FRACUNIT)/110, 36*ANG1, 0)
+		local calcangle = ease.outquad((a.angv*FRACUNIT)/110, 0, -90*ANG1-10)
+		local decreasespd = ease.outquint((a.angv*FRACUNIT)/110, 27*ANG1, 0)
 		local height = ease.outquad((a.angv*FRACUNIT)/110, 0, 58)
 
 		if a.angv < 110 then
@@ -251,14 +252,14 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(bulb,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+(33+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+(35+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 			for id,stick in ipairs(a.stick) do
 				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+34*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+35*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 		end
