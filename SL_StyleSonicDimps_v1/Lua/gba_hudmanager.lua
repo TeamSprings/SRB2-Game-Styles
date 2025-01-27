@@ -347,7 +347,6 @@ local fake_timebonus = 0
 local fake_ringbonus = 0
 
 HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
-	if skins["modernsonic"] then return end	-- whyyyy
 	if p.styles_tallytimer == nil then return end
 
 	if p.styles_tallytimer and p.styles_tallytimer == -98 then
