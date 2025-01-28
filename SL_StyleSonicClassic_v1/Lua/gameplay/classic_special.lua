@@ -97,14 +97,14 @@ local entrance_cv = CV_RegisterVar{
 		else
 			if multiplayer then
 				CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
-				
+
 				mobjinfo[MT_TOKEN].radius = original_radius
 				mobjinfo[MT_TOKEN].height = original_height
 			else
 				-- first of many cheating measures
 				if change_var == -1 or anotherlvl then
 					print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
-					anotherlvl = nil					
+					anotherlvl = nil
 				end
 			end
 
@@ -282,6 +282,26 @@ addHook("MapLoad", function()
 	anotherlvl = true
 end)
 
+local init_ch = true
+
+addHook("AddonLoaded", function()
+	if init_ch and change_var > -1 then
+		special_entrance = change_var
+
+		if special_entrance then
+			mobjinfo[MT_TOKEN].radius = 89*FRACUNIT
+			mobjinfo[MT_TOKEN].height = 128*FRACUNIT
+		else
+			mobjinfo[MT_TOKEN].radius = original_radius
+			mobjinfo[MT_TOKEN].height = original_height
+		end
+
+		change_var = -1
+
+		init_ch = nil
+	end
+end)
+
 addHook("GameQuit", function()
 	maps_data = {}
 	last_map = 0
@@ -361,6 +381,10 @@ addHook("MobjCollide", function(a, k)
 		return false
 	end
 
+	if not leveltime then
+		return false
+	end
+
 	if not (a.flags2 & MF2_DONTDRAW) then
 		if special_entrance == 3
 		and a.z < k.z+k.height and a.z+a.height > k.z then
@@ -408,6 +432,9 @@ addHook("MobjThinker", function(a)
 		P_GiantRingCheck(a)
 	end
 
+	if not leveltime then
+		return false
+	end
 
 	if a.levelcountdown then
 		a.levelcountdown = $-1
