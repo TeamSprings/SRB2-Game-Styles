@@ -84,7 +84,7 @@ rawset(_G, "G_ExitLevel", function(...)
 
 	-- Force skip true
 	if end_tallyenabled then
-		if skip then
+		if (skip == nil and skiptally) or skip == true then
 			skiptally = true
 		else
 			skiptally = false
@@ -103,6 +103,10 @@ rawset(_G, "G_ExitLevel", function(...)
 
 	if customexit then
 		customexit = nil
+	end
+
+	if skiptally then
+		skiptally = false
 	end
 end)
 
@@ -159,6 +163,7 @@ local function G_InteprateStyleSectors(s)
 		local udmf_skip = ((finish[6][1] & TMEF_SKIPTALLY) and true or skiptally)
 
 		skiptally = udmf_skip and true or binary_skip
+		customexit = finish[6][0] and finish[6][0] or finish[3]
 	end
 end
 
