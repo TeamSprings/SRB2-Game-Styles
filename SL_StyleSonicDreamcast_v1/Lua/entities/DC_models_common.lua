@@ -407,7 +407,7 @@ mobjinfo[MT_REDBOOSTER].painsound = sfx_advdas
 
 sfxinfo[freeslot("sfx_advite")].caption = "Pop"
 
-addHook("MobjSpawn", function(a, mt)
+addHook("MapThingSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
@@ -415,7 +415,7 @@ addHook("MobjSpawn", function(a, mt)
 	return true
 end, MT_YELLOWBOOSTER)
 
-addHook("MobjSpawn", function(a, mt)
+addHook("MapThingSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
