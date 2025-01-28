@@ -412,6 +412,15 @@ addHook("MapThingSpawn", function(a, mt)
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
 	a.state = S_YELLOWBOOSTERROLLER
+
+	if mt.args[0] > 0 then
+		a.flags2 = $ | MF2_AMBUSH
+	end
+
+	if (mt.options & MTF_AMBUSH) then
+		a.flags2 = $ | MF2_AMBUSH
+	end
+
 	return true
 end, MT_YELLOWBOOSTER)
 
@@ -420,6 +429,15 @@ addHook("MapThingSpawn", function(a, mt)
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
 	a.scale = $+FRACUNIT/3
 	a.state = S_REDBOOSTERROLLER
+
+	if mt.args[0] > 0 then
+		a.flags2 = $ | MF2_AMBUSH
+	end
+
+	if (mt.options & MTF_AMBUSH) then
+		a.flags2 = $ | MF2_AMBUSH
+	end
+
 	return true
 end, MT_REDBOOSTER)
 
