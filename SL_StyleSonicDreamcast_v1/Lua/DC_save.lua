@@ -24,7 +24,7 @@ addHook("GameQuit", function(quit)
 		"dc_hud_rankdisplay",
 	}
 
-	local check = io.openlocal("bluespring/styles/adv_cvars.dat", "r+")
+	local check = io.openlocal("client/bluespring/styles/adv_cvars.dat", "r+")
 	if check then
 		for line in check:lines() do
 			local w = line:match("^([%w]+)")
@@ -38,7 +38,7 @@ addHook("GameQuit", function(quit)
 		check:close()
 	end
 
-    local file = io.openlocal("bluespring/styles/adv_cvars.dat", "w")
+    local file = io.openlocal("client/bluespring/styles/adv_cvars.dat", "w")
 	if file then
 		for k,v in ipairs(forced_variables) do
 			file:seek("set", forced_variables.index[k] == 1 and finalpos or forced_variables.index[k]-2)
@@ -49,7 +49,7 @@ addHook("GameQuit", function(quit)
 end)
 
 local function LoadConfig()
-	local loadfile = io.openlocal("bluespring/styles/adv_cvars.dat", "r+")
+	local loadfile = io.openlocal("client/bluespring/styles/adv_cvars.dat", "r+")
 
 	if loadfile then
 		loadfile:seek("set", 0)
@@ -62,7 +62,7 @@ local function LoadConfig()
 
 			if tab and tab[1] and tab[2] then
 				local cvar = CV_FindVar(tab[1])
-				if cvar then
+				if cvar and (not ((cvar.flags & CV_NETVAR) and multiplayer) or isserver) then
 					CV_Set(cvar, tab[2])
 				end
 			else
