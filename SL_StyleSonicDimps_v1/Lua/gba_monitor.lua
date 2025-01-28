@@ -43,6 +43,17 @@ local function P_SpawnItemBox(a)
 	a.item.frame = icframe
 	a.item.origin = a
 	a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+
+	if a.info.spawnstate == S_RING_BLUEBOX1 then
+		a.color = SKINCOLOR_SAPPHIRE
+		a.colorized = true
+	elseif a.info.spawnstate == S_RING_REDBOX1 then
+		a.color = SKINCOLOR_RUBY
+		a.colorized = true
+	elseif G_GametypeHasTeams() then
+		a.color = SKINCOLOR_APPLE
+		a.colorized = true
+	end
 end
 
 --Define which sprites we'll use

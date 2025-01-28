@@ -134,14 +134,6 @@ local function P_SpawnItemBox(a)
 		a.state = S_DUMMYMONITOR
 	end
 
-	if a.type == MT_RING_REDBOX then
-		a.state = S_DUMMYRMONITOR
-	end
-
-	if a.type == MT_RING_BLUEBOX then
-		a.state = S_DUMMYBMONITOR
-	end
-
 	local icon = mobjinfo[a.type].damage
 	local icstate = mobjinfo[icon].spawnstate
 	local icsprite = states[icstate].sprite
@@ -152,6 +144,15 @@ local function P_SpawnItemBox(a)
 	a.item.sprite = icsprite
 	a.item.frame = icframe
 	a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
+
+	if a.info.spawnstate == S_RING_BLUEBOX1 then
+		a.state = S_DUMMYBMONITOR
+	elseif a.info.spawnstate == S_RING_REDBOX1 then
+		a.state = S_DUMMYRMONITOR
+	elseif G_GametypeHasTeams() then
+		a.color = SKINCOLOR_APPLE
+		a.colorized = true
+	end
 end
 
 --Define which sprites we'll use
