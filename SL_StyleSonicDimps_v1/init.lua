@@ -1,7 +1,7 @@
 local gameString = "gba"
 
-local packVersion = '3.020'
-rawset(_G, "Style_DimpsVersion", 3020)
+local packVersion = '3.021'
+rawset(_G, "Style_DimpsVersion", 3021)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Dimps Style '..packVersion..'] '
