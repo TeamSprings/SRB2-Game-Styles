@@ -12,14 +12,14 @@ local slope_handler = tbsrequire 'helpers/mo_slope'
 local springtroll_cv = CV_RegisterVar{
 	name = "gba_springroll",
 	defaultvalue = "disabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {disabled=0, enabled=1}
 }
 
 local thok_cv = CV_RegisterVar{
 	name = "gba_thok",
 	defaultvalue = "enabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {enabled=0, disabled=1}
 }
 

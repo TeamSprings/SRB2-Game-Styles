@@ -96,12 +96,15 @@ local entrance_cv = CV_RegisterVar{
 			init = nil
 		else
 			if multiplayer then
-				CONS_Printf(consoleplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
+				CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
+				
+				mobjinfo[MT_TOKEN].radius = original_radius
+				mobjinfo[MT_TOKEN].height = original_height
 			else
 				-- first of many cheating measures
 				if change_var == -1 or anotherlvl then
 					print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
-					anotherlvl = nil
+					anotherlvl = nil					
 				end
 			end
 

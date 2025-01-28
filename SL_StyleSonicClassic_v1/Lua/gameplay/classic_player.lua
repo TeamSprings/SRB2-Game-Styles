@@ -16,35 +16,35 @@ local slope_handler = tbsrequire 'helpers/mo_slope'
 local spindash_cv = CV_RegisterVar{
 	name = "classic_spindash",
 	defaultvalue = "genesis",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {genesis=0, soniccd=1}
 }
 
 local springtwirl_cv = CV_RegisterVar{
 	name = "classic_springtwirl",
 	defaultvalue = "disabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {disabled=0, soniccd=1}
 }
 
 local springtwalk_cv = CV_RegisterVar{
 	name = "classic_springairwalk",
 	defaultvalue = "disabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {disabled=0, genesis=1}
 }
 
 local springtroll_cv = CV_RegisterVar{
 	name = "classic_springroll",
 	defaultvalue = "disabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {disabled=0, diagonalonly=1, genesis=2}
 }
 
 local thok_cv = CV_RegisterVar{
 	name = "classic_thok",
 	defaultvalue = "enabled",
-	flags = 0,
+	flags = CV_NETVAR,
 	PossibleValue = {enabled=0, disabled=1}
 }
 

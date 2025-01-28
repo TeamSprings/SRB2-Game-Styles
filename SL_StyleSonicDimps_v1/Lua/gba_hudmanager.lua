@@ -101,13 +101,9 @@ local borders_cv = CV_RegisterVar{
 local itemdisplay_cv = CV_RegisterVar{
 	name = "gba_itemdisplay",
 	defaultvalue = "disabled",
-	flags = CV_CALL,
-	func = function(var)
-		hud_border = var.value and true or false
-	end,
+	flags = 0,
 	PossibleValue = {disabled=0, enabled=1}
 }
-
 
 local gba_hud = CV_RegisterVar{
 	name = "gba_hud",

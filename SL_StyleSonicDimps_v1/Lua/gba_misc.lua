@@ -239,7 +239,6 @@ local signmove_cv = CV_RegisterVar{
 	name = "gba_sign_movement",
 	flags = CV_NETVAR,
 	defaultvalue = "stand",
-	flags = 0,
 	PossibleValue = {srb2=0, stand=1}
 }
 
