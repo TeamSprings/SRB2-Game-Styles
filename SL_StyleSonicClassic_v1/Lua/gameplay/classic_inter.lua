@@ -39,8 +39,25 @@ addHook("PlayerSpawn", function(p)
 		end_tallyenabled = change_var
 		change_var = -1
 	end
+end)
 
-	p.styles_tallytimer = nil
+addHook("MapLoad", function()
+	for p in players.iterate() do
+		p.styles_tallytimer = nil
+
+		-- Anti exploit measure
+		if p.styles_tallylastscore then
+			p.score = p.styles_tallylastscore
+
+			p.styles_tallylastscore = nil
+		end
+
+		if p.styles_tallylastlives then
+			p.lives = p.styles_tallylastlives
+			
+			p.styles_tallylastlives = nil
+		end
+	end
 end)
 
 
@@ -231,6 +248,7 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallyfakecounttimer = calc_help.Y_GetTimingCalculation(p)
 					p.styles_tallyendtime = p.styles_tallyfakecounttimer + 5*TICRATE
 					p.styles_tallylastscore = p.score
+					p.styles_tallylastlives = p.lives
 					p.exiting = 5
 
 					S_ChangeMusic("_clear", false, p)
@@ -267,6 +285,8 @@ local function G_StylesTallyBackend(p)
 
 					if p.styles_tallytimer > p.styles_tallyendtime then
 						p.exiting = 1
+						p.styles_tallylastscore = nil
+						p.styles_tallylastlives = nil
 						G_ExitLevel()
 						return
 					end
@@ -274,6 +294,8 @@ local function G_StylesTallyBackend(p)
 			end
 
 			if p.exiting == 1 then
+				p.styles_tallylastscore = nil
+				p.styles_tallylastlives = nil
 				G_ExitLevel()
 			end
 		end
