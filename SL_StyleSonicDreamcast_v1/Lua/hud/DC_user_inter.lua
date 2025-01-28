@@ -257,11 +257,14 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 	if (leveltime <= et) then
 
-		hud.sa2musicstop = (t <= (2*TICRATE+9) and 1 or 0)
+		if consoleplayer and consoleplayer == p then
+			hud.sa2musicstop = (t <= (2*TICRATE+9) and 2 or 0)
 
-		if hud.sa2musicstop then
-			S_SetInternalMusicVolume(0, p)
+			if hud.sa2musicstop then
+				S_SetInternalMusicVolume(0, p)
+			end
 		end
+
 		if (t == TICRATE/2) then
 			S_StartSound(nil, sfx_advtts, p)
 		end
@@ -372,6 +375,7 @@ addHook("PreThinkFrame", function()
 	for p in players.iterate() do
 		if hud.sa2musicstop then
 			S_PauseMusic(p)
+			hud.sa2musicstop = $ - 1
 		end
 	end
 end)
