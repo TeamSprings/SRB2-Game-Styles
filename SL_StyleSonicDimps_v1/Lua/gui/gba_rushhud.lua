@@ -56,7 +56,10 @@ return {
 
 		if icon_style and bot_existance then
 			if bot_existance.valid then
-				draw_lifeicon(v, hudinfo[HUD_LIVES].x+10, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), bot_color, p)
+				if bot_skin then
+					draw_lifeicon(v, hudinfo[HUD_LIVES].x+10, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), bot_color, p)
+				end
+
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x-3, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p.mo.color, p)
 
 				if G_GametypeUsesLives() then
