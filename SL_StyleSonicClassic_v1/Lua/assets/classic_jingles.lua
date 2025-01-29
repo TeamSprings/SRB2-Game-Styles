@@ -103,45 +103,49 @@ local shoes_select = {
 addHook("MusicChange", function(oldname, newname, mflags, looping, position, prefadems, fadeinms)
 	local music_change = false
 
-	if newname == "_1up" then
-		if lifetheme_select[lifeuptheme_cv.value] then
-			music_change = lifetheme_select[lifeuptheme_cv.value]
-		end
-	end
-
-	if newname == "_inv" then
-		if invincibility_select[invincibilitytheme_cv.value] then
-			music_change = invincibility_select[invincibilitytheme_cv.value]
-		end
-	end
-
-	if newname == "_super" then
-		if supertheme_select[supertheme_cv.value] then
-			music_change = supertheme_select[supertheme_cv.value]
-		end
-	end
-
-	if newname == "_drown" then
-		if drown_select[drowntheme_cv.value] then
-			music_change = drown_select[drowntheme_cv.value]
-		end
-	end
-
 	if newname == "_clear" then
 		if levelend_select[levelendtheme_cv.value] then
 			music_change = levelend_select[levelendtheme_cv.value]
 		end
 	end
 
-	if newname == "_shoes" then
-		if shoes_select[shoestheme_cv.value] then
-			music_change = shoes_select[shoestheme_cv.value]
+	if oldname == levelend_select[levelendtheme_cv.value] then
+		return music_change, mflags, looping, position, prefadems, fadeinms
+	else
+		if newname == "_1up" then
+			if lifetheme_select[lifeuptheme_cv.value] then
+				music_change = lifetheme_select[lifeuptheme_cv.value]
+			end
 		end
-	end
 
-	if newname == "VSBOSS" then
-		if boss_select[bosstheme_cv.value] then
-			music_change = boss_select[bosstheme_cv.value]
+		if newname == "_inv" then
+			if invincibility_select[invincibilitytheme_cv.value] then
+				music_change = invincibility_select[invincibilitytheme_cv.value]
+			end
+		end
+
+		if newname == "_super" then
+			if supertheme_select[supertheme_cv.value] then
+				music_change = supertheme_select[supertheme_cv.value]
+			end
+		end
+
+		if newname == "_drown" then
+			if drown_select[drowntheme_cv.value] then
+				music_change = drown_select[drowntheme_cv.value]
+			end
+		end
+
+		if newname == "_shoes" then
+			if shoes_select[shoestheme_cv.value] then
+				music_change = shoes_select[shoestheme_cv.value]
+			end
+		end
+
+		if newname == "VSBOSS" then
+			if boss_select[bosstheme_cv.value] then
+				music_change = boss_select[bosstheme_cv.value]
+			end
 		end
 	end
 
