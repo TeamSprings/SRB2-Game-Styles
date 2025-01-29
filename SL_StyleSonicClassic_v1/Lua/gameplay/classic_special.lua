@@ -174,6 +174,10 @@ local function SP_SaveState(mobj, toucher)
 		storage.starposttime = displayplayer.starposttime
 		storage.starpostangle = displayplayer.starpostangle
 		storage.starpostscale = displayplayer.starpostscale
+		storage.flags = displayplayer.mo.flags &~ MF_NOTHINK
+		storage.flags2 = displayplayer.mo.flags2
+		storage.eflags = displayplayer.mo.eflags
+		storage.player1 = true
 
 		storage.leveltime = leveltime
 
@@ -190,6 +194,11 @@ local function SP_SaveState(mobj, toucher)
 			storage.p2starposttime = secondarydisplayplayer.starposttime
 			storage.p2starpostangle = secondarydisplayplayer.starpostangle
 			storage.p2starpostscale = secondarydisplayplayer.starpostscale
+			storage.p2flags = secondarydisplayplayer.mo.flags &~ MF_NOTHINK
+			storage.p2flags2 = secondarydisplayplayer.mo.flags2
+			storage.p2eflags = secondarydisplayplayer.mo.eflags
+			storage.player2 = true
+
 		end
 
 		if not maps_data[gamemap].delete then
@@ -209,13 +218,12 @@ local function SP_SaveState(mobj, toucher)
 	G_ExitLevel()
 end
 
-
 local function SP_LoadState(map)
 	if maps_data[map] then
 		local data = maps_data[map]
 
 		if data.delete then
-			if displayplayer.mo then
+			if displayplayer.mo and data.player1 then
 				P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
 				displayplayer.mo.angle = data.angle
 				displayplayer.mo.scale = data.scale
@@ -223,17 +231,98 @@ local function SP_LoadState(map)
 				displayplayer.starposty = data.starposty
 				displayplayer.starpostz = data.starpostz
 				displayplayer.starpostnum = data.starpostnum
-				displayplayer.starposttime = data.starposttime
+				displayplayer.starposttime = max(data.starposttime, data.leveltime)
 				displayplayer.starpostangle = data.starpostangle
 				displayplayer.starpostscale = data.starpostscale
 
-				displayplayer.style_additionaltime = data.leveltime
-
-				displayplayer.mo.flags = $ &~ MF_NOTHINK
+				displayplayer.style_additionaltime = max(data.starposttime, data.leveltime)
 				displayplayer.mo.alpha = FRACUNIT
+
+				displayplayer.mo.flags = data.flags &~ MF_NOTHINK
+				displayplayer.mo.flags2 = data.flags2
+				displayplayer.mo.eflags = data.eflags
+
+				displayplayer.powers[pw_flashing] = TICRATE
+
+				if displayplayer.mo.subsector and displayplayer.mo.subsector.sector then
+					local sector = displayplayer.mo.subsector.sector
+
+					if (P_MobjFlip(displayplayer.mo) > 0 or not P_IsObjectOnGround(displayplayer.mo)) and sector.damagetype then
+						local safesc = sector
+						local found = false
+
+						searchBlockmap("lines", function(ref, line)
+							if line.frontsector then
+								local sect = line.frontsector
+								local lines_sector = sect.lines
+
+								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > displayplayer.mo.height then
+									safesc = sect
+									found = true
+									return true
+								end
+							end
+
+							if line.backsector then
+								local sect = line.backsector
+								local lines_sector = sect.lines
+
+								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > displayplayer.mo.height then
+									safesc = sect
+									found = true
+									return true
+								end
+							end
+
+							return nil
+						end, displayplayer.mo)
+
+						if found then
+							local max_y, min_y, max_x, min_x = INT32_MIN, INT32_MAX, INT32_MIN, INT32_MAX
+
+							local lines_sector = safesc.lines
+							for i = 1, #lines_sector do
+								local line = safesc.lines[i]
+								if line and line.valid then
+									max_y = max(line.v2.y, max_y)
+									min_y = min(line.v2.y, min_y)
+									max_x = max(line.v2.x, max_x)
+									min_x = min(line.v2.x, min_x)
+								end
+							end
+
+							local x = min_x + (max_x - min_x) / 2
+							local y = min_y + (max_y - min_y) / 2
+							local z = P_MobjFlip(displayplayer.mo) > 0 and safesc.floorheight or safesc.ceilingheight
+
+							P_SetOrigin(displayplayer.mo, x, y, z)
+						end
+					end
+				end
+
+
+				data.x = nil
+				data.y = nil
+				data.z = nil
+				data.angle = nil
+				data.scale = nil
+				data.starpostx = nil
+				data.starposty = nil
+				data.starpostz = nil
+				data.starpostnum = nil
+				data.starposttime = nil
+				data.starpostangle = nil
+				data.starpostscale = nil
+				data.flags = nil
+				data.flags2 = nil
+				data.eflags = nil
+
+				data.player1 = nil
+			elseif displayplayer.mo then
+				displayplayer.style_additionaltime = 0
 			end
 
-			if splitscreen and secondarydisplayplayer and secondarydisplayplayer.mo then
+			if splitscreen and secondarydisplayplayer and secondarydisplayplayer.mo and data.player2 then
 				P_SetOrigin(secondarydisplayplayer.mo, data.p2x, data.p2y, data.p2z)
 				secondarydisplayplayer.mo.angle = data.p2angle
 				secondarydisplayplayer.mo.scale = data.p2scale
@@ -241,15 +330,97 @@ local function SP_LoadState(map)
 				secondarydisplayplayer.starposty = data.p2starposty
 				secondarydisplayplayer.starpostz = data.p2starpostz
 				secondarydisplayplayer.starpostnum = data.p2starpostnum
-				secondarydisplayplayer.starposttime = data.p2starposttime
+				secondarydisplayplayer.starposttime = max(data.p2starposttime, data.leveltime)
 				secondarydisplayplayer.starpostangle = data.p2starpostangle
 				secondarydisplayplayer.starpostscale = data.p2starpostscale
 
-				secondarydisplayplayer.style_additionaltime = data.leveltime
-
-				secondarydisplayplayer.mo.flags = $ &~ MF_NOTHINK
+				secondarydisplayplayer.style_additionaltime = max(data.p2starposttime, data.leveltime)
 				secondarydisplayplayer.mo.alpha = FRACUNIT
+
+				secondarydisplayplayer.mo.flags = data.p2flags &~ MF_NOTHINK
+				secondarydisplayplayer.mo.flags2 = data.p2flags2
+				secondarydisplayplayer.mo.eflags = data.p2eflags
+
+				secondarydisplayplayer.powers[pw_flashing] = TICRATE
+
+				if secondarydisplayplayer.mo.subsector and secondarydisplayplayer.mo.subsector.sector then
+					local sector = secondarydisplayplayer.mo.subsector.sector
+
+					if (P_MobjFlip(secondarydisplayplayer.mo) > 0 or not P_IsObjectOnGround(secondarydisplayplayer.mo)) and sector.damagetype then
+						local safesc = sector
+						local found = false
+
+						searchBlockmap("lines", function(ref, line)
+							if line.frontsector then
+								local sect = line.frontsector
+								local lines_sector = sect.lines
+
+								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > secondarydisplayplayer.mo.height then
+									safesc = sect
+									found = true
+									return true
+								end
+							end
+
+							if line.backsector then
+								local sect = line.backsector
+								local lines_sector = sect.lines
+
+								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > secondarydisplayplayer.mo.height then
+									safesc = sect
+									found = true
+									return true
+								end
+							end
+
+							return nil
+						end, secondarydisplayplayer.mo)
+
+						if found then
+							local max_y, min_y, max_x, min_x = INT32_MIN, INT32_MAX, INT32_MIN, INT32_MAX
+
+							local lines_sector = safesc.lines
+							for i = 1, #lines_sector do
+								local line = safesc.lines[i]
+								if line and line.valid then
+									max_y = max(line.v2.y, max_y)
+									min_y = min(line.v2.y, min_y)
+									max_x = max(line.v2.x, max_x)
+									min_x = min(line.v2.x, min_x)
+								end
+							end
+
+							local x = min_x + (max_x - min_x) / 2
+							local y = min_y + (max_y - min_y) / 2
+							local z = P_MobjFlip(secondarydisplayplayer.mo) > 0 and safesc.floorheight or safesc.ceilingheight
+
+							P_SetOrigin(secondarydisplayplayer.mo, x, y, z)
+						end
+					end
+				end
+
+				data.p2x = nil
+				data.p2y = nil
+				data.p2z = nil
+				data.p2angle = nil
+				data.p2scale = nil
+				data.p2starpostx = nil
+				data.p2starposty = nil
+				data.p2starpostz = nil
+				data.p2starpostnum = nil
+				data.p2starposttime = nil
+				data.p2starpostangle = nil
+				data.p2starpostscale = nil
+				data.p2flags = nil
+				data.p2flags2 = nil
+				data.p2eflags = nil
+
+				data.player2 = nil
+			elseif secondarydisplayplayer and secondarydisplayplayer.mo then
+				secondarydisplayplayer.style_additionaltime = 0
 			end
+
+			data.leveltime = 0
 
 			for _,v in ipairs(data.delete) do
 				if mapthings[v].mobj then
