@@ -14,6 +14,8 @@ local function notice(str)
 	print("\x83NOTICE: \x80"..str);
 end
 
+local UPDATE = {}
+
 -- Should match hud_disable_options in lua_hudlib.c
 local defaultitems = {
 	{"stagetitle", "titlecard"},
@@ -91,6 +93,22 @@ if (rawget(_G, "customhud")) then
 		return;
 	end
 
+	for i = 1, #defaultitems do
+		local findItemExists = customhud.FindItem ~= nil and true or false;
+		local enabledExists = customhud.enabled ~= nil and true or false;
+		local enabledHudItem = nil;
+
+		if finditemExists then
+			local findItem = customhud.FindItem(itemName);
+			enabledHudItem = findItem.enabled;
+		elseif enabledExists then
+			local callEnabled = pcall(do return customhud.enabled(defaultitems[i][1]) end);
+			enabledHudItem = type(callEnabled) == "boolean" and callEnabled or nil
+		end
+
+		UPDATE[defaultitems[i][1]] = enabledHudItem
+	end
+
 	if customhud.Overwritten then
 		for k, overwrite in pairs(customhud.Overwritten) do
 			rawset(hud, k, overwrite)
@@ -103,13 +121,13 @@ end
 rawset(_G, "customhud", {});
 
 customhud.Overwritten = {}
-customhud.Overwritten["enable"] = rawget(hud, "enable")
-customhud.Overwritten["enabled"] = rawget(hud, "enabled")
-customhud.Overwritten["disable"] = rawget(hud, "disable")
+customhud.Overwritten["enable"] = hud.enable
+customhud.Overwritten["enabled"] = hud.enabled
+customhud.Overwritten["disable"] = hud.disable
 
-local hudenable =  rawget(customhud.Overwritten, "enable") ---@type function
-local hudenabled = rawget(customhud.Overwritten, "enabled") ---@type function
-local huddisable = rawget(customhud.Overwritten, "disable") ---@type function
+local hudenable =  customhud.Overwritten["enable"]
+local hudenabled = customhud.Overwritten["enabled"]
+local huddisable = customhud.Overwritten["disable"]
 
 function customhud.GetVersionNum()
 	-- Make sure you cannot overwrite the version number by copying it into another table
@@ -169,7 +187,7 @@ for _,v in pairs(defaultitems) do
 
 	newItem.funcs["vanilla"] = nil;
 	newItem.type = "vanilla";
-	newItem.enabled = hudenable(itemName);
+	newItem.enabled = UPDATE[itemName] and UPDATE[itemName] or hudenabled(itemName);
 	newItem.layer = INT32_MIN;
 	newItem.isDefaultItem = true;
 
