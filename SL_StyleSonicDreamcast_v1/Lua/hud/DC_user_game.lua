@@ -88,7 +88,7 @@ HOOK("time", "dchud", function(v, p, t, e)
 	local time_string = ""
 	local mint, sect, cent
 
-	if p.gammaTimerRan ~= nil then
+	if p.gammaTimerRan ~= nil and p.gammaTimerRan == true and p.gammaTime ~= nil then
 		mint, sect, cent = convertPlayerTime(p.gammaTime)
 		time_string = mint..':'..sect..':'..cent
 	else

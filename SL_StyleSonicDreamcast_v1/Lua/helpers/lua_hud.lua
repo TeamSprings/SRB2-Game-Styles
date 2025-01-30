@@ -7,10 +7,10 @@ Contributors: Skydusk
 
 local helper = {}
 
-function helper.convertPlayerTime(time)
-	local mint = G_TicsToMinutes(time, true)
-	local sect = G_TicsToSeconds(time)
-	local cent = G_TicsToCentiseconds(time)
+function helper.convertPlayerTime(ttime)
+	local mint = G_TicsToMinutes(ttime)
+	local sect = G_TicsToSeconds(ttime)
+	local cent = G_TicsToCentiseconds(ttime)
 	mint = (mint < 10 and '0'..mint or mint)
 	sect = (sect < 10 and '0'..sect or sect)
 	cent = (cent < 10 and '0'..cent or cent)
