@@ -4,7 +4,7 @@
 -- USAGE: Main part of customhud is the ability to creating and overwriting existing HUD items, and adding support for other HUD modifications.
 -- This helps sort out HUD conflicts that are otherwise impossible to detect without the use of this library.
 
-local VERSIONNUM = {2, 5};
+local VERSIONNUM = {2, 6};
 
 local function warn(str)
 	print("\131WARNING: \128"..str);
@@ -13,6 +13,39 @@ end
 local function notice(str)
 	print("\x83NOTICE: \x80"..str);
 end
+
+-- Should match hud_disable_options in lua_hudlib.c
+local defaultitems = {
+	{"stagetitle", "titlecard"},
+	{"textspectator", "game"},
+	{"crosshair", "game"},
+
+	{"score", "game"},
+	{"time", "game"},
+	{"rings", "game"},
+	{"lives", "game"},
+
+	{"weaponrings", "game"},
+	{"powerstones", "game"},
+	{"teamscores", "gameandscores"},
+
+	{"nightslink", "game"},
+	{"nightsdrill", "game"},
+	{"nightsrings", "game"},
+	{"nightsscore", "game"},
+	{"nightstime", "game"},
+	{"nightsrecords", "game"},
+
+	{"rankings", "scores"},
+	{"coopemeralds", "scores"},
+	{"tokens", "scores"},
+	{"tabemblems", "scores"},
+
+	{"intermissiontally", "intermission"},
+	{"intermissiontitletext", "intermission"},
+	{"intermissionmessages", "intermission"},
+	{"intermissionemeralds", "intermission"},
+};
 
 if (rawget(_G, "customhud")) then
 	local oldnum = customhud.GetVersionNum();
@@ -70,20 +103,20 @@ end
 rawset(_G, "customhud", {});
 
 customhud.Overwritten = {}
-customhud.Overwritten["enable"] = hud.enable
-customhud.Overwritten["enabled"] = hud.enabled
-customhud.Overwritten["disable"] = hud.disable
+customhud.Overwritten["enable"] = rawget(hud, "enable")
+customhud.Overwritten["enabled"] = rawget(hud, "enabled")
+customhud.Overwritten["disable"] = rawget(hud, "disable")
 
-local hudenable =  customhud.Overwritten["enable"]
-local hudenabled = customhud.Overwritten["enabled"]
-local huddisable = customhud.Overwritten["disable"]
+local hudenable =  rawget(customhud.Overwritten, "enable") ---@type function
+local hudenabled = rawget(customhud.Overwritten, "enabled") ---@type function
+local huddisable = rawget(customhud.Overwritten, "disable") ---@type function
 
 function customhud.GetVersionNum()
 	-- Make sure you cannot overwrite the version number by copying it into another table
 	-- That'd be really silly :V
 	local tempNum = {};
 
-	for k,v in ipairs(VERSIONNUM)
+	for k,v in ipairs(VERSIONNUM) do
 		tempNum[k] = v;
 	end
 
@@ -129,39 +162,6 @@ local function CreateNewItem(itemName)
 	return newItem;
 end
 
--- Should match hud_disable_options in lua_hudlib.c
-local defaultitems = {
-	{"stagetitle", "titlecard"},
-	{"textspectator", "game"},
-	{"crosshair", "game"},
-
-	{"score", "game"},
-	{"time", "game"},
-	{"rings", "game"},
-	{"lives", "game"},
-
-	{"weaponrings", "game"},
-	{"powerstones", "game"},
-	{"teamscores", "gameandscores"},
-
-	{"nightslink", "game"},
-	{"nightsdrill", "game"},
-	{"nightsrings", "game"},
-	{"nightsscore", "game"},
-	{"nightstime", "game"},
-	{"nightsrecords", "game"},
-
-	{"rankings", "scores"},
-	{"coopemeralds", "scores"},
-	{"tokens", "scores"},
-	{"tabemblems", "scores"},
-
-	{"intermissiontally", "intermission"},
-	{"intermissiontitletext", "intermission"},
-	{"intermissionmessages", "intermission"},
-	{"intermissionemeralds", "intermission"},
-};
-
 for _,v in pairs(defaultitems) do
 	local itemName = v[1];
 	local hookType = v[2];
@@ -169,7 +169,7 @@ for _,v in pairs(defaultitems) do
 
 	newItem.funcs["vanilla"] = nil;
 	newItem.type = "vanilla";
-	newItem.enabled = hud.enabled(itemName);
+	newItem.enabled = hudenable(itemName);
 	newItem.layer = INT32_MIN;
 	newItem.isDefaultItem = true;
 
@@ -192,57 +192,52 @@ function customhud.ItemExists(itemName)
 	return (FindItem(itemName) != nil);
 end
 
----Enables a HUD item. Should completely replace instances of the base game's hud.enable, as it has support for custom HUD items.
----@param itemName string Item here means "rings" "time" "score" etc.
----@return boolean
+function customhud.FindItem(itemName)
+	return FindItem(itemName);
+end
+
+function customhud.UpdateHudItemStatus(item)
+	-- Update status of default hud items
+	if (item.isDefaultItem != true) then
+		return;
+	end
+
+	if (item.enabled == true and item.type == "vanilla") then
+		hudenable(item.name);
+	else
+		huddisable(item.name);
+	end
+end
+
 function customhud.enable(itemName)
-	local item = FindItem(itemName);
+	local item = customhud.FindItem(itemName);
 	if (item == nil) then
 		return false;
 	end
 
 	item.enabled = true;
-
-	if (item.isDefaultItem == true) then
-		if (item.type == "vanilla") then
-			hudenable(itemName);
-		else
-			huddisable(itemName);
-		end
-	end
-
+	customhud.UpdateHudItemStatus(item);
 	return true;
 end
 
----Disables a HUD item. Should completely replace instances of the base game's hud.disable, as it has support for custom HUD items.
----@param itemName string Item here means "rings" "time" "score" etc.
----@return boolean
 function customhud.disable(itemName)
-	local item = FindItem(itemName);
+	local item = customhud.FindItem(itemName);
 	if (item == nil) then
 		return false;
 	end
 
 	item.enabled = false;
-
-	if (item.isDefaultItem == true) then
-		huddisable(itemName);
-	end
-
+	customhud.UpdateHudItemStatus(item);
 	return true;
 end
 
----	Return true if a HUD item has been enabled or false if it hasn't. Should completely replace instances of the base game's hud.enabled, as it has support for custom HUD items.
----@param itemName string Item here means "rings" "time" "score" etc.
----@return boolean
 function customhud.enabled(itemName)
-	local item = FindItem(itemName);
+	local item = customhud.FindItem(itemName);
 	if (item == nil) then
 		return false;
 	end
 
-	if (item.isDefaultItem == true)
-	and (item.type == "vanilla") then
+	if (item.isDefaultItem == true and item.type == "vanilla") then
 		return hudenabled(itemName);
 	end
 
@@ -321,21 +316,20 @@ function customhud.SetupItem(itemName, modName, itemFunc, hook, layer)
 	end
 	item.type = modName;
 
-	-- Update status
-	if (item.isDefaultItem == true) then
-		if (item.enabled == false) then
-			huddisable(itemName);
-		else
-			if (modName == "vanilla") then
-				hudenable(itemName);
-			else
-				huddisable(itemName);
-			end
-		end
-	end
-
+	customhud.UpdateHudItemStatus(item)
 	return true;
 end
+
+COM_AddCommand("customhud_setitem", function(_, itemName, modName)
+	local item = customhud.FindItem(itemName);
+	if (item == nil)
+		-- Item doesn't exist.
+		return;
+	end
+
+	customhud.SetupItem(itemName, modName);
+end, COM_LOCAL);
+
 
 local function RunCustomHooks(hook, v, ...)
 	if (huditems[hook] == nil) then
