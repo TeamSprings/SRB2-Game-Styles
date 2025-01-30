@@ -69,9 +69,9 @@ addHook("PlayerThink", function(p)
 
 		p.styles_swappedthok = true
 	elseif p.styles_swappedthok then
-		p.thokitem = skins[p.mo.skin].thokitem
-		p.spinitem = skins[p.mo.skin].spinitem
-		p.revitem = skins[p.mo.skin].revitem
+		p.thokitem = skins[p.mo.skin].thokitem == -1 and MT_THOK or skins[p.mo.skin].thokitem
+		p.spinitem = skins[p.mo.skin].spinitem == -1 and MT_THOK or skins[p.mo.skin].spinitem
+		p.revitem = skins[p.mo.skin].revitem -1 and MT_THOK or skins[p.mo.skin].revitem
 
 		p.styles_swappedthok = nil
 	end
