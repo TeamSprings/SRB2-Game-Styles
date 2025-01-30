@@ -5,6 +5,7 @@
 -- This helps sort out HUD conflicts that are otherwise impossible to detect without the use of this library.
 
 local VERSIONNUM = {2, 6};
+local updating = nil;
 
 local function warn(str)
 	print("\131WARNING: \128"..str);
@@ -13,8 +14,6 @@ end
 local function notice(str)
 	print("\x83NOTICE: \x80"..str);
 end
-
-local UPDATE = {}
 
 -- Should match hud_disable_options in lua_hudlib.c
 local defaultitems = {
@@ -56,8 +55,6 @@ if (rawget(_G, "customhud")) then
 	local loadednum = "";
 	local newnum = "";
 
-	local oldvers = false;
-
 	for i = 1,numlength
 		local num1 = oldnum[i];
 		local num2 = VERSIONNUM[i];
@@ -82,31 +79,15 @@ if (rawget(_G, "customhud")) then
 		end
 
 		if (num1 < num2) then
-			oldvers = true;
+			updating = true;
 		elseif (num1 > num2) then
 			break;
 		end
 	end
 
-	if (oldvers == false) then
+	if (updating == nil) then
 		-- Existing version is OK
 		return;
-	end
-
-	for i = 1, #defaultitems do
-		local findItemExists = customhud.FindItem ~= nil and true or false;
-		local enabledExists = customhud.enabled ~= nil and true or false;
-		local enabledHudItem = nil;
-
-		if finditemExists then
-			local findItem = customhud.FindItem(itemName);
-			enabledHudItem = findItem.enabled;
-		elseif enabledExists then
-			local callEnabled = pcall(do return customhud.enabled(defaultitems[i][1]) end);
-			enabledHudItem = type(callEnabled) == "boolean" and callEnabled or nil
-		end
-
-		UPDATE[defaultitems[i][1]] = enabledHudItem
 	end
 
 	if customhud.Overwritten then
@@ -116,9 +97,9 @@ if (rawget(_G, "customhud")) then
 	end
 
 	notice("An old version of customhud was detected ("..loadednum.."). Switching to newer ("..newnum.."), errors may occur.");
+else
+	rawset(_G, "customhud", {});
 end
-
-rawset(_G, "customhud", {});
 
 customhud.Overwritten = {}
 customhud.Overwritten["enable"] = hud.enable
@@ -141,19 +122,39 @@ function customhud.GetVersionNum()
 	return tempNum;
 end
 
-local huditems = {};
+if (updating == nil)
+	customhud.hudItems = {};
+end
 
-local hooktypes = {
+local huditems = customhud.hudItems
+
+customhud.hookTypes = {
 	"game",
 	"scores",
 	"title",
 	"titlecard",
 	"intermission",
 	"gameandscores",
+	"continue",
+	"playersetup"
 };
 
-for _,v in pairs(hooktypes) do
-	huditems[v] = {};
+local hooktypes = customhud.hookTypes
+
+local function FindItem(itemName)
+	for _,hook in pairs(hooktypes) do
+		for _,item in pairs(huditems[hook]) do
+			if (item.name == itemName) then
+				return item;
+			end
+		end
+	end
+
+	return nil;
+end
+
+function customhud.FindItem(itemName)
+	return FindItem(itemName);
 end
 
 local function CreateNewItem(itemName)
@@ -180,38 +181,43 @@ local function CreateNewItem(itemName)
 	return newItem;
 end
 
+function customhud.CreateNewItem(itemName)
+	return CreateNewItem(itemName);
+end
+
+for _,v in pairs(hooktypes) do
+	if (huditems[v] == nil) then
+		huditems[v] = {};
+	end
+end
+
 for _,v in pairs(defaultitems) do
 	local itemName = v[1];
 	local hookType = v[2];
-	local newItem = CreateNewItem(itemName);
 
-	newItem.funcs["vanilla"] = nil;
-	newItem.type = "vanilla";
-	newItem.enabled = UPDATE[itemName] and UPDATE[itemName] or hudenabled(itemName);
-	newItem.layer = INT32_MIN;
-	newItem.isDefaultItem = true;
+	local item = customhud.FindItem(itemName);
+	local updatingItem = true;
 
-	table.insert(huditems[hookType], newItem);
-end
-
-local function FindItem(itemName)
-	for _,hook in pairs(hooktypes) do
-		for _,item in pairs(huditems[hook]) do
-			if (item.name == itemName) then
-				return item;
-			end
-		end
+	if (item == nil) then
+		item = customhud.CreateNewItem(itemName);
+		updatingItem = false;
 	end
 
-	return nil;
+	item.funcs["vanilla"] = nil;
+
+	if (updatingItem == false) then
+		item.type = "vanilla";
+		item.enabled = hudenabled(itemName);
+	end
+
+	item.layer = INT32_MIN;
+	item.isDefaultItem = true;
+
+	table.insert(huditems[hookType], item);
 end
 
 function customhud.ItemExists(itemName)
 	return (FindItem(itemName) != nil);
-end
-
-function customhud.FindItem(itemName)
-	return FindItem(itemName);
 end
 
 function customhud.UpdateHudItemStatus(item)
@@ -399,14 +405,21 @@ rawset(hud, "enable",  customhud.enable)
 rawset(hud, "enabled", customhud.enabled)
 rawset(hud, "disable", customhud.disable)
 
-local fonts = {};
+--#endregion
+--#region Fonts -- Currently unsupported
+
+if not customhud.fonts then
+	customhud.fonts = {};
+end
+
+local fonts = customhud.fonts;
 
 local function CreateNewFont(fontName, kerning, space, mono)
-	if (type(kerning) != "number")
+	if (type(kerning) ~= "number") then
 		kerning = 0;
 	end
 
-	if (type(space) != "number")
+	if (type(space) ~= "number") then
 		space = 4;
 	end
 
@@ -419,15 +432,25 @@ local function CreateNewFont(fontName, kerning, space, mono)
 		number = false,
 	};
 
-	if (type(mono) == "number")
+	if (type(mono) == "number") then
 		newFont.mono = mono;
 	end
 
 	return newFont;
 end
 
+function customhud.CreateNewFont(fontName, kerning, space, mono)
+	return CreateNewFont(fontName, kerning, space, mono)
+end
+
+---Defines a new font. This should be done before using any of the font functions.
+---@param fontName string is the font's prefix. This is used for determining the patch to use, which is in xxxxxyyy, where x is the font prefix and y is the ASCII decimal of each character. This cannot be longer than 5 characters.
+---@param kerning number? is the spacing between letters. Negative numbers makes letters overlap, positive numbers are spaced farther apart. Defaults to 0.
+---@param space number? is how many pixels a space should be. Defaults to 4
+---@param mono number? makes all characters mono-spaced instead of being based on each patch size. Defaults to nil, for a variable-width font.
+---@return table|nil
 function customhud.SetupFont(fontName, kerning, space, mono)
-	if (type(fontName) != "string") then
+	if (type(fontName) ~= "string") then
 		warn("Invalid font name \""..fontName.."\" in customhud.SetupFont");
 		return;
 	end
@@ -445,12 +468,19 @@ function customhud.SetupFont(fontName, kerning, space, mono)
 	fonts[fontName] = CreateNewFont(fontName, kerning, space, mono);
 end
 
+---Returns font data from customhud.SetupFont or customhud.SetupNumberFont.
+---@param fontName string
+---@return table
 function customhud.GetFont(fontName)
 	return fonts[fontName];
 end
 
 local function FontPatchNameDirect(fontName, charByte)
 	return fontName .. string.format("%03d", charByte);
+end
+
+function customhud.FontPatchNameDirect(fontName, charByte)
+	return FontPatchNameDirect(fontName, charByte);
 end
 
 local function FontPatchName(v, fontName, charByte)
@@ -468,6 +498,10 @@ local function FontPatchName(v, fontName, charByte)
 	return patchName;
 end
 
+function customhud.FontPatchName(v, fontName, charByte)
+	return FontPatchName(v, fontName, charByte);
+end
+
 local function NumberPatchName(v, fontName, charByte)
 	local charNumber = charByte - 48;
 	if (charNumber >= 0 and charNumber <= 9) then
@@ -476,6 +510,15 @@ local function NumberPatchName(v, fontName, charByte)
 	return "";
 end
 
+function customhud.NumberPatchName(v, fontName, charByte)
+	return NumberPatchName(v, fontName, charByte);
+end
+
+---Caches and returns a specific character patch from font data.
+---@param v 	   videolib
+---@param font 	   table
+---@param charByte number
+---@return patch_t|nil
 function customhud.GetFontPatch(v, font, charByte)
 	if not (font.patches[charByte] and font.patches[charByte].valid) then
 		local patchName = "";
@@ -486,7 +529,7 @@ function customhud.GetFontPatch(v, font, charByte)
 			patchName = FontPatchName(v, font.name, charByte);
 		end
 
-		if (patchName == "")
+		if (patchName == "") then
 			return nil;
 		end
 
@@ -499,6 +542,12 @@ function customhud.GetFontPatch(v, font, charByte)
 	return font.patches[charByte];
 end
 
+---Caches and returns a specific character patch from font data.
+---@param v 	   videolib
+---@param str 	   string
+---@param fontName string?
+---@param scale    number?
+---@return number|nil
 function customhud.CustomFontStringWidth(v, str, fontName, scale)
 	if not (type(str) == "string") then
 		warn("No string given in customhud.CustomFontStringWidth");
@@ -521,22 +570,22 @@ function customhud.CustomFontStringWidth(v, str, fontName, scale)
 		return strwidth;
 	end
 
-	if (type(scale) != "number")
+	if (type(scale) ~= "number") then
 		scale = nil;
 	end
 
 	local kerning = font.kerning;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		kerning = $1 * scale;
 	end
 
 	local space = font.space;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		space = $1 * scale;
 	end
 
 	local mono = font.mono;
-	if (mono != nil and scale != nil) then
+	if (mono ~= nil and scale ~= nil) then
 		mono = $1 * scale;
 	end
 
@@ -547,9 +596,9 @@ function customhud.CustomFontStringWidth(v, str, fontName, scale)
 		if (patch and patch.valid) then
 			local charWidth = patch.width;
 
-			if (mono != nil) then
+			if (mono ~= nil) then
 				charWidth = mono;
-			elseif (scale != nil) then
+			elseif (scale ~= nil) then
 				charWidth = $1 * scale;
 			end
 
@@ -562,6 +611,16 @@ function customhud.CustomFontStringWidth(v, str, fontName, scale)
 	return strwidth;
 end
 
+---Draws a single character of a custom font. Returns the X position to draw another character at, if trying to draw an entire string.
+---@param v videolib
+---@param x fixed_t|number
+---@param y fixed_t|number
+---@param charByte number
+---@param fontName string
+---@param flags number
+---@param scale fixed_t
+---@param color number
+---@return number|nil
 function customhud.CustomFontChar(v, x, y, charByte, fontName, flags, scale, color)
 	if not (type(charByte) == "number") then
 		warn("No character byte given in customhud.CustomFontChar");
@@ -579,22 +638,26 @@ function customhud.CustomFontChar(v, x, y, charByte, fontName, flags, scale, col
 		return;
 	end
 
-	if (type(scale) != "number")
+	if (type(scale) ~= "number") then
 		scale = nil;
 	end
 
+	if (type(flags) != "number") then
+		flags = 0;
+	end
+
 	local kerning = font.kerning;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		kerning = $1 * scale;
 	end
 
 	local space = font.space;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		space = $1 * scale;
 	end
 
 	local mono = font.mono;
-	if (mono != nil and scale != nil) then
+	if (mono ~= nil and scale ~= nil) then
 		mono = $1 * scale;
 	end
 
@@ -605,7 +668,7 @@ function customhud.CustomFontChar(v, x, y, charByte, fontName, flags, scale, col
 
 	local patch = customhud.GetFontPatch(v, font, charByte);
 	if (patch and patch.valid) then
-		if (scale != nil) then
+		if (scale ~= nil) then
 			v.drawScaled(x, y, scale, patch, flags, wc);
 		else
 			v.draw(x, y, patch, flags, wc);
@@ -616,9 +679,9 @@ function customhud.CustomFontChar(v, x, y, charByte, fontName, flags, scale, col
 	if (patch and patch.valid) then
 		local charWidth = patch.width;
 
-		if (mono != nil) then
+		if (mono ~= nil) then
 			charWidth = mono;
-		elseif (scale != nil) then
+		elseif (scale ~= nil) then
 			charWidth = $1 * scale;
 		end
 
@@ -630,6 +693,16 @@ function customhud.CustomFontChar(v, x, y, charByte, fontName, flags, scale, col
 	return nextx;
 end
 
+---Draws a string in a custom font. If scale is not nil, then the X/Y coordinates are expected to be in fixed point scale, otherwise they are expected to be integers. color uses skincolors rather than the base games' text colors.
+---@param v videolib
+---@param x fixed_t|number
+---@param y fixed_t|number
+---@param str number
+---@param fontName string
+---@param flags number
+---@param align string
+---@param scale fixed_t
+---@param color number
 function customhud.CustomFontString(v, x, y, str, fontName, flags, align, scale, color)
 	if not (type(str) == "string") then
 		warn("No string given in customhud.CustomFontString");
@@ -647,22 +720,22 @@ function customhud.CustomFontString(v, x, y, str, fontName, flags, align, scale,
 		return;
 	end
 
-	if (type(scale) != "number")
+	if (type(scale) ~= "number") then
 		scale = nil;
 	end
 
 	local kerning = font.kerning;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		kerning = $1 * scale;
 	end
 
 	local space = font.space;
-	if (scale != nil) then
+	if (scale ~= nil) then
 		space = $1 * scale;
 	end
 
 	local mono = font.mono;
-	if (mono != nil and scale != nil) then
+	if (mono ~= nil and scale ~= nil) then
 		mono = $1 * scale;
 	end
 
@@ -685,8 +758,13 @@ function customhud.CustomFontString(v, x, y, str, fontName, flags, align, scale,
 	end
 end
 
+---Defines a new number font. Unlike standard fonts, the font prefix can be up to 7 characters long, but it only uses 0-9 as bytes to represent numbers. Generally, it's recommended to use customhud.SetupFont instead, as this is mostly only for backwards compatibility with some older mods' number font names.
+---@param fontName string
+---@param kerning number?
+---@param space number?
+---@param mono number?
 function customhud.SetupNumberFont(fontName, kerning, space, mono)
-	if (type(fontName) != "string") then
+	if (type(fontName) ~= "string") then
 		warn("Invalid font name \""..fontName.."\" in customhud.SetupNumberFont");
 		return;
 	end
@@ -707,10 +785,17 @@ function customhud.SetupNumberFont(fontName, kerning, space, mono)
 	fonts[fontName] = newFont;
 end
 
+---Returns the width of a number if it were drawn in a custom font. padding is the number of padding zeroes to use, set to nil for no padding.
+---@param v 		videolib
+---@param num 		number
+---@param fontName 	string
+---@param padding 	string?
+---@param scale 	fixed_t?
+---@return number|nil
 function customhud.CustomNumWidth(v, num, fontName, padding, scale)
 	local str = "";
 
-	if (padding != nil)
+	if (padding ~= nil) then
 		str = string.format("%0"..padding.."d", num);
 	else
 		str = string.format("%d", num);
@@ -719,10 +804,23 @@ function customhud.CustomNumWidth(v, num, fontName, padding, scale)
 	return customhud.CustomFontStringWidth(v, str, fontName, scale);
 end
 
+---Draws a number in a custom number font.
+---comment
+---@param v videolib
+---@param x fixed_t|number
+---@param y fixed_t|number
+---@param num number
+---@param fontName string
+---@param padding number?
+---@param flags number?
+---@param align string?
+---@param scale number?
+---@param color number?
+---@return nil
 function customhud.CustomNum(v, x, y, num, fontName, padding, flags, align, scale, color)
 	local str = "";
 
-	if (padding != nil)
+	if (padding ~= nil) then
 		str = string.format("%0"..padding.."d", num);
 	else
 		str = string.format("%d", num);
@@ -730,3 +828,5 @@ function customhud.CustomNum(v, x, y, num, fontName, padding, flags, align, scal
 
 	return customhud.CustomFontString(v, x, y, str, fontName, flags, align, scale, color);
 end
+
+--#endregion
