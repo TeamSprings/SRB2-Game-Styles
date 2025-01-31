@@ -58,13 +58,13 @@ CV_RegisterVar({
 	displayname = "Item Boxes",
 })
 
---CV_RegisterVar({
---	name = "dc_itemboxstyle",
---	defaultvalue = "adventure",
---	PossibleValue = {nextgen = 1, adventure = 0},
---	category = "Adventure Style - Eyecandy",
---	displayname = "Item Box Style",
---})
+CV_RegisterVar({
+	name = "dc_itemboxstyle",
+	defaultvalue = "adventure",
+	PossibleValue = {adventure = 0, nextgen = 1},
+	category = "Adventure Style - Eyecandy",
+	displayname = "Item Box Style",
+})
 
 CV_RegisterVar({
 	name = "dc_checkpoints",

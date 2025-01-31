@@ -13,7 +13,6 @@ local slope_handler = tbsrequire 'helpers/mo_slope'
 local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 
 local Disable_ItemBox = false
---local ItemBox_Type = CV_FindVar("dc_itemboxstyle")
 
 addHook("MapChange", function()
 	Disable_ItemBox = false
@@ -21,6 +20,9 @@ addHook("MapChange", function()
 		Disable_ItemBox = true
 	end
 end)
+
+local itemboxstyle_cv = CV_FindVar("dc_itemboxstyle")
+
 
 local function P_SpawnItemBox(a)
 	if Disable_ItemBox then return end
@@ -42,6 +44,7 @@ local function P_SpawnItemBox(a)
 			a.item.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 			a.item.flags2 = $|MF2_LINKDRAW &~ MF2_OBJECTFLIP
 			a.item.tfl = 1
+			a.item.dispoffset = 1
 		end
 
 		if not a.caps then
@@ -51,6 +54,7 @@ local function P_SpawnItemBox(a)
 			a.caps.sprite = SPR_DC_MONITOR
 			a.caps.flags = $|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT
 			a.caps.flags2 = $|MF2_LINKDRAW
+			a.caps.dispoffset = 2
 		end
 	end
 
@@ -94,21 +98,21 @@ end
 local function itemBoxSwitching(a, typem)
 	if typem == 1 then
 		a.flags = $ &~ (MF_SOLID|MF_NOGRAVITY)
-		a.caps.frame = C|FF_TRANS50
+		a.caps.frame = (C + itemboxstyle_cv.value * 8)|FF_TRANS50
 
 		if a.info.flags & MF_GRENADEBOUNCE then
-			a.frame = H
+			a.frame = H + itemboxstyle_cv.value  * 8
 		else
 			if a.health > 0 then
-				a.frame = A
+				a.frame = A + itemboxstyle_cv.value * 8
 			else
-				a.frame = B
+				a.frame = B + itemboxstyle_cv.value * 8
 			end
 		end
 	else
 		a.flags = $|MF_NOGRAVITY &~ MF_SOLID
-		a.frame = D
-		a.caps.frame = E|FF_TRANS50
+		a.frame = D + itemboxstyle_cv.value * 8
+		a.caps.frame = (E + itemboxstyle_cv.value * 8)|FF_TRANS50
 	end
 end
 
@@ -307,6 +311,10 @@ local function P_MonitorThinker(a)
 					end
 				end
 
+				if itemboxstyle_cv.value == 1 then
+					a.item.frame = $ &~ FF_PAPERSPRITE
+				end
+
 				-- Type specific
 				if monitor_type == 1 then
 					slope_handler.slopeRotation(a)
@@ -463,7 +471,7 @@ local function P_MonitorDeath(a, d, s)
 			smuk.scale = a.scale*8/3
 			a.state = S_INVISIBLE
 			a.sprite = SPR_DC_MONITOR
-			a.frame = B
+			a.frame = B + itemboxstyle_cv.value * 8
 			P_RemoveMobj(a.item)
 			P_RemoveMobj(a.caps)
 		end
