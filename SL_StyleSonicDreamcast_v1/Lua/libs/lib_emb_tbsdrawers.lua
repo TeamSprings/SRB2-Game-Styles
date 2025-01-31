@@ -17,6 +17,7 @@ local FixedSqrt = FixedSqrt
 local FixedMul = FixedMul
 local FixedDiv = FixedDiv
 
+local strbyte = string.byte
 local strchar = string.char
 local strsub = string.sub
 local strrep = string.rep
@@ -33,20 +34,20 @@ end
 
 local function V_RegisterFont(v, font, selectchar)
 	fontregistry[font] = {}
-	for byte = 0, 128 do
-		local char = ASCII[byte]
+	local cache = fontregistry[font]
 
+	for byte, char in ipairs(ASCII) do
 		local char_check = font..char
 		if not v.patchExists(char_check) then
 			local byte_check = font..byte
 
 			if v.patchExists(byte_check) then
-				fontregistry[font][char] = v.cachePatch(byte_check)
+				cache[char] = v.cachePatch(byte_check)
 			else
-				fontregistry[font][char] = v.cachePatch(font..'NONE')
+				cache[char] = v.cachePatch(font..'NONE')
 			end
 		else
-			fontregistry[font][char] = v.cachePatch(char_check)
+			cache[char] = v.cachePatch(char_check)
 		end
 	end
 
@@ -56,9 +57,13 @@ end
 local function V_CachePatches(v, patch, str, font, val, padding, i)
 	local char = strsub(str, i, i)
 
-	local symbol = fontregistry[font] and
-	(fontregistry[font][char] or V_RegisterFont(v, font, char)) or V_RegisterFont(v, font, char)
+	if not ASCII[strbyte(char)] then
+		char = " "
+	end
 
+	local symbol = fontregistry[font] and (fontregistry[font][char]
+	and fontregistry[font][char]
+	or V_RegisterFont(v, font, char)) or V_RegisterFont(v, font, char)
 	return {patch = symbol, width = symbol.width+padding}
 end
 

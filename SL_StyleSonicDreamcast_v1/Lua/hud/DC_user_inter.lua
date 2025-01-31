@@ -223,6 +223,47 @@ local SubToTagLUT = {
 	["SPECIAL STAGE 7"] = "Special Stage: 07",
 }
 
+local SubToColor = {
+	["SPECIAL STAGE 1"] = {SKINCOLOR_EMERALD, true},
+	["SPECIAL STAGE 2"] = {SKINCOLOR_PURPLE, true},
+	["SPECIAL STAGE 3"] = {SKINCOLOR_SAPPHIRE, true},
+	["SPECIAL STAGE 4"] = {SKINCOLOR_SKY, true},
+	["SPECIAL STAGE 5"] = {SKINCOLOR_SANDY, true},
+	["SPECIAL STAGE 6"] = {SKINCOLOR_PEPPER, true},
+	["SPECIAL STAGE 7"] = {SKINCOLOR_AZURE, true},
+}
+
+
+local mission = {
+	[1] = "st ",
+	[2] = "nd ",
+	[3] = "rd ",
+}
+
+local function THTHTHfunc(num)
+	if type(num) ~= "number" then
+		return num
+	end
+
+	if num == 0 then
+		return ""
+	end
+
+	local ord = num
+	local str = "th "
+
+	if num > 20 then
+		num = (num % 10) + 1
+	end
+
+	if mission[num] then
+		str = mission[num]
+	end
+
+	return ord..str
+end
+
+
 HOOK("stagetitle", "dchud", function(v, p, t, et)
 	if t > et-1 then return end
 
@@ -300,7 +341,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 			v.fadeScreen(0xFF00|V_PERPLAYER, 31-(easegoout*31/93))
 		end
 
-		local color = p.skincolor or consoleplayer.skincolor
+		local color = p.skincolor or displayplayer.skincolor
 
 		if mapheaderinfo[gamemap].styles_titlecard_color then
 			local ttcl = tostring(mapheaderinfo[gamemap].styles_titlecard_color)
@@ -327,6 +368,17 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 			v.draw(41,-50-(t % SRB2tagsideline.height), SRB2tagsideline, V_SNAPTOLEFT|V_SNAPTOTOP|V_ADD|(easetransparency1 << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
 		end
 
+		local textColor = v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE)
+
+		if SubToColor[string.upper(subtitle)] then
+			local data = SubToColor[string.upper(subtitle)]
+			textColor = v.getColormap(TC_DEFAULT, data[1])
+
+			if data[2] then
+				color = data[1]
+			end
+		end
+
 		-- SPEEEEN
 
 		local spinGhost = v.getSpritePatch(SPR_CHE0, H, 0, easespeen)
@@ -339,23 +391,30 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 		v.draw((75+#lenght*10)-easespinspin+easespout, 75, spinGraphic, V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 
 		if mapheaderinfo[gamemap].styles_dc_stagenum then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, textColor, 0, -1, 0)
 		elseif SubToTagLUT[string.upper(subtitle)] then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, SubToTagLUT[string.upper(subtitle)], V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, SubToTagLUT[string.upper(subtitle)], V_PERPLAYER, textColor, 0, -1, 0)
 			subtitle = nil
 		elseif not (G_RingSlingerGametype() or G_GametypeHasSpectators()) then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, textColor, 0, -1, 0)
 		end
 
 		-- SUBTITLE
 
-		if subtitle and subtitle ~= "" then
+		if subtitle and string.len(subtitle) > 0 then
 			for i = 1, 2 do
 				v.drawScaled(FixedDiv(84*FRACUNIT, easesubtit), FixedDiv(140*FRACUNIT, easesubtit), easesubtit, v.cachePatch("SA2TTSUB"..i), ((i == 2 and easetransparency4 or easetransparency3) << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 			end
 
 			if t > TICRATE then
-				font_drawer(v, 'COMSANSFT', 320*FRACUNIT, 300*FRACUNIT, FRACUNIT/2, subtitle, (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_CARBON), "center", 1, 0)
+				if mapheaderinfo[gamemap].styles_mission then
+					local tag = mapheaderinfo[gamemap].styles_missiontag or "Mission:"
+
+					font_drawer(v, 'SA2TTFONT', 187*FRACUNIT, 298*FRACUNIT, 3*FRACUNIT/5-FRACUNIT/9, THTHTHfunc(tonumber(mapheaderinfo[gamemap].styles_mission) or 0)..tag, (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+					font_drawer(v, 'COMSANSFT', 182*FRACUNIT, 312*FRACUNIT, FRACUNIT/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1, 0)
+				else
+					font_drawer(v, 'COMSANSFT', 358*FRACUNIT, 300*FRACUNIT, FRACUNIT/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "center", 1, 0)
+				end
 			end
 
 		end
@@ -364,7 +423,7 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 
 		for i = 1, #split do
 			local spliteaseout = ease.inquint((max(min(t-5*TICRATE/2-(i-1), TICRATE/2+(i-1)), 0)*FRACUNIT)/(TICRATE/2+(i-1)), 0, 500)
-			font_drawer(v, 'SA2LTTFONT', (115-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FRACUNIT, (88+(i-1)*20)*FRACUNIT, FRACUNIT, split[i], V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+			font_drawer(v, 'SA2LTTFONT', (115-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FRACUNIT, (88+(i-1)*20)*FRACUNIT, FRACUNIT, split[i], V_PERPLAYER, textColor, 0, -1, 0)
 		end
 
 	end
