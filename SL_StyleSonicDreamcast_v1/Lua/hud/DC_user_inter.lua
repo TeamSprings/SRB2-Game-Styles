@@ -25,7 +25,7 @@ local Y_GetPerfectBonus = helper.Y_GetPerfectBonus
 local HOOK = customhud.SetupItem
 
 --
--- End Level Tally
+-- End Level Tally...
 --
 
 sfxinfo[freeslot("sfx_rank")].caption = "rank drop!"
