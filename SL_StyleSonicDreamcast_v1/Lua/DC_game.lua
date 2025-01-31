@@ -242,6 +242,7 @@ local function G_StylesTallyBackend(p)
 				if p.exiting == 2*TICRATE+10 then
 					p.tallytimer = 13*TICRATE
 					p.exiting = 2*TICRATE+9
+					p.styles_teleportToGround = true
 
 					if not p.mo.advposecamera then
 						p.mo.advposecamera = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_THOK)
@@ -277,6 +278,11 @@ local function G_StylesTallyBackend(p)
 						end
 					end
 					]]
+
+					if p.styles_teleportToGround then
+						P_SetOrigin(p.mo, p.mo.x, p.mo.y, P_MobjFlip(p.mo) > 0 and p.mo.floorz or p.mo.ceilingz)
+						p.styles_teleportToGround = nil
+					end
 
 					p.tallytimer = $-1
 					local angeasemath = ease.insine(max(min(p.tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
