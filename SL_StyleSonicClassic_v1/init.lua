@@ -1,7 +1,7 @@
 local gameString = "classic"
 
-local packVersion = '3.025'
-rawset(_G, "Style_ClassicVersion", 3025)
+local packVersion = '3.071b'
+rawset(_G, "Style_ClassicVersion", 3071)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Classic Style '..packVersion..'] '
@@ -56,13 +56,13 @@ if VERSION == 202 and SUBVERSION > 13 and not Style_DimpsVersion and not Style_A
 	-- Game Assets
 	dofile(gameString.."_init.lua")
 
+	dofile("assets/"..gameString.."_jingles.lua")
 	dofile("gameplay/"..gameString.."_inter.lua")
 
 	dofile("assets/"..gameString.."_monitor.lua")
 	dofile("assets/"..gameString.."_misc.lua")
 	dofile("gameplay/"..gameString.."_player.lua")
 
-	dofile("assets/"..gameString.."_jingles.lua")
 	dofile("gameplay/"..gameString.."_special.lua")
 
 	dofile(gameString.."_presets.lua")

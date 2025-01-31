@@ -11,70 +11,79 @@ local invincibilitytheme_cv = CV_RegisterVar{
 	name = "classic_invintheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3=5}
+	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3=5, sonicknuckles=6, blast3d=7}
 }
 
 local invincibility_select = {
-	"_INVIS1",
-	"_INVIS2",
-	"_INVCDJP",
-	"_INVCDUS",
-	"_SUPS3",
+	"_INS1",
+	"_INS2",
+	"_INJP",
+	"_INUS",
+	"_INS3",
+	"_INSK",
+	"_IN3D",
 }
 
 local supertheme_cv = CV_RegisterVar{
 	name = "classic_supertheme",
 	defaultvalue = "sonic2",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic2=1, sonic3=2, sonic3unused=3}
+	PossibleValue = {vanilla=0, sonic2=1, sonic3=2, sonicknuckles=3, sonic3unused=4}
 }
 
 local supertheme_select = {
-	"_SUPS2",
-	"_SUPS3",
-	"_SUPSU",
+	"_SES2",
+	"_INS3",
+	"_INSK",
+	"_SESU",
 }
 
 local lifeuptheme_cv = CV_RegisterVar{
 	name = "classic_oneuptheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic3=2}
+	PossibleValue = {vanilla=0, sonic1=1, sonic3=2, sonicknuckles=3}
 }
 
 local lifetheme_select = {
-	"_1UPS1",
-	"_1UPS3",
+	"_1US1",
+	"_1US3",
+	"_1USK",
 }
 
 local bosstheme_cv = CV_RegisterVar{
 	name = "classic_bosstheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3act1=5, sonic3act2=6}
+	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3act1=5, sonicknucklesact1=6, sonic3act2=7, blast3d1=8, blast3d2=9, blast3d3=10}
 }
 
 local boss_select = {
-	"_BOSSS1",
-	"_BOSSS2",
-	"_BOSCDJP",
-	"_BOSCDUS",
-	"_BOSS3A1",
-	"_BOSS3A2",
+	"_BOS1",
+	"_BOS2",
+	"_BOCJ",
+	"_BOCU",
+	"_BS31",
+	"_BSK1",
+	"_BS32",
+	"_B3D1",
+	"_B3D2",
+	"_B3D3",
 }
 
 local levelendtheme_cv = CV_RegisterVar{
 	name = "classic_levelendtheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4}
+	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4, blast3d1=5}
 }
 
 local levelend_select = {
-	"_CLES1",
-	"_CLECDJP",
-	"_CLECDUS",
-	"_CLES3",
+	"_LCS1",
+	"_LCJP",
+	"_LCUS",
+	"_LCS3",
+	"_LC3D",
 }
 
 local drowntheme_cv = CV_RegisterVar{
@@ -85,7 +94,7 @@ local drowntheme_cv = CV_RegisterVar{
 }
 
 local drown_select = {
-	"_DROS1",
+	"_DRS1",
 }
 
 local shoestheme_cv = CV_RegisterVar{
@@ -96,8 +105,8 @@ local shoestheme_cv = CV_RegisterVar{
 }
 
 local shoes_select = {
-	"_SHOCDJP",
-	"_SHOCDUS",
+	"_SHJP",
+	"_SHUS",
 }
 
 addHook("MusicChange", function(oldname, newname, mflags, looping, position, prefadems, fadeinms)

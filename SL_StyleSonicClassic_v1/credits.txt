@@ -14,7 +14,12 @@ Audio Sources:
 + Internet Archive
 + Cutting Room Floor
 
+-- Mostly: https://16bap.theclassicgamer.net/media/
+
+
 Special Thanks:
+
+	"Trimint123"
 
 	"Sonic Team"
 	"Dimps"

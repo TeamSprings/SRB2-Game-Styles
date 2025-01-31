@@ -333,25 +333,3 @@ addHook("MobjThinker", function(a)
 	if Disable_Shields then return end
 	P_RemoveMobj(a)
 end, MT_IVSP)
-
---
--- Power up timers
---
-
-function A_SuperSneakers(mo, var1, var2)
-	super(mo, var1, var2)
-
-	if mo.target and mo.target.player then
-		local player = mo.target.player
-		player.powers[pw_sneakers] = $ - 6 * TICRATE - TICRATE/2 - 1
-	end
-end
-
-function A_Invincibility(mo, var1, var2)
-	super(mo, var1, var2)
-
-	if mo.target and mo.target.player then
-		local player = mo.target.player
-		player.powers[pw_invulnerability] = $ + TICRATE/2 + TICRATE/8 - 3
-	end
-end

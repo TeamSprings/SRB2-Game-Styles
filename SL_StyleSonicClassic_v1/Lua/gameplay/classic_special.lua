@@ -429,6 +429,8 @@ local function SP_LoadState(map)
 					replacement.state = giantring_used
 					replacement.flags = $|MF_NOGRAVITY
 					P_GiantRingCheck(replacement)
+
+					replacement.styles_sizecheck = true
 				end
 			end
 		else
@@ -599,8 +601,10 @@ end, MT_TOKEN)
 
 addHook("MobjThinker", function(a)
 	-- Making sure that FOFs are loaded before checking, can't use mobj spawn due to order of things.
-	if leveltime == 3 then
+	if leveltime > 2 and not a.styles_sizecheck then
 		P_GiantRingCheck(a)
+
+		a.styles_sizecheck = true
 	end
 
 	if not leveltime then

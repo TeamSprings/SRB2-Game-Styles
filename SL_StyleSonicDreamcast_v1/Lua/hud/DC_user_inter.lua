@@ -15,6 +15,7 @@ local helper2 = tbsrequire 'helpers/lua_hud'
 local convertPlayerTime = helper2.convertPlayerTime
 
 local font_drawer = drawlib.draw
+local font_draweru = drawlib.drawUdj
 local rank_calculator = helper.RankCounter
 local Y_GetTimeBonus = helper.Y_GetTimeBonus
 local Y_GetRingsBonus = helper.Y_GetRingsBonus
@@ -33,6 +34,8 @@ sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
 local interm_size = FRACUNIT-3*FRACUNIT/8
 
+local music = "_ADVLCEAR"
+
 HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if not (p.exiting and p.tallytimer) then return true end
 	-- Ease and timing
@@ -42,16 +45,16 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	local xcnt = {}
 
 	for i = 1,5 do
-		textscaling[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), interm_size, 3*FRACUNIT)
-		transparency[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 1, 9) << V_ALPHASHIFT
+		textscaling[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), interm_size, 3*FRACUNIT/2)
+		transparency[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 	end
 
 	local fade = ease.linear(max(min(p.tallytimer-8*TICRATE-5, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 16, 0)
 
 	local fadewhite = abs(abs(ease.linear(max(min(p.tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
 
-	local rankamp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), FRACUNIT, 3*FRACUNIT)
-	local ranktrp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 1, 9) << V_ALPHASHIFT
+	local rankamp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), FRACUNIT, 3*FRACUNIT/2)
+	local ranktrp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 
 	local calculationtime = ease.linear(max(min(p.tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), Y_GetTimeBonus(p.realtime), 0)
 
@@ -61,21 +64,6 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	-- stop music
 	if p.tallytimer == 13*TICRATE-1 then
 		S_FadeOutStopMusic(MUSICRATE, p)
-	end
-
-	if p.tallytimer == 11*TICRATE then
-		P_PlayJingleMusic(p, "_ADVCLEAR", 0, false)
-	end
-
-	if p.tallytimer == 8*TICRATE then S_StartSound(p.mo, sfx_advtal, p) end
-	-- cha-ching! sound
-	if p.tallytimer == 5*TICRATE then
-		S_StartSound(nil, sfx_advchi, p)
-	end
-
-	if hud.skiptallysa then
-		S_FadeOutStopMusic(MUSICRATE, p)
-		S_StopSoundByID(nil, sfx_advtal)
 	end
 
 	-- rank sound
@@ -112,8 +100,8 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 		v.drawScaled(FixedDiv((72+patch.leftoffset)*textscaling[index], textscaling[index]), 5*zscore/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
-		font_drawer(v, 'SA2TL', FixedDiv(392*textscaling[index]-scorelen*textscaling[index]/4,
-		textscaling[index]), zscore-textscaling[index], textscaling[index], currentscore,
+		font_draweru(v, 'SA2TL', FixedDiv(246*textscaling[index], textscaling[index]) + (scorelen * 9 * (textscaling[index] - interm_size)),
+		5*zscore/8, textscaling[index], currentscore,
 		V_PERPLAYER|transparency[index], v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 
 	end
@@ -127,14 +115,14 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 
 		local mint, sect, cent = convertPlayerTime(p.realtime)
 		local tallytime = ''..(mint..':'..sect..':'..cent)
-
+		local len = (string.len(""..tallytime))
 
 		local patch = v.cachePatch("SA2TLTIME")
 		v.drawScaled(FixedDiv((76+patch.leftoffset)*textscaling[index], textscaling[index]), 5*ztime/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
-		font_drawer(v, 'SA2TL', 392*FRACUNIT, ztime-textscaling[index],
-		textscaling[index], tallytime,
+		font_draweru(v, 'SA2TL', FixedDiv(246*textscaling[index], textscaling[index]) + (len * 9 * (textscaling[index] - interm_size)),
+		5*ztime/8, textscaling[index], tallytime,
 		V_PERPLAYER|transparency[index], v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 
 	end
@@ -152,8 +140,8 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 		v.drawScaled(FixedDiv((74+patch.leftoffset)*textscaling[index], textscaling[index]), 5*zrings/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
-		font_drawer(v, 'SA2TL', FixedDiv(392*textscaling[index]-ringslen*textscaling[index]/4,
-		textscaling[index]), zrings-textscaling[index], textscaling[index], tallyrings,
+		font_draweru(v, 'SA2TL', FixedDiv(246*textscaling[index], textscaling[index]) + (ringslen * 9 * (textscaling[index] - interm_size)),
+		5*zrings/8, textscaling[index], tallyrings,
 		V_PERPLAYER|transparency[index], v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 
 	end
@@ -171,8 +159,8 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 		v.drawScaled(FixedDiv((63+patch.leftoffset)*textscaling[index], textscaling[index]), 5*timebonz/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
-		font_drawer(v, 'SA2TL', FixedDiv(392*textscaling[index]-timelen*textscaling[index]/4,
-		textscaling[index]), timebonz, textscaling[index], timebonus,
+		font_draweru(v, 'SA2TL', FixedDiv(246*textscaling[index], textscaling[index]) + (timelen * 9 * (textscaling[index] - interm_size)),
+		5*timebonz/8, textscaling[index], timebonus,
 		V_PERPLAYER|transparency[index], v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 
 	end
@@ -184,13 +172,14 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 
 		local totalz = FixedDiv((z2+77)*textscaling[index], textscaling[index])
 		local totalScore = ''..(Y_GetRingsBonus(p.rings)+(p.score-p.startscore)+calculationtime)
+		local len = (string.len(""..totalScore))
 
 		local patch = v.cachePatch("SA2TLTS")
 		v.drawScaled(FixedDiv((61+patch.leftoffset)*textscaling[index], textscaling[index]), 5*totalz/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
-		font_drawer(v, 'SA2TL', FixedDiv(392*textscaling[index],
-		textscaling[index]), totalz, textscaling[index], totalScore,
+		font_draweru(v, 'SA2TL', FixedDiv(246*textscaling[index], textscaling[index]) + (len * 9 * (textscaling[index] - interm_size)),
+		5*totalz/8, textscaling[index], totalScore,
 		V_PERPLAYER|transparency[index], v.getColormap(TC_DEFAULT, 0), "right", 0, 0)
 
 	end
@@ -198,7 +187,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	-- Rank
 
 	local rank = rank_calculator(p)
-	if rankamp ~= 3*FRACUNIT then
+	if rankamp ~= 3*FRACUNIT/2 then
 		local patch = v.cachePatch("SA2RANK"..rank)
 		v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),
 		FixedDiv(158*rankamp, rankamp)+FixedDiv((patch.height/2)*rankamp, rankamp), rankamp, patch, V_PERPLAYER|ranktrp)

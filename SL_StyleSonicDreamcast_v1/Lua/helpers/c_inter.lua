@@ -109,15 +109,20 @@ function helper.RankCounter(p)
 		requirementscore = 10000 + helper.Y_GetRingsBonus(helper.totalcoinnum) + helper.Y_GetRingsBonus(mapheaderinfo[gamemap].startrings)
 	end
 
+	local A_rank = tonumber(mapheaderinfo[gamemap].styles_ranks_a) or requirementscore/4
+	local B_rank = tonumber(mapheaderinfo[gamemap].styles_ranks_b) or requirementscore/7
+	local C_rank = tonumber(mapheaderinfo[gamemap].styles_ranks_c) or requirementscore/10
+	local D_rank = tonumber(mapheaderinfo[gamemap].styles_ranks_d) or requirementscore/12
+
 	-- Compare score and requirement to result
 
-	if totalscore > requirementscore/4 then
+	if totalscore >= A_rank then
 		return "A"
-	elseif totalscore > requirementscore/7 then
+	elseif totalscore >= B_rank then
 		return "B"
-	elseif totalscore > requirementscore/10 then
+	elseif totalscore >= C_rank then
 		return "C"
-	elseif totalscore > requirementscore/12 then
+	elseif totalscore >= D_rank then
 		return "D"
 	else
 		return "E"

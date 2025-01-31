@@ -7,8 +7,6 @@ Contributors: Skydusk
 
 ]]
 
-
-local finishSectors = {}
 local helper = 	tbsrequire 'helpers/c_inter'
 
 -- Global that should have been exposed! Bruh.
@@ -45,8 +43,21 @@ addHook("PlayerSpawn", function(p)
 	p.startscore = p.score
 end)
 
+addHook("MapLoad", function()
+	for p in players.iterate() do
+		-- Anti exploit measure
+		if p.styles_tallylastscore then
+			p.score = p.styles_tallylastscore
+
+			p.styles_tallylastscore = nil
+		end
+	end
+end)
+
+
 local skiptally = false
 local customexit = nil
+local lastspecialsector = nil
 
 --
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
@@ -95,12 +106,6 @@ rawset(_G, "G_ExitLevel", function(...)
 
 	G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
 
-	if not (multiplayer or skiptally) then
-		for p in players.iterate do
-			P_AddPlayerScore(p, helper.Y_GetAllBonus(p))
-		end
-	end
-
 	if customexit then
 		customexit = nil
 	end
@@ -108,73 +113,62 @@ rawset(_G, "G_ExitLevel", function(...)
 	if skiptally then
 		skiptally = false
 	end
+
+	lastspecialsector = nil
 end)
-
---
---	Search Custom Exits
---
-
-local function Hack_SearchCustomExits()
-	finishSectors = {}
-	skiptally = false
-
-	for s in sectors.iterate do
-
-		if (s.specialflags & SSF_EXIT) then
-			local l_id = P_FindSpecialLineFromTag(2, s.tag)
-
-			if l_id and lines[l_id] then
-				local l = lines[l_id]
-
-				finishSectors[s] = {
-					s,
-					s.tag,
-					s.floorheight,
-					s.ceilingheight,
-					l.flags,
-					l.args,
-				}
-			else
-				finishSectors[s] = {
-					s,
-					s.tag,
-					s.floorheight,
-					s.ceilingheight,
-					nil,
-					nil,
-				}
-			end
-		end
-
-	end
-end
-
-addHook("MapLoad", Hack_SearchCustomExits)
 
 --
 -- Setup functions
 --
 
-local function G_InteprateStyleSectors(s)
-	if finishSectors[s][5] then
-		local finish = finishSectors[s]
+local function G_CheckIfSectorIsCustomExit(s)
+	local result = nil
 
-		local binary_skip = ((finish[5] & ML_NOCLIMB) and true or skiptally)
-		local udmf_skip = ((finish[6][1] & TMEF_SKIPTALLY) and true or skiptally)
+	for l in lines.tagged(s.tag) do
+		if l.special ~= 2 then continue end
 
-		skiptally = udmf_skip and true or binary_skip
-		customexit = finish[6][0] and finish[6][0] or finish[3]
+		result = {
+			s,
+			s.tag,
+			s.floorheight,
+			s.ceilingheight,
+			l.flags,
+			l.args,
+			l.frontsector,
+		}
 	end
+
+	return result
+end
+
+local function G_InteprateStyleSectors(finish)
+	if not finish then return end
+
+	local binary_skip = ((finish[5] & ML_NOCLIMB) and true or skiptally)
+	local udmf_skip = ((finish[6][1] & TMEF_SKIPTALLY) and true or skiptally)
+
+	skiptally = udmf_skip and true or binary_skip
+
+	local check = nil
+
+	if finish[7] and finish[7].floorheight then
+		check = finish[7].floorheight/FRACUNIT
+	end
+
+	customexit = (finish[6][0] > 0 and finish[6][0] or check) or customexit
+
+	lastspecialsector = finish
 end
 
 local function G_InitiateNewExit()
-	G_SetCustomExitOriginal(nil, 1)
+	G_SetCustomExitOriginal(nil or customexit, 1)
 end
-
 
 local function G_StylesTallyBackend(p)
 	if multiplayer then return end
 	if not (p.mo and p.mo.valid) then return end
+	if p.bot then return end
+
 	if marathonmode then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
@@ -183,15 +177,25 @@ local function G_StylesTallyBackend(p)
 
 	if G_GametypeUsesCoopStarposts() and G_GametypeUsesLives() then
 
-		-- Handles cases with skiptally, hopefully.
-		if not p.urhudon then
-			local spacial_sec = P_MobjTouchingSectorSpecialFlag(p.mo, SSF_EXIT)
+		if p.exiting and not lastspecialsector then
+			-- Handles cases with skiptally, hopefully.
+			if not p.urhudon then
+				local spacial_sec = P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT)
 
-			if spacial_sec and finishSectors[spacial_sec] then
-				G_InteprateStyleSectors(spacial_sec)
+				if spacial_sec then
+					G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec))
+				end
+
+				if not spacial_sec and p.mo then
+					spacial_sec = p.mo.subsector
+
+					if spacial_sec and spacial_sec.sector then
+						G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec.sector))
+					end
+				end
+
+				G_InitiateNewExit()
 			end
-
-			G_InitiateNewExit()
 		end
 
 		if G_EnoughPlayersFinished() then
@@ -255,29 +259,52 @@ local function G_StylesTallyBackend(p)
 					else
 						p.exiting = 2*TICRATE+9
 					end
+
+					if p.tallytimer == 8*TICRATE then S_StartSound(p.mo, sfx_advtal, p) end
+
+					if p.tallytimer == 11*TICRATE then
+						p.styles_tallytrack = "_ADVCLEAR"
+
+						P_PlayJingleMusic(p, p.styles_tallytrack, 0, false)
+						p.styles_tallyposms = 0
+						p.styles_tallystoplooping = nil
+						p.styles_tallysoundlenght = S_GetMusicLength()
+					elseif p.tallytimer < 11*TICRATE then
+						local cur_music = S_MusicName(p)
+
+						if p.styles_tallystoplooping then
+							S_StopMusic(p)
+						elseif cur_music then
+							if cur_music ~= p.styles_tallytrack or not (S_MusicPlaying(p)) then
+								S_ChangeMusic(p.styles_tallytrack, false, p, 0, p.styles_tallyposms, 0, 0)
+
+								if p.styles_tallystoplooping or (p.styles_tallysoundlenght - MUSICRATE <= p.styles_tallyposms) then
+									S_StopMusic(p)
+									p.styles_tallystoplooping = true
+								end
+							elseif cur_music and cur_music == p.styles_tallytrack then
+								if p.styles_tallysoundlenght - MUSICRATE > p.styles_tallyposms then
+									p.styles_tallyposms = S_GetMusicPosition()
+
+									if p.styles_tallyposms == p.styles_tallysoundlenght then
+										p.styles_tallystoplooping = true
+									end
+								end
+							end
+						end
+					end
+
+					-- cha-ching! sound
+					if p.tallytimer == 5*TICRATE then
+						S_StartSound(nil, sfx_advchi, p)
+					end
+
 					if p.cmd.buttons & BT_SPIN and p.tallytimer > 4*TICRATE+1 then
 						p.tallytimer = 4*TICRATE
 						-- I wanted to do it but whatever, Demnyx you have this one
-						S_StopMusic(p)
 						S_StartSound(p.mo, sfx_advchi)
+						S_StopSoundByID(p.mo, sfx_advtal)
 					end
-
-					--[[
-					if p.tallytimer == 12*TICRATE-TICRATE/2 then
-						local signpost
-						for mo in p.mo.subsector.sector.thinglist() do
-							if mo.type == MT_SIGN or MT_SA2_GOALRING then
-								signpost = mo
-							end
-						end
-
-						if signpost and signpost.valid then
-							local ang = singpost.angle-ANGLE_90
-							P_SetOrigin(p.mo, signpost.x+50*cos(ang), signpost.y+50*sin(ang), signpost.z)
-							p.mo.angle = ang
-						end
-					end
-					]]
 
 					if p.styles_teleportToGround then
 						P_SetOrigin(p.mo, p.mo.x, p.mo.y, P_MobjFlip(p.mo) > 0 and p.mo.floorz or p.mo.ceilingz)
@@ -299,6 +326,10 @@ local function G_StylesTallyBackend(p)
 			end
 
 			if p.exiting == 1 then
+				if not skiptally then
+					p.styles_tallylastscore = p.score + helper.Y_GetAllBonus(p)
+				end
+
 				G_ExitLevel()
 			end
 		end
@@ -319,4 +350,5 @@ end)
 
 addHook("MapChange", function()
 	customexit = nil
+	lastspecialsector = nil
 end)

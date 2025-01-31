@@ -646,13 +646,13 @@ local classic_menu_vars = {
 	{minv = 1, maxv = 2, name = "SIGN", cv = CV_FindVar("classic_sign")},
 	{minv = 0, maxv = 1, name = "SIGN ACTION", cv = CV_FindVar("classic_sign_movement")},
 	"MUSIC",
-	{minv = 0, maxv = 2, name = "1UP THEME", cv = CV_FindVar("classic_oneuptheme")},
-	{minv = 0, maxv = 2, name = "SPSHOES THEME", cv = CV_FindVar("classic_shoestheme")},
-	{minv = 0, maxv = 5, name = "INVIN THEME", cv = CV_FindVar("classic_invintheme")},
-	{minv = 0, maxv = 3, name = "SUPER THEME", cv = CV_FindVar("classic_supertheme")},
-	{minv = 0, maxv = 6, name = "BOSS THEME", cv = CV_FindVar("classic_bosstheme")},
-	{minv = 0, maxv = 4, name = "CLEAR THEME", cv = CV_FindVar("classic_levelendtheme")},
-	{minv = 0, maxv = 1, name = "DROWN THEME", cv = CV_FindVar("classic_drowntheme")},
+	{minv = 0, maxv = 3, 	name = "1UP THEME", cv = CV_FindVar("classic_oneuptheme")},
+	{minv = 0, maxv = 2, 	name = "SPSHOES THEME", cv = CV_FindVar("classic_shoestheme")},
+	{minv = 0, maxv = 7, 	name = "INVIN THEME", cv = CV_FindVar("classic_invintheme")},
+	{minv = 0, maxv = 4, 	name = "SUPER THEME", cv = CV_FindVar("classic_supertheme")},
+	{minv = 0, maxv = 10, 	name = "BOSS THEME", cv = CV_FindVar("classic_bosstheme")},
+	{minv = 0, maxv = 5, 	name = "CLEAR THEME", cv = CV_FindVar("classic_levelendtheme")},
+	{minv = 0, maxv = 1, 	name = "DROWN THEME", cv = CV_FindVar("classic_drowntheme")},
 }
 
 local menu_select = 1
