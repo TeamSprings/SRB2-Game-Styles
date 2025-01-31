@@ -40,13 +40,13 @@ local monitor_cv = CV_RegisterVar{
 	defaultvalue = "sonic1",
 	flags = CV_CALL,
 	func = function(var)
-		local sets = {0, 3, 10, 6}
+		local sets = {13, 0, 3, 10, 6}
 		frame_offset = sets[var.value]
 
-		local heights = {14, 20, 15, 14}
+		local heights = {14, 14, 20, 15, 14}
 		icon_height = heights[var.value]
 	end,
-	PossibleValue = {sonic1=1, sonic3=2, blast3d=3, mania=4}
+	PossibleValue = {sonic1=1, sonic2=2, sonic3=3, blast3d=4, mania=5}
 }
 
 local monitor_jump_cv = CV_RegisterVar{

@@ -19,10 +19,12 @@ addHook("GameQuit", function(quit)
 		"classic_hudfont",
 		"classic_debug",
 		"classic_hidehudop",
+		"classic_bluefade",
 		-- Gameplay
 		"classic_specialentrance",
 		"classic_endtally",
 		"classic_monitordistribution",
+		"classic_monitormaniajump",
 		-- Player
 		"classic_thok",
 		"classic_spindash",

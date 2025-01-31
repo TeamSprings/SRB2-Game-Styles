@@ -48,7 +48,7 @@ local presets = {
 		classic_pity = 2,
 		classic_score = 2,
 		classic_sign = 1,
-		classic_monitor = 1,
+		classic_monitor = 2,
 		classic_specialentrance = 2,
 
 		-- Player
@@ -106,7 +106,7 @@ local presets = {
 		classic_pity = 2,
 		classic_score = 4,
 		classic_sign = 1,
-		classic_monitor = 2,
+		classic_monitor = 3,
 		classic_specialentrance = 3,
 
 		-- Player
@@ -135,7 +135,7 @@ local presets = {
 		classic_pity = 1,
 		classic_score = 2,
 		classic_sign = 1,
-		classic_monitor = 4,
+		classic_monitor = 5,
 		classic_specialentrance = 3,
 
 		-- Player
