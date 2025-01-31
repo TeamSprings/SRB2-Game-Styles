@@ -598,46 +598,48 @@ end, "intermission")
 --
 
 local classic_menu_vars = {
-	{name = "STYLE PRESET", cv = CV_FindVar("classic_presets")},
+	{minv = 1, maxv = 5, name = "STYLE PRESET", cv = CV_FindVar("classic_presets")},
 	"HUD",
-	{name = "HUD PRESET", cv = hud_cv, --preview = function(v, x, y, flags)
+	{minv = 1, maxv = 8, name = "HUD PRESET", cv = hud_cv, --preview = function(v, x, y, flags)
 		--v.draw(x+24, 16+y, v.cachePatch(prefix..'TTIME'), flags)
 		--drawf(v, prefix..'TNUM', (x+24)*FRACUNIT, (32+y)*FRACUNIT, FRACUNIT, 8420, flags, v.getColormap(TC_DEFAULT, 1), "left")
 	--end
 	},
-	{name = "HUD FONT", cv = font_cv},
-	{name = "HUD ICON STYLE", cv = lif_cv},
-	{name = "DEBUG MODE", cv = debugmode_coordinates},
-	{name = "HIDEABLE HUD", cv = hud_hide_cv},
+	{minv = 1, maxv = 8, name = "HUD FONT", cv = font_cv},
+	{minv = 1, maxv = 6, name = "HUD ICON STYLE", cv = lif_cv},
+	{minv = 0, maxv = 2, name = "DEBUG MODE", cv = debugmode_coordinates},
+	{minv = 0, maxv = 3, name = "HIDEABLE HUD", cv = hud_hide_cv},
+	{minv = 0, maxv = 1, name = "BLUE FADE", cv = fade_cv},
 	"GAMEPLAY",
-	{name = "TOKEN", cv = CV_FindVar("classic_specialentrance")},
-	{name = "SCORE TALLY", cv = CV_FindVar("classic_endtally")},
-	{name = "MONITOR SETS", cv = CV_FindVar("classic_monitordistribution")},
+	{minv = 0, maxv = 3, name = "TOKEN", cv = CV_FindVar("classic_specialentrance")},
+	{minv = 0, maxv = 1, name = "SCORE TALLY", cv = CV_FindVar("classic_endtally")},
+	{minv = 0, maxv = 3, name = "MONITOR SETS", cv = CV_FindVar("classic_monitordistribution")},
+	{minv = 0, maxv = 1, name = "MONITOR HOP", cv = CV_FindVar("classic_monitormaniajump")},
 	"PLAYER",
-	{name = "SPIN TRAIL", cv = CV_FindVar("classic_thok")},
-	{name = "SPINDASH", cv = CV_FindVar("classic_spindash")},
-	{name = "SPRING TWIRL", cv = CV_FindVar("classic_springtwirl")},
-	{name = "SPRING ROLL", cv = CV_FindVar("classic_springroll")},
-	{name = "FALL AIRWALK", cv = CV_FindVar("classic_springairwalk")},
+	{minv = 0, maxv = 1, name = "SPIN TRAIL", cv = CV_FindVar("classic_thok")},
+	{minv = 0, maxv = 1, name = "SPINDASH", cv = CV_FindVar("classic_spindash")},
+	{minv = 0, maxv = 1, name = "SPRING TWIRL", cv = CV_FindVar("classic_springtwirl")},
+	{minv = 0, maxv = 2, name = "SPRING ROLL", cv = CV_FindVar("classic_springroll")},
+	{minv = 0, maxv = 1, name = "FALL AIRWALK", cv = CV_FindVar("classic_springairwalk")},
 	"EYECANDY",
-	{name = "MONITORS", cv = CV_FindVar("classic_monitor")},
-	{name = "STARPOSTS", cv = CV_FindVar("classic_checkpoints")},
-	{name = "EMERALDS", cv = get_emerald_sprite},
-	{name = "EXPLOSIONS", cv = CV_FindVar("classic_explosions")},
-	{name = "POOF DUST", cv = CV_FindVar("classic_dust")},
-	{name = "PITY SHIELD", cv = CV_FindVar("classic_pity")},
-	{name = "INVINCIBILITY", cv = CV_FindVar("classic_invincibility")},
-	{name = "SCORE", cv = CV_FindVar("classic_score")},
-	{name = "SIGN", cv = CV_FindVar("classic_sign")},
-	{name = "SIGN ACTION", cv = CV_FindVar("classic_sign_movement")},
+	{minv = 1, maxv = 5, name = "MONITORS", cv = CV_FindVar("classic_monitor")},
+	{minv = 1, maxv = 6, name = "STARPOSTS", cv = CV_FindVar("classic_checkpoints")},
+	{minv = 1, maxv = 5, name = "EMERALDS", cv = get_emerald_sprite},
+	{minv = 1, maxv = 3, name = "EXPLOSIONS", cv = CV_FindVar("classic_explosions")},
+	{minv = 1, maxv = 2, name = "POOF DUST", cv = CV_FindVar("classic_dust")},
+	{minv = 1, maxv = 4, name = "PITY SHIELD", cv = CV_FindVar("classic_pity")},
+	{minv = 1, maxv = 2, name = "INVINCIBILITY", cv = CV_FindVar("classic_invincibility")},
+	{minv = 1, maxv = 4, name = "SCORE", cv = CV_FindVar("classic_score")},
+	{minv = 1, maxv = 2, name = "SIGN", cv = CV_FindVar("classic_sign")},
+	{minv = 0, maxv = 1, name = "SIGN ACTION", cv = CV_FindVar("classic_sign_movement")},
 	"MUSIC",
-	{name = "1UP THEME", cv = CV_FindVar("classic_oneuptheme")},
-	{name = "SPSHOES THEME", cv = CV_FindVar("classic_shoestheme")},
-	{name = "INVIN THEME", cv = CV_FindVar("classic_invintheme")},
-	{name = "SUPER THEME", cv = CV_FindVar("classic_supertheme")},
-	{name = "BOSS THEME", cv = CV_FindVar("classic_bosstheme")},
-	{name = "CLEAR THEME", cv = CV_FindVar("classic_levelendtheme")},
-	{name = "DROWN THEME", cv = CV_FindVar("classic_drowntheme")},
+	{minv = 0, maxv = 2, name = "1UP THEME", cv = CV_FindVar("classic_oneuptheme")},
+	{minv = 0, maxv = 2, name = "SPSHOES THEME", cv = CV_FindVar("classic_shoestheme")},
+	{minv = 0, maxv = 5, name = "INVIN THEME", cv = CV_FindVar("classic_invintheme")},
+	{minv = 0, maxv = 3, name = "SUPER THEME", cv = CV_FindVar("classic_supertheme")},
+	{minv = 0, maxv = 6, name = "BOSS THEME", cv = CV_FindVar("classic_bosstheme")},
+	{minv = 0, maxv = 4, name = "CLEAR THEME", cv = CV_FindVar("classic_levelendtheme")},
+	{minv = 0, maxv = 1, name = "DROWN THEME", cv = CV_FindVar("classic_drowntheme")},
 }
 
 local menu_select = 1
@@ -742,7 +744,7 @@ addHook("PlayerCmd", function(p, cmd)
 				if type(classic_menu_vars[menu_select]) ~= "table" then
 					menu_select = $ + 1
 				end
-				press_delay = 3
+				press_delay = 8
 				offset_y = $+60
 
 				S_StartSound(nil, sfx_menu1, p)
@@ -756,7 +758,7 @@ addHook("PlayerCmd", function(p, cmd)
 				if menu_select < 1 then
 					menu_select = #classic_menu_vars
 				end
-				press_delay = 3
+				press_delay = 8
 				offset_y = $-60
 
 				S_StartSound(nil, sfx_menu1, p)
@@ -764,16 +766,28 @@ addHook("PlayerCmd", function(p, cmd)
 
 			if cmd.sidemove < -25 and classic_menu_vars[menu_select].cv then
 				local cv = classic_menu_vars[menu_select].cv
-				CV_Set(cv, cv.value-1)
-				press_delay = 3
+
+				local value = cv.value-1
+				if value < classic_menu_vars[menu_select].minv then
+					value = classic_menu_vars[menu_select].maxv
+				end
+
+				CV_Set(cv, value)
+				press_delay = 8
 
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
 			if cmd.sidemove > 25 and classic_menu_vars[menu_select].cv then
 				local cv = classic_menu_vars[menu_select].cv
-				CV_Set(cv, cv.value+1)
-				press_delay = 3
+
+				local value = cv.value+1
+				if value > classic_menu_vars[menu_select].maxv then
+					value = classic_menu_vars[menu_select].minv
+				end
+
+				CV_Set(cv, value)
+				press_delay = 8
 
 				S_StartSound(nil, sfx_menu1, p)
 			end

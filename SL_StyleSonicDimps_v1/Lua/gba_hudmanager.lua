@@ -659,7 +659,7 @@ addHook("PlayerCmd", function(p, cmd)
 				while((not (gba_menu_vars[menu_select]) or (type(gba_menu_vars[menu_select]) == "string"))  and menu_select < menu_max_val) do
 					menu_select = (menu_select % menu_max_val) + 1
 				end
-				press_delay = 3
+				press_delay = 8
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
@@ -671,7 +671,7 @@ addHook("PlayerCmd", function(p, cmd)
 				if menu_select < 1 then
 					menu_select = menu_max_val
 				end
-				press_delay = 3
+				press_delay = 8
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
@@ -679,8 +679,13 @@ addHook("PlayerCmd", function(p, cmd)
 				local cv = gba_menu_vars[menu_select].cv
 				gba_menu_vars[menu_select].anim = 0
 
-				CV_Set(cv, max(cv.value-1, gba_menu_vars[menu_select].minv))
-				press_delay = 3
+				local value = cv.value-1
+				if value < gba_menu_vars[menu_select].minv then
+					value = gba_menu_vars[menu_select].maxv
+				end
+
+				CV_Set(cv, value)
+				press_delay = 8
 
 				S_StartSound(nil, sfx_menu1, p)
 			end
@@ -689,8 +694,13 @@ addHook("PlayerCmd", function(p, cmd)
 				local cv = gba_menu_vars[menu_select].cv
 				gba_menu_vars[menu_select].anim = 0
 
-				CV_Set(cv, min(cv.value+1, gba_menu_vars[menu_select].maxv))
-				press_delay = 3
+				local value = cv.value+1
+				if value > gba_menu_vars[menu_select].maxv then
+					value = gba_menu_vars[menu_select].minv
+				end
+
+				CV_Set(cv, value)
+				press_delay = 8
 
 				S_StartSound(nil, sfx_menu1, p)
 			end
