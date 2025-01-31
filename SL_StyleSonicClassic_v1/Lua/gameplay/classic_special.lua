@@ -443,6 +443,8 @@ local function SP_LoadState(map)
 end
 
 addHook("MapLoad", function()
+	if not special_entrance then return end
+
 	if last_map then
 		G_SetCustomExitVars(last_map, 0)
 		last_map = nil
@@ -450,6 +452,10 @@ addHook("MapLoad", function()
 
 	if maps_data[gamemap] then
 		SP_LoadState(gamemap)
+	else
+		for p in players.iterate do
+			p.style_additionaltime = 0
+		end
 	end
 
 	anotherlvl = true
