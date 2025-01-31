@@ -11,16 +11,20 @@ local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
 local monitor_style = A
+local monitor_iconoffset = 1
 
 CV_RegisterVar{
 	name = "gba_monitorstyle",
 	defaultvalue = "advance1",
 	flags = CV_CALL,
 	func = function(var)
-		local monitors = {A, C, E}
+		local monitors = {A, C, E, G, I}
 		monitor_style = monitors[var.value]
+
+		local offset = {1, 1, 1, -1, 1}
+		monitor_iconoffset = offset[var.value]
 	end,
-	PossibleValue = {advance1=1, advance2=2, rush=3}
+	PossibleValue = {advance1=1, advance2=2, rush=3, rushadventure=4, colords=5}
 }
 
 local function P_SpawnItemBox(a)
@@ -134,6 +138,7 @@ local function P_MonitorThinker(a)
 			if a.item and a.item.valid then
 				a.flags = $|MF_SOLID
 				a.flags2 = $ &~ MF2_DONTDRAW
+				a.item.dispoffset = monitor_iconoffset
 
 				-- Style Switching
 				if a.info.flags & MF_GRENADEBOUNCE then

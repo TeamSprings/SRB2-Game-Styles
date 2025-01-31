@@ -502,7 +502,7 @@ local gba_menu_vars = {
 	"MISC",
 	nil,
 	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SIGN ANIM", 			cv = CV_FindVar("gba_sign_movement")};
-	{minv = 1, maxv = 3, anim = FRACUNIT, name = "MONITOR STYLE", 		cv = CV_FindVar("gba_monitorstyle")};
+	{minv = 1, maxv = 5, anim = FRACUNIT, name = "MONITOR STYLE", 		cv = CV_FindVar("gba_monitorstyle")};
 	{minv = 0, maxv = 2, anim = FRACUNIT, name = "EGGMAN VOICE", 		cv = CV_FindVar("gba_eggmanvoice")};
 	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SCORE TALLY", 		cv = CV_FindVar("gba_endtally")};
 }
