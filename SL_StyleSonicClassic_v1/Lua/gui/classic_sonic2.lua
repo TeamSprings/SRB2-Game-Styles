@@ -22,7 +22,7 @@ local trx1, trx2, try
 
 
 return{
-	titlecard = function(v, p, t, e)
+	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
@@ -60,6 +60,10 @@ return{
 			if t >= (3*TICRATE) then
 				trx2 = $+((screenw-120)/(35/4))+4
 			end
+
+			trx1 = max(min(trx1, screenw*2), 0)
+			trx2 = max(min(trx2, screenw*2), 0)
+			try = max(min(try, screenh*2), 0)
 
 			local pskin = "none"
 			if p.mo then

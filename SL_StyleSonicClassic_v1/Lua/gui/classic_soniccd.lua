@@ -76,7 +76,7 @@ end
 
 return{
 
-	titlecard = function(v, player, tctime, etime)
+	titlecard = function(v, player, tctime, etime, fade)
 		if tctime > etime-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 

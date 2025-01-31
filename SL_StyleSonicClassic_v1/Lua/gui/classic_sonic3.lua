@@ -38,7 +38,7 @@ local tryx, tryy = 0, 0
 
 return{
 
-	titlecard = function(v, p, t, e)
+	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
@@ -52,7 +52,7 @@ return{
 		end
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
-		local fade = isSpecialStage and 0xFB00 or 0xFF00
+		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
 		local translation = isSpecialStage and "SPECIALSTAGE_SONIC3_TITLE" or nil
 		local special_gp = isSpecialStage and 'S3KTTCARDSS' or 'S3KTTCARD'
 
@@ -63,8 +63,8 @@ return{
 		end
 		if t and t <= 3*TICRATE then
 			if t <= TICRATE/5 then
-				tryx = $-27*FRACUNIT
-				tryy = $+27*FRACUNIT
+				tryx = max($-27*FRACUNIT, 0)
+				tryy = min($+27*FRACUNIT, 0)
 			end
 			if t >= (3*TICRATE - TICRATE/5) then
 				tryx = $+27*FRACUNIT

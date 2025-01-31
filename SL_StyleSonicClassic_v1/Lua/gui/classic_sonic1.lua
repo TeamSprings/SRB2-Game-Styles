@@ -11,7 +11,7 @@ local fontlen = drawlib.lenght
 
 return{
 
-	titlecard = function(v, p, t, e)
+	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
@@ -27,7 +27,7 @@ return{
 		end
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
-		local fade = isSpecialStage and 0xFB00 or 0xFF00
+		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
 		local translation = isSpecialStage and "SPECIALSTAGE_SONIC1_TALLY1" or nil
 		local color_choice = isSpecialStage and SKINCOLOR_YELLOW or nil
 
@@ -38,10 +38,10 @@ return{
 		end
 		if t and t <= 3*TICRATE then
 			if t <= TICRATE/5 then
-				hud.trx = $-27*FRACUNIT
+				hud.trx = max(hud.trx-27*FRACUNIT, 0)
 			end
 			if t >= (3*TICRATE - TICRATE/5) then
-				hud.trx = $+27*FRACUNIT
+				hud.trx = min(hud.trx+27*FRACUNIT, 400*FRACUNIT)
 			end
 
 			local mo = p.mo

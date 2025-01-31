@@ -76,6 +76,13 @@ local lif_cv = CV_RegisterVar{
 	PossibleValue = {sonic1=1, soniccd=2, sonic3=3, blast3d=4, mania=5, xtreme=6}
 }
 
+local fade_cv = CV_RegisterVar{
+	name = "classic_bluefade",
+	defaultvalue = "off",
+	flags = 0,
+	PossibleValue = {off = 0, tally = 1},
+}
+
 local font_cv = CV_RegisterVar{
 	name = "classic_hudfont",
 	defaultvalue = "sonic1",
@@ -95,6 +102,12 @@ local font_cv = CV_RegisterVar{
 
 		local tallyfonts = {1, 2, 1, 4, 2, 2, 2, 2}
 		tallytitleft = tallyfonts[var.value]
+
+		if var.value > 4 then
+			CV_Set(fade_cv, 1)
+		else
+			CV_Set(fade_cv, 0)
+		end
 	end,
 	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, chaotix=6, mania=7, xtreme=8}
 }
@@ -544,14 +557,14 @@ HOOK("stagetitle", "classichud", function(v, p, t, e)
 	end
 
 	if hud_hide_cv.value > 1 then
-		local check = hud_data[min(hud_select, 4)].titlecard(v, p, t, e)
+		local check = hud_data[min(hud_select, 4)].titlecard(v, p, t, e, fade_cv.value > 0)
 
 		if check then
 			styles_hide_hud = true
 			styles_hide_fullhud = true
 		end
 	else
-		hud_data[min(hud_select, 4)].titlecard(v, p, t, e)
+		hud_data[min(hud_select, 4)].titlecard(v, p, t, e, fade_cv.value > 0)
 	end
 
 	return true
