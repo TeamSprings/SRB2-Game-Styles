@@ -197,6 +197,7 @@ local function P_MonitorThinker(a)
 					local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
 					newitembox.scale = a.originscale
 					newitembox.alpha = FRACUNIT
+					newitembox.flags = a.flags|MF_SOLID
 					P_RemoveMobj(a)
 					return
 				end
