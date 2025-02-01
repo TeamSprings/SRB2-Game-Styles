@@ -228,6 +228,11 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallylastscore = p.score
 					p.styles_tallylastlives = p.lives
 
+					p.powers[pw_invulnerability] = 0
+					p.powers[pw_sneakers] = 0
+					p.powers[pw_extralife] = 0
+					p.powers[pw_super] = 0
+
 					S_StopMusic(p)
 					p.styles_tallytrack = "_CLEAR"
 

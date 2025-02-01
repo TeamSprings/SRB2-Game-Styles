@@ -248,6 +248,11 @@ local function G_StylesTallyBackend(p)
 					p.exiting = 2*TICRATE+9
 					p.styles_teleportToGround = true
 
+					p.powers[pw_invulnerability] = 0
+					p.powers[pw_sneakers] = 0
+					p.powers[pw_extralife] = 0
+					p.powers[pw_super] = 0
+
 					if not p.mo.advposecamera then
 						p.mo.advposecamera = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_THOK)
 						p.mo.advposecamera.state = S_INVISIBLE
