@@ -331,7 +331,9 @@ local function P_MonitorDeath(a, d, s)
 	if P_MarioExistsThink(a.item) then
 		A_MonitorPop(a, 0, 0)
 	else
-		if mobjinfo[a.type].damage == MT_UNKNOWN then
+		if a.special_case then
+			a.special_case(a, a.item)
+		elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 			A_MonitorPop(a, 0, 0)
 		else
 			boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
@@ -391,7 +393,7 @@ end
 addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
 addHook("MobjThinker", function(a)
 	P_MonitorThinker(a)
-	if a.health > 0 and a.item then
+	if a and a.health > 0 and a.item then
 		life_up_thinker(a.item)
 	end
 end, MT_1UP_BOX)
@@ -430,6 +432,16 @@ local function P_AddMonitor(mobjtype)
 		addHook("MobjDeath", P_MonitorDeath, mobjtype)
 		addHook("MobjRemoved", P_MonitorRemoval, mobjtype)
 		monitor_database[mobjtype] = 1
+	end
+end
+
+local function P_ExcludeMonitors(...)
+	local array = {...}
+	if not array then return end
+
+	for i = 1, #array do
+		local item = array[i]
+		monitor_database[item] = 1
 	end
 end
 

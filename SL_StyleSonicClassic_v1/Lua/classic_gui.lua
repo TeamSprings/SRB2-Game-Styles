@@ -65,6 +65,19 @@ end, COM_LOCAL)
 --	CVARs
 --
 
+local layout_val = 1
+local layouts = tbsrequire('gui/definitions/classic_layouts')
+
+local layout_cv = CV_RegisterVar{
+	name = "classic_hudlayout",
+	defaultvalue = "classic",
+	flags = CV_CALL,
+	func = function(var)
+		layout_val = var.value
+	end,
+	PossibleValue = {classic=1, blast3d=2}
+}
+
 local lif_cv = CV_RegisterVar{
 	name = "classic_lifeicon",
 	defaultvalue = "sonic1",
@@ -174,6 +187,8 @@ HOOK("score", "classichud", function(v, p, t, e)
 	local mo = p.mo and p.mo or p.realmo
 	if not mo then return end
 
+	if layouts[layout_val] and layouts[layout_val].score == false then return end
+
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
 	end
@@ -214,6 +229,8 @@ local time_display_settings = CV_FindVar("timerres")
 
 HOOK("time", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
+
+	if layouts[layout_val] and layouts[layout_val].time == false then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -276,6 +293,8 @@ end, "game")
 
 HOOK("rings", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
+
+	if layouts[layout_val] and layouts[layout_val].rings == false then return end
 
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -610,50 +629,7 @@ end, "intermission")
 --	MENU
 --
 
-local classic_menu_vars = {
-	{minv = 1, maxv = 5, name = "STYLE PRESET", cv = CV_FindVar("classic_presets")},
-	"HUD",
-	{minv = 1, maxv = 8, name = "HUD PRESET", cv = hud_cv, --preview = function(v, x, y, flags)
-		--v.draw(x+24, 16+y, v.cachePatch(prefix..'TTIME'), flags)
-		--drawf(v, prefix..'TNUM', (x+24)*FRACUNIT, (32+y)*FRACUNIT, FRACUNIT, 8420, flags, v.getColormap(TC_DEFAULT, 1), "left")
-	--end
-	},
-	{minv = 1, maxv = 8, name = "HUD FONT", cv = font_cv},
-	{minv = 1, maxv = 6, name = "HUD ICON STYLE", cv = lif_cv},
-	{minv = 0, maxv = 2, name = "DEBUG MODE", cv = debugmode_coordinates},
-	{minv = 0, maxv = 3, name = "HIDEABLE HUD", cv = hud_hide_cv},
-	{minv = 0, maxv = 1, name = "BLUE FADE", cv = fade_cv},
-	"GAMEPLAY",
-	{minv = 0, maxv = 3, name = "TOKEN", cv = CV_FindVar("classic_specialentrance")},
-	{minv = 0, maxv = 1, name = "SCORE TALLY", cv = CV_FindVar("classic_endtally")},
-	{minv = 0, maxv = 3, name = "MONITOR SETS", cv = CV_FindVar("classic_monitordistribution")},
-	{minv = 0, maxv = 1, name = "MONITOR HOP", cv = CV_FindVar("classic_monitormaniajump")},
-	"PLAYER",
-	{minv = 0, maxv = 1, name = "SPIN TRAIL", cv = CV_FindVar("classic_thok")},
-	{minv = 0, maxv = 1, name = "SPINDASH", cv = CV_FindVar("classic_spindash")},
-	{minv = 0, maxv = 1, name = "SPRING TWIRL", cv = CV_FindVar("classic_springtwirl")},
-	{minv = 0, maxv = 2, name = "SPRING ROLL", cv = CV_FindVar("classic_springroll")},
-	{minv = 0, maxv = 1, name = "FALL AIRWALK", cv = CV_FindVar("classic_springairwalk")},
-	"EYECANDY",
-	{minv = 1, maxv = 5, name = "MONITORS", cv = CV_FindVar("classic_monitor")},
-	{minv = 1, maxv = 6, name = "STARPOSTS", cv = CV_FindVar("classic_checkpoints")},
-	{minv = 1, maxv = 5, name = "EMERALDS", cv = get_emerald_sprite},
-	{minv = 1, maxv = 3, name = "EXPLOSIONS", cv = CV_FindVar("classic_explosions")},
-	{minv = 1, maxv = 2, name = "POOF DUST", cv = CV_FindVar("classic_dust")},
-	{minv = 1, maxv = 4, name = "PITY SHIELD", cv = CV_FindVar("classic_pity")},
-	{minv = 1, maxv = 2, name = "INVINCIBILITY", cv = CV_FindVar("classic_invincibility")},
-	{minv = 1, maxv = 4, name = "SCORE", cv = CV_FindVar("classic_score")},
-	{minv = 1, maxv = 2, name = "SIGN", cv = CV_FindVar("classic_sign")},
-	{minv = 0, maxv = 1, name = "SIGN ACTION", cv = CV_FindVar("classic_sign_movement")},
-	"MUSIC",
-	{minv = 0, maxv = 3, 	name = "1UP THEME", cv = CV_FindVar("classic_oneuptheme")},
-	{minv = 0, maxv = 2, 	name = "SPSHOES THEME", cv = CV_FindVar("classic_shoestheme")},
-	{minv = 0, maxv = 7, 	name = "INVIN THEME", cv = CV_FindVar("classic_invintheme")},
-	{minv = 0, maxv = 4, 	name = "SUPER THEME", cv = CV_FindVar("classic_supertheme")},
-	{minv = 0, maxv = 10, 	name = "BOSS THEME", cv = CV_FindVar("classic_bosstheme")},
-	{minv = 0, maxv = 5, 	name = "CLEAR THEME", cv = CV_FindVar("classic_levelendtheme")},
-	{minv = 0, maxv = 1, 	name = "DROWN THEME", cv = CV_FindVar("classic_drowntheme")},
-}
+local classic_menu_vars = tbsrequire('gui/definitions/classic_menuitems')
 
 local menu_select = 1
 local press_delay = 0
@@ -704,7 +680,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 				v.draw(x_off, y, v.cachePatch(menu_select == i and "S3KBUTTON2" or "S3KBUTTON1"), V_SNAPTOLEFT)
 				v.drawString(x_off, y+8, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT, "center")
 				if item.cv then
-					drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.format("%02x", item.cv.value), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
+					drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
 					v.drawString(x_off, y+28, "\x8C"..item.cv.string, V_SNAPTOLEFT, "center")
 				end
 			elseif type(item) == "string" then

@@ -115,13 +115,13 @@ local presets = {
 		classic_springairwalk = 1,
 
 		-- Music
-		classic_invintheme = 5,
-		classic_supertheme = 3,
+		classic_invintheme = 4,
+		classic_supertheme = 4,
 		classic_oneuptheme = 2,
 		classic_bosstheme = 5,
 		classic_levelendtheme = 4,
-		classic_drowntheme = 1,
-		classic_shoestheme = 1,
+		classic_drowntheme = 2,
+		classic_shoestheme = 3,
 	},
 
 	-- SONIC MANIA
@@ -144,13 +144,13 @@ local presets = {
 		classic_springairwalk = 1,
 
 		-- Music
-		classic_invintheme = 5,
-		classic_supertheme = 1,
-		classic_oneuptheme = 1,
-		classic_bosstheme = 6,
-		classic_levelendtheme = 4,
-		classic_drowntheme = 1,
-		classic_shoestheme = 1,
+		classic_invintheme = 8,
+		classic_supertheme = 5,
+		classic_oneuptheme = 4,
+		classic_bosstheme = 12,
+		classic_levelendtheme = 8,
+		classic_drowntheme = 3,
+		classic_shoestheme = 3,
 	},
 }
 

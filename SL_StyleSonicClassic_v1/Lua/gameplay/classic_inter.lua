@@ -210,7 +210,10 @@ local levelend_select = {
 	"_LCJP",
 	"_LCUS",
 	"_LCS3",
-	"_LC3D",
+	"_LC3G",
+	"_LC3S",
+	"_LCKC",
+	"_LCSM",
 }
 
 local levelendtheme_cv = CV_FindVar("classic_levelendtheme")
@@ -277,6 +280,11 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallylastscore = p.score
 					p.styles_tallylastlives = p.lives
 					p.exiting = 5
+
+					p.powers[pw_invulnerability] = 0
+					p.powers[pw_sneakers] = 0
+					p.powers[pw_extralife] = 0
+					p.powers[pw_super] = 0
 
 					S_StopMusic(p)
 					S_ChangeMusic(G_GetLevelEndMusic(), false, p, 0, 0, 0, 0)

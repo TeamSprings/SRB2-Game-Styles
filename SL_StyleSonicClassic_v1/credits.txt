@@ -2,6 +2,7 @@ Contributors:
 
     "Skydusk",
     "Clone Fighter",
+	"Trimint123",
 
 Libraries:
 
@@ -18,8 +19,6 @@ Audio Sources:
 
 
 Special Thanks:
-
-	"Trimint123"
 
 	"Sonic Team"
 	"Dimps"

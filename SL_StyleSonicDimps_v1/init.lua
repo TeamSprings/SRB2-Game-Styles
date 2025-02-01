@@ -62,6 +62,7 @@ if VERSION == 202 and SUBVERSION > 13 and not Style_ClassicVersion and not Style
 	"assets.lua",
 	"misc.lua",
 	"inter.lua",
+	"jingles.lua",
 	"monitor.lua",
 	"player.lua",
 	"hudmanager.lua",

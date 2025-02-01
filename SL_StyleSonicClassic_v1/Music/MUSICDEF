@@ -1,0 +1,181 @@
+Lump _1US1
+Title = 1UP! (Sonic 1 & 2)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _1US3
+Title = 1UP! (Sonic 3)
+Authors = Masaru Setsumaru, Tomonori Sawada
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _1USK
+Title = 1UP! (Sonic & Knuckles)
+Authors = Masaru Setsumaru, Howard Drossin
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _INS1
+Title = Invincible (Sonic 1)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _INS3
+Title = Invincible (Sonic 3)
+Authors = Tomonori Sawada, Masayuki Nagao
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _INSK
+Title = Invincible (Sonic & Knuckles)
+Authors = Masaru Setsumaru, Howard Drossin
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _INUS
+Title = Invincible (Sonic CD US)
+Authors = Spencer Nilsen, David Young
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _INJP
+Title = Invincible (Sonic CD JP)
+Authors = Masafumi Ogata
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _IN3D
+Title = Invincible (Sonic 3D Blast)
+Authors = Richard Jacques
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _SHJP
+Title = Speed Up! (Sonic CD JP)
+Authors = Masafumi Ogata
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _SHUS
+Title = Speed Up! (Sonic CD US)
+Authors = Spencer Nilsen, David Young
+Soundtestpage = 1
+Soundtestcond = 0
+Stoppingtime = 22.599
+
+Lump _SES2
+Title = Super Sonic (Sonic 2)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _SESU
+Title = Unused (Sonic 3)
+Authors = Sega Sound Team
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _DRS1
+Title = Drowning (Sonic 1 & 2)
+Authors = Yukifumi Makino
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BOS1
+Title = Robotnik (Sonic 1)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BOS2
+Title = Robotnik (Sonic 2)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BOCJ
+Title = Robotnik (Sonic CD JP)
+Authors = Masafumi Ogata
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BOCU
+Title = Robotnik (Sonic CD US)
+Authors = Spencer Nilsen, David Young
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BS31
+Title = Mini Boss (Sonic 3)
+Authors = Brad Buxer, Bobby Brooks, Darryl Ross, Doug Grigsby III, Geoff Grace
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BSK1
+Title = Mini Boss (Sonic & Knuckles)
+Authors = Tatsuyuki Maeda, Sachio Ogawa, Masanori Hikichi
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _BS32
+Title = Robotnik (Sonic 3 & Knuckles)
+Authors = Masayuki Nagao, Tatsuyuki Maeda, Sachio Ogawa, Masanori Hikichi
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _B3D1
+Title = Boss 1 (Sonic 3D Blast)
+Authors = Sonic Team
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _B3D2
+Title = Boss 2 (Sonic 3D Blast)
+Authors = Sonic Team
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _B3D3
+Title = Boss 3 (Sonic 3D Blast - Saturn)
+Authors = Richard Jacques
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _LC3D
+Title = Score Tally (Sonic 3D Blast - Saturn)
+Authors = Richard Jacques
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _LCJP
+Title = Score Tally (Sonic CD - JP)
+Authors = Masafumi Ogata
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _LCUS
+Title = Score Tally (Sonic CD - US)
+Authors = Spencer Nilsen, David Young
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _LCS1
+Title = Score Tally (Sonic 1 & 2)
+Authors = Masato Nakamura
+Soundtestpage = 1
+Soundtestcond = 0
+
+Lump _LCS3
+Title = Score Tally (Sonic 3)
+Authors = Jun Senoue
+Soundtestpage = 1
+Soundtestcond = 0
