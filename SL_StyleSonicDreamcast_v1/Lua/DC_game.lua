@@ -275,6 +275,11 @@ local function G_StylesTallyBackend(p)
 						p.styles_tallystoplooping = nil
 						p.styles_tallysoundlenght = S_GetMusicLength()
 					elseif p.tallytimer < 11*TICRATE then
+						p.powers[pw_invulnerability] = 0
+						p.powers[pw_sneakers] = 0
+						p.powers[pw_extralife] = 0
+						p.powers[pw_super] = 0
+
 						local cur_music = S_MusicName(p)
 
 						if p.styles_tallystoplooping then

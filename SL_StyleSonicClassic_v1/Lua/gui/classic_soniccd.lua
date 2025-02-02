@@ -10,6 +10,7 @@ Contributors: Clone Fighter, Skydusk
 ]]
 
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
+local drawBG = tbsrequire 'helpers/draw_background'
 local drawf = drawlib.draw
 local fontlen = drawlib.lenght
 
@@ -245,5 +246,9 @@ return{
 			v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 			v.drawScaled((lives_x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 		end
+	end,
+
+	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
+		drawBG(v, v.cachePatch("CDTSPECBG"), 0, nil)
 	end,
 }

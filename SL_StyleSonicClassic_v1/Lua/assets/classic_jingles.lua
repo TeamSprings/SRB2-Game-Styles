@@ -264,8 +264,6 @@ addHook("MusicChange", function(oldname, newname, mflags, looping, position, pre
 				forced_fadeinms = MUSICRATE/4
 				our_track = true
 			end
-
-
 		end
 
 		if newname == "VSBOSS" then

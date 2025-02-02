@@ -104,4 +104,56 @@ local function V_GetCharLenght(v, patch, str, font, val, padding, i)
 	return (fontregistry[font] and fontregistry[font][char] or V_RegisterFont(v, font, char)).width+padding
 end
 
-return {draw = V_FontDrawer, lenght = V_GetCharLenght}
+local function V_GetTextLenght(v, font, str, padding)
+	local lenght = 0
+	local lenstr = #str
+
+	if lenstr then
+		for i = 1, lenstr do
+			lenght = $ + V_GetCharLenght(v, patch, str, font, val, padding, i)
+		end
+	end
+
+	return lenght
+end
+
+local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol, progress, anim, offset, ...)
+	if value == nil then return end
+	local str = value..""
+	local fontoffset = 0
+	local lenght = 0
+	local cache = {}
+
+	if leftadd then
+		str = strrep(symbol or ";", max(leftadd-#str, 0))..str
+	end
+
+	local maxv = #str
+
+	for i = 1,maxv do
+		local cur = V_CachePatches(v, patch, str, font, val, padding or 0, i)
+		cache[i] = cur
+		lenght = $+cur.width
+	end
+
+	local nprogress = (progress % FRACUNIT) + 1
+	local animseq = FRACUNIT / maxv
+	local animoff = offset / maxv
+
+	local nx = FixedMul(x, scale)
+	local ny = FixedMul(y, scale)
+
+	if alligment == "center" then
+		nx = $-(lenght*scale >> 1)
+	elseif alligment == "right" then
+		nx = $-lenght*scale
+	end
+
+	for i = 1,maxv do
+		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FRACUNIT)
+		anim(v, nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color, i, invprg, nprogress, {...})
+		fontoffset = $+cache[i].width
+	end
+end
+
+return {draw = V_FontDrawer, lenght = V_GetCharLenght, text_lenght = V_GetTextLenght, drawanim = V_FontAnimDrawer}

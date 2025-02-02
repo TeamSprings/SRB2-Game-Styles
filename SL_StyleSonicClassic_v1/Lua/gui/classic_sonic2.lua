@@ -96,13 +96,46 @@ return{
 		local mo = p.mo
 
 		if mo then
-			local skin_name = skins[mo.skin].realname
+			local skin_name = string.lower(skins[mo.skin].realname)
 
 			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", 0)
 		else
 			v.drawLevelTitle(72-offsetx, 48, "you got", 0)
 		end
 
-		v.drawLevelTitle(72-offsetx, 66, "through act", 0)
+		local gotthrough = "through "
+
+		if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
+			gotthrough = $..'zone'
+		else
+			gotthrough = $..'act'
+
+			local act = ''..mapheaderinfo[gamemap].actnum
+
+			if act ~= "0" then
+				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+			end
+		end
+
+		v.drawLevelTitle(72-offsetx, 66, gotthrough, 0)
+	end,
+
+	tallyspecial = function(v, p, offsetx, color, color2)
+		local mo = p.mo
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+
+		local str = "chaos emeralds"
+
+		if emeralds == All7Emeralds(emeralds) then
+			str = " got them all"
+
+			if mo then
+				str = string.lower(mo.skin)..str
+			else
+				str = "you"..str
+			end
+		end
+
+		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, 0)
 	end,
 }

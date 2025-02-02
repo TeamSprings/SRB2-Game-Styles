@@ -47,6 +47,7 @@ local hud_data = {
 	[5] = tbsrequire('gui/classic_blast3d'),
 	[6] = tbsrequire('gui/classic_mania'),
 	[7] = tbsrequire('gui/classic_xtreme'),
+	[8] = tbsrequire('gui/classic_chaotix'),
 }
 
 --
@@ -75,7 +76,7 @@ local layout_cv = CV_RegisterVar{
 	func = function(var)
 		layout_val = var.value
 	end,
-	PossibleValue = {classic=1, blast3d=2}
+	PossibleValue = {classic=1, bonus=2, blast3d=3}
 }
 
 local lif_cv = CV_RegisterVar{
@@ -83,10 +84,10 @@ local lif_cv = CV_RegisterVar{
 	defaultvalue = "sonic1",
 	flags = CV_CALL,
 	func = function(var)
-		local set = {1, 3, 4, 5, 6, 7}
+		local set = {1, 3, 4, 5, 6, 7, 8}
 		lifeicon = set[var.value]
 	end,
-	PossibleValue = {sonic1=1, soniccd=2, sonic3=3, blast3d=4, mania=5, xtreme=6}
+	PossibleValue = {sonic1=1, soniccd=2, sonic3=3, blast3d=4, mania=5, xtreme=6, chaotix=7}
 }
 
 local fade_cv = CV_RegisterVar{
@@ -101,19 +102,17 @@ local font_cv = CV_RegisterVar{
 	defaultvalue = "sonic1",
 	flags = CV_CALL,
 	func = function(var)
-		local prefixes = {"S1", "ST", "CD", "S3", "3B", "KC", "MA", "XT"}
+		local prefixes = {"S1", "ST", "CD", "S3", "3B", "MA", "XT", "KC"}
 		prefix = prefixes[var.value]
+		tallyft = prefix
 
-		local paddingset = {0, 0, 0, 0, 0, -1, -1}
+		local paddingset = {0, 0, 0, 0, -1, -1, 0}
 		txtpadding = paddingset[var.value]
 
 		local debugprefixes = {"S1", "S1", "S1", "S3", "S3", "S3", "S3", "S3"}
 		debugft = debugprefixes[var.value]
 
-		local tallyprefixes = {"S1", "ST", "CD", "S3", "S3", "S3", "MA", "S3"}
-		tallyft = tallyprefixes[var.value]
-
-		local tallyfonts = {1, 2, 1, 4, 2, 2, 2, 2}
+		local tallyfonts = {1, 2, 3, 4, 4, 6, 4, 4}
 		tallytitleft = tallyfonts[var.value]
 
 		if var.value > 4 then
@@ -122,7 +121,7 @@ local font_cv = CV_RegisterVar{
 			CV_Set(fade_cv, 0)
 		end
 	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, chaotix=6, mania=7, xtreme=8}
+	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, mania=6, xtreme=7, chaotix=8}
 }
 
 local hud_cv = CV_RegisterVar{
@@ -133,12 +132,12 @@ local hud_cv = CV_RegisterVar{
 		local prefixes = {1, 2, 3, 4, 5, 6, 7, 8}
 		CV_Set(font_cv, prefixes[var.value])
 
-		local lives = {1, 1, 2, 3, 4, 4, 5, 6}
+		local lives = {1, 1, 2, 3, 4, 5, 6, 7}
 		CV_Set(lif_cv, lives[var.value])
 
 		hud_select = var.value
 	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, chaotix=6, mania=7, xtreme=8}
+	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, mania=6, xtreme=7, chaotix=8}
 }
 
 local debugmode_coordinates = CV_RegisterVar{
@@ -193,33 +192,44 @@ HOOK("score", "classichud", function(v, p, t, e)
 		return
 	end
 
+	local layout_opt = layouts[layout_val]
+
 	if debugmode_coordinates.value then
-		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x, hudinfo[HUD_SCORE].y, v.cachePatch(prefix..'TSCODB'), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
+		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x+layout_opt.xoffset_score,
+		hudinfo[HUD_SCORE].y+layout_opt.yoffset_score,
+		v.cachePatch(prefix..'TSCODB'),
+		hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
 
 		-- Debug Mode
 		local bitf = FRACUNIT
 		local pvx, pvy = abs(mo.x/bitf)/4, abs(mo.y/bitf)/4
 		local cvx, cvy = abs(t.x/bitf)/4, abs(t.y/bitf)/4
 
-		local xval = hudinfo[HUD_SCORE].x+32+hidefull_offset_x
+		local xval = hudinfo[HUD_SCORE].x+32+hidefull_offset_x+layout_opt.xoffset_score
 
 		if debugmode_coordinates.value == 2 then
 			local pvz, cvz = abs(mo.z/bitf)/4, abs(t.z/bitf)/4
 
-			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1)*FRACUNIT, FRACUNIT,
+			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
 			string.upper(string.format("%04x%04x%04x", pvx, pvy, pvz)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
-			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7)*FRACUNIT, FRACUNIT,
+			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
 			string.upper(string.format("%04x%04x%04x", cvx, cvy, cvz)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
 		else
-			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1)*FRACUNIT, FRACUNIT,
+			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
 			string.upper(string.format("%04x%04x", pvx, pvy)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
-			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7)*FRACUNIT, FRACUNIT,
+			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
 			string.upper(string.format("%04x%04x", cvx, cvy)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
 		end
 	else
 		-- no debug
-		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x, hudinfo[HUD_SCORE].y, v.cachePatch(prefix..'TSCORE'), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
-		drawf(v, prefix..'TNUM', (hudinfo[HUD_SCORENUM].x+hidefull_offset_x)*FRACUNIT, hudinfo[HUD_SCORENUM].y*FRACUNIT, FRACUNIT, p.score, hudinfo[HUD_SCORENUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x+layout_opt.xoffset_score, hudinfo[HUD_SCORE].y+layout_opt.yoffset_score, v.cachePatch(prefix..'TSCORE'), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
+		drawf(v, prefix..'TNUM',
+		(hudinfo[HUD_SCORENUM].x+hidefull_offset_x+layout_opt.xoffset_scorenum+layout_opt.xoffset_score)*FRACUNIT,
+		(hudinfo[HUD_SCORENUM].y+layout_opt.yoffset_scorenum+layout_opt.yoffset_score)*FRACUNIT,
+		FRACUNIT,
+		p.score,
+		hudinfo[HUD_SCORENUM].f|V_HUDTRANS|V_PERPLAYER,
+		v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 	end
 
 	return true
@@ -235,6 +245,8 @@ HOOK("time", "classichud", function(v, p, t, e)
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
 	end
+
+	local layout_opt = layouts[layout_val]
 
 	local tics = p.realtime + (p.style_additionaltime or 0)
 	local countdown = false
@@ -273,19 +285,19 @@ HOOK("time", "classichud", function(v, p, t, e)
 		time_string = mint..":"..sect
 	end
 
-	local tics_xcor = hudinfo[show_tic and HUD_TICS or HUD_SECONDS].x+hidefull_offset_x
+	local tics_xcor = hudinfo[show_tic and HUD_TICS or HUD_SECONDS].x+hidefull_offset_x+layout_opt.xoffset_time+layout_opt.xoffset_timenum
 
 	-- drawing
 	if countdown and tics < 10*TICRATE and (leveltime % red_flashing_timer)/red_flashing_thred then
-		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x, hudinfo[HUD_TIME].y, v.cachePatch(prefix..'TRTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
+		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x+layout_opt.xoffset_time, (hudinfo[HUD_TIME].y+layout_opt.yoffset_time), v.cachePatch(prefix..'TRTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
 		if prefix == "KC" then
-			drawf(v, prefix..'RNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'RNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 		else
 			drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 		end
 	else
-		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x, hudinfo[HUD_TIME].y, v.cachePatch(prefix..'TTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
-		drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x+layout_opt.xoffset_time, hudinfo[HUD_TIME].y+layout_opt.yoffset_time, v.cachePatch(prefix..'TTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
+		drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 	end
 
 	return true
@@ -300,18 +312,22 @@ HOOK("rings", "classichud", function(v, p, t, e)
 		return
 	end
 
-	local x_num = ((time_display_settings.value > 1 and hudinfo[HUD_RINGSNUMTICS].x or hudinfo[HUD_RINGSNUM].x) + hide_offset_x)*FRACUNIT
+	local layout_opt = layouts[layout_val]
+
+	local option = layout_val > 1 and hudinfo[HUD_RINGSNUM].x or (time_display_settings.value > 1 and hudinfo[HUD_RINGSNUMTICS].x or hudinfo[HUD_RINGSNUM].x)
+
+	local x_num = (option + hide_offset_x + layout_opt.xoffset_rings + layout_opt.xoffset_ringsnum)*FRACUNIT
 
 	if p.rings < 1 and (leveltime % red_flashing_timer)/red_flashing_thred then
-		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x, hudinfo[HUD_RINGS].y, v.cachePatch(prefix..'TRRING'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
+		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRRING'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
 		if prefix == "KC" then
-			drawf(v, prefix..'RNUM', x_num, hudinfo[HUD_RINGSNUM].y*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'RNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 		else
-			drawf(v, prefix..'TNUM', x_num, hudinfo[HUD_RINGSNUM].y*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 		end
 	else
-		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x, hudinfo[HUD_RINGS].y, v.cachePatch(prefix..'TRINGS'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
-		drawf(v, prefix..'TNUM', x_num, hudinfo[HUD_RINGSNUM].y*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRINGS'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
+		drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 	end
 
 	return true
@@ -499,7 +515,17 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			local color = v.getColormap(TC_DEFAULT, SKINCOLOR_YELLOW)
 			local color2 = v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC1_TALLY1")
 
-			hud_data[min(tallytitleft, 1)].tallyspecial(v, p, min((timed+89)*24, 0), color, color2)
+			if tallytitleft and hud_data[tallytitleft].tallyspecialbg then
+				hud_data[tallytitleft].tallyspecialbg(v, p, min((timed+89)*24, 0), color, color2, timerfade)
+			else
+				hud_data[1].tallyspecialbg(v, p, min((timed+89)*24, 0), color, color2, timerfade)
+			end
+
+			if tallytitleft and hud_data[tallytitleft].tallyspecial then
+				hud_data[tallytitleft].tallyspecial(v, p, min((timed+89)*24, 0), color, color2)
+			else
+				hud_data[1].tallyspecial(v, p, min((timed+89)*24, 0), color, color2)
+			end
 
 			local sprite = emeralds_sprites[get_emerald_sprite.value]
 
@@ -512,7 +538,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			end
 
 			v.draw(tally_x_row2+29, 139, v.cachePatch(tallyft..'TBICON'), 0, color)
-			v.draw(tally_x_row2, 140, v.cachePatch(tallyft..'TSCORE'), 0, color2)
+			v.draw(tally_x_row2, 140, v.cachePatch(tallyft..'TTSCORE'), 0, color2)
 			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, p.score, 0, color2, "right", txtpadding)
 
 			if (maptol & TOL_NIGHTS) then
@@ -527,12 +553,17 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
 			end
 		else
-			hud_data[tallytitleft].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
+			if hud_data[tallytitleft].tallytitle then
+				hud_data[tallytitleft].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
+			else
+				hud_data[1].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
+			end
+
 
 			v.draw(tally_x_row4+70, 107, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
 			v.draw(tally_x_row3+70, 123, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
 
-			v.draw(tally_x_row4, 108, v.cachePatch(tallyft..'TTIME'))
+			v.draw(tally_x_row4, 108, v.cachePatch(tallyft..'TTTIME'))
 			v.draw(tally_x_row3, 124, v.cachePatch(tallyft..'TRING'))
 
 			v.draw(tally_x_row4+40, 108, v.cachePatch(tallyft..'TBONUS'))
@@ -557,7 +588,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				drawf(v, tallyft..'TNUM', (tally_x_row1+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			else
 				v.draw(tally_x_row5+29, 91, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
-				v.draw(tally_x_row5, 92, v.cachePatch(tallyft..'TSCORE'))
+				v.draw(tally_x_row5, 92, v.cachePatch(tallyft..'TTSCORE'))
 				drawf(v, tallyft..'TNUM', (tally_x_row5+160)*FRACUNIT, 92*FRACUNIT, FRACUNIT, p.score, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			end
 		end
@@ -575,15 +606,21 @@ HOOK("stagetitle", "classichud", function(v, p, t, e)
 		return
 	end
 
+	local exists = min(hud_select, 4)
+
+	if hud_data[hud_select].titlecard then
+		exists = hud_select
+	end
+
 	if hud_hide_cv.value > 1 then
-		local check = hud_data[min(hud_select, 4)].titlecard(v, p, t, e, fade_cv.value > 0)
+		local check = hud_data[exists].titlecard(v, p, t, e, fade_cv.value > 0)
 
 		if check then
 			styles_hide_hud = true
 			styles_hide_fullhud = true
 		end
 	else
-		hud_data[min(hud_select, 4)].titlecard(v, p, t, e, fade_cv.value > 0)
+		hud_data[exists].titlecard(v, p, t, e, fade_cv.value > 0)
 	end
 
 	return true

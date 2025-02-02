@@ -143,4 +143,8 @@ return{
 
 		drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, str, 0, color2, "center")
 	end,
+
+	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
+		return
+	end,
 }

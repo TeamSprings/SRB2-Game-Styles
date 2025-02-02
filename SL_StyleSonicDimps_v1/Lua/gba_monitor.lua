@@ -350,6 +350,13 @@ local function P_AddMonitor(mobjtype)
 	end
 end
 
+local only_monitors_with = {
+	[S_BOX_POP1] = true,
+	[S_GOLDBOX_OFF1] = true,
+	[S_BLUEBOX_POP1] = true,
+	[S_REDBOX_POP1] = true,
+}
+
 -- This checks every mobjinfo slot, parameter being start of from where it should search in the Mobjinfo list.
 local function P_CheckNewMonitors(start)
 	local count = 0
@@ -357,7 +364,8 @@ local function P_CheckNewMonitors(start)
 	for i = start, #mobjinfo do
 		if i == 1675 then break end
 
-		if mobjinfo[i] and mobjinfo[i].flags & MF_MONITOR then
+		if mobjinfo[i] and mobjinfo[i].flags & MF_MONITOR
+		and (i < 501 or only_monitors_with[mobjinfo[i].deathstate]) then
 			P_AddMonitor(i)
 			count = $ + 1
 		end

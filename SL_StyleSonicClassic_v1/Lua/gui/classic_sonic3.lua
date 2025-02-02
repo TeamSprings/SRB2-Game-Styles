@@ -153,4 +153,23 @@ return{
 			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 55*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
+
+	tallyspecial = function(v, p, offsetx, color, color2)
+		local mo = p.mo
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+
+		local str = "CHAOS EMERALDS"
+
+		if emeralds == All7Emeralds(emeralds) then
+			str = " GOT THEM ALL"
+
+			if mo then
+				str = string.upper(mo.skin)..str
+			else
+				str = "YOU"..str
+			end
+		end
+
+		drawS3KTXT(v, 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+	end,
 }

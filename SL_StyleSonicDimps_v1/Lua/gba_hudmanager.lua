@@ -124,7 +124,7 @@ local gba_hud = CV_RegisterVar{
 --
 
 addHook("PlayerThink", function(p)
-	if p.bot and consoleplayer == p.botleader then
+	if p.mo and p.bot and consoleplayer == p.botleader then
 		bot_existance = p.mo
 		bot_color = p.mo.color
 		bot_skin = p.mo.skin

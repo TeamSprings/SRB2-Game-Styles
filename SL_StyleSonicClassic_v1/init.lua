@@ -1,7 +1,7 @@
 local gameString = "classic"
 
-local packVersion = '3.080'
-rawset(_G, "Style_ClassicVersion", 3080)
+local packVersion = '3.100'
+rawset(_G, "Style_ClassicVersion", 3100)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Classic Style '..packVersion..'] '
