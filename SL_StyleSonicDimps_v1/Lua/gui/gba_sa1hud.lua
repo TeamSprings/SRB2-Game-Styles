@@ -10,7 +10,8 @@ local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 
 local function drawLifeIcon(v, x, y, patch, flags, p, color, skin)
-	local skin_name = string.upper(skins[skin].name)
+	local skin_name = string.upper(skins[p.mo and p.mo.skin or p.skin].name)
+
 	local patch_name = "STYLES_ADV1LIFE_"..skin_name
 	local patch_s_name = "STYLES_SADV1LIFE_"..skin_name
 
@@ -64,8 +65,9 @@ return {
 		if icon_style and bot_existance and bot_existance.valid then
 			drawLifeIcon(v, hudinfo[HUD_LIVES].x+3, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p, v.getColormap(TC_DEFAULT, p.mo.color), p.mo.skin)
 
-			if bot_skin then
-				drawLifeIcon(hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), bot_existance.player or p, v.getColormap(TC_DEFAULT, bot_color), bot_skin)
+			if bot_existance then
+				drawLifeIcon(v, hudinfo[HUD_LIVES].x-6, hudinfo[HUD_LIVES].y+19, v.getSprite2Patch(bot_skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0),
+				bot_existance.player or p, v.getColormap(TC_DEFAULT, bot_color), bot_existance.skin or bot_skin)
 			end
 
 			if G_GametypeUsesLives() then
