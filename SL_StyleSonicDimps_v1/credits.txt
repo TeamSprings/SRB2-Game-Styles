@@ -1,6 +1,7 @@
 Contributors:
 
     "Skydusk",
+	"Trimint123",
 
 Libraries:
 
@@ -12,8 +13,6 @@ Audio Sources:
 + https://soahcity.com/sonic-music/sonic-advance-2001-music/
 
 Special Thanks:
-
-	"Trimint123"
 
 	"Sonic Team"
 	"Dimps"
