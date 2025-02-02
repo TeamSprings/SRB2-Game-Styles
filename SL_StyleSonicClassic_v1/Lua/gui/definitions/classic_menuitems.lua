@@ -8,6 +8,7 @@ return {
 	},
 	{minv = 1, maxv = 8, name = "HUD FONT", cv = CV_FindVar("classic_hudfont")},
 	{minv = 1, maxv = 6, name = "HUD ICON STYLE", cv = CV_FindVar("classic_lifeicon")},
+	{minv = 0, maxv = 1, name = "HUD LAYOUT", cv = CV_FindVar("classic_hudlayout")},
 	{minv = 0, maxv = 2, name = "DEBUG MODE", cv = CV_FindVar("classic_debug")},
 	{minv = 0, maxv = 3, name = "HIDEABLE HUD", cv = CV_FindVar("classic_hidehudop")},
 	{minv = 0, maxv = 1, name = "BLUE FADE", cv = CV_FindVar("classic_bluefade")},
