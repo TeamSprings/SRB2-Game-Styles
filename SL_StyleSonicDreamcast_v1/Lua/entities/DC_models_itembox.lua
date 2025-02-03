@@ -288,11 +288,13 @@ local function P_MonitorThinker(a)
 						a.type = MT_ATTRACT_BOX
 						P_RemoveMobj(a.item)
 
+						a.item = nil
 						P_SpawnItemBox(a)
 					elseif not (CV_FindVar("dc_replaceshields").value) and a.type == MT_ATTRACT_BOX and a.orgcapsule then
 						a.type = a.orgcapsule
 						P_RemoveMobj(a.item)
 
+						a.item = nil
 						P_SpawnItemBox(a)
 					end
 				end
@@ -302,11 +304,13 @@ local function P_MonitorThinker(a)
 						a.type = ringboxrandomizer[a.randomring]
 						P_RemoveMobj(a.item)
 
+						a.item = nil
 						P_SpawnItemBox(a)
 					elseif not CV_FindVar("dc_ringboxrandomizer").value and a.type ~= MT_RING_BOX then
 						a.type = MT_RING_BOX
 						P_RemoveMobj(a.item)
 
+						a.item = nil
 						P_SpawnItemBox(a)
 					end
 				end
@@ -334,11 +338,15 @@ local function P_MonitorThinker(a)
 				if funny < FRACUNIT then
 					a.spriteyscale = funny
 					a.caps.spriteyscale = funny
-					a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24))
+					if a.item and a.item.valid then
+						a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24))
+					end
 				else
 					a.spritexscale = FRACUNIT
 					a.spriteyscale = FRACUNIT
-					a.item.scale = a.originscale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24)
+					if a.item and a.item.valid then
+						a.item.scale = a.originscale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24)
+					end
 				end
 			else
 				-- Spawns all necessary components
@@ -404,7 +412,7 @@ local function P_MonitorThinker(a)
 	end
 end
 
-local function insertPlayerItemToHud(p, sprite, frame)
+local function insertPlayerItemToHud(p, sprite, frame, extras)
 	if p and not p.boxdisplay then
 		p.boxdisplay = {}
 	end
@@ -412,7 +420,7 @@ local function insertPlayerItemToHud(p, sprite, frame)
 		p.boxdisplay.item = {}
 	end
 	p.boxdisplay.timer = TICRATE*3
-	table.insert(p.boxdisplay.item, {sprite, frame})
+	table.insert(p.boxdisplay.item, {sprite, frame, extras})
 end
 
 local function P_MonitorDeath(a, d, s)
@@ -431,11 +439,14 @@ local function P_MonitorDeath(a, d, s)
 		S_StartSound(a, a.info.deathsound)
 
 		local boxicon
+		local extras
 
 		if P_MarioExistsThink(a.item) then
 			A_MonitorPop(a, 0, 0)
 		else
-			if mobjinfo[a.type].damage == MT_UNKNOWN then
+			if a.special_case then
+				extras = a.special_case(a, a.item, a.target)
+			elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 				A_MonitorPop(a, 0, 0)
 			else
 				boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
@@ -457,8 +468,10 @@ local function P_MonitorDeath(a, d, s)
 			end
 		end
 
-		if a.target.player then
-			insertPlayerItemToHud(a.target.player, a.item.sprite, a.item.frame)
+		if a.target.player and (boxicon or extras) then
+			insertPlayerItemToHud(a.target.player,
+			boxicon ~= nil and boxicon.sprite or extras.sprite,
+			boxicon ~= nil and boxicon.frame or extras.frame, extras)
 		end
 
 		if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY and a.dctypemonitor and a.dctypemonitor > 1 then
@@ -546,7 +559,7 @@ addHook("MobjThinker", function(a)
 	if Disable_ItemBox then return end
 
 	P_MonitorThinker(a)
-	if a.health > 0 and a.item then
+	if a and a.valid and a.health > 0 and a.item then
 		life_up_thinker(a.item)
 	end
 end, MT_1UP_BOX)
@@ -565,7 +578,7 @@ addHook("MobjThinker", function(a)
 	if Disable_ItemBox then return end
 
 	P_MonitorThinker(a)
-	if a.item and a.item.valid then
+	if a and a.valid and a.item and a.item.valid then
 		a.item.sprite = SPR_TVMY
 		a.item.frame = C|(a.item.frame &~ FF_FRAMEMASK)
 	end
@@ -619,6 +632,29 @@ local function P_CheckNewMonitors(start)
 	end
 end
 
+local encore_thinker = nil
+
 addHook("AddonLoaded", function()
+	if not encore_thinker and A_EncorePop and _G["MT_ENC_BOX"] then
+		encore_thinker = tbsrequire 'entities/compact/DC_encore'
+
+		addHook("MobjSpawn", function(a)
+			P_SpawnItemBox(a)
+			a.special_case = encore_thinker.pop
+		end, MT_ENC_BOX)
+		addHook("MobjThinker", function(a)
+			P_MonitorThinker(a)
+			if a and a.valid and a.health > 0 and a.item and a.item.valid then
+				encore_thinker.think(a.item)
+			end
+
+			return true
+		end, MT_ENC_BOX)
+		addHook("MobjDeath", P_MonitorDeath, MT_ENC_BOX)
+		addHook("MobjRemoved", P_MonitorRemoval, MT_ENC_BOX)
+
+		monitor_database[MT_ENC_BOX] = 1
+	end
+
 	P_CheckNewMonitors(MT_BOXSPARKLE)
 end)

@@ -132,10 +132,17 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 			local flags = V_PERPLAYER|(easetratit << V_ALPHASHIFT)|V_SNAPTOBOTTOM
 
 			v.drawScaled(x, y, easesubtit, pic, flags)
-			if img[1] == SPR_TV1P and p.mo then
-				v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
-			end
+			if img[3] and img[3].type and img[3].type == "ENC" then
+				local enc = img[3]
 
+				if enc.skin and enc.color then
+					v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
+				end
+			else
+				if img[1] == SPR_TV1P and p.mo then
+					v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+				end
+			end
 
 			offset = $ + incs
 		end

@@ -454,8 +454,16 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 
 				v.drawCropped(x, y, easesubtit, easesubtit, pic, flags, nil, 3*FRACUNIT+1, 3*FRACUNIT+1, (incs-9)*FRACUNIT, (incs-9)*FRACUNIT)
 				v.drawScaled(x, y, easesubtit, item_border, flags)
-				if img[1] == SPR_TV1P and p.mo then
-					v.drawScaled(x-3*easesubtit, y-7*easesubtit, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+				if img[3] and img[3].type and img[3].type == "ENC" then
+					local enc = img[3]
+
+					if enc.skin and enc.color then
+						v.drawScaled(x-3*easesubtit, y-7*easesubtit, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
+					end
+				else
+					if img[1] == SPR_TV1P and p.mo then
+						v.drawScaled(x-3*easesubtit, y-7*easesubtit, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+					end
 				end
 			else
 				local x = FixedDiv((offset-(incs*#lenght)/2+incs/2)*easesubtit, easesubtit)
@@ -463,8 +471,16 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 				local flags = V_PERPLAYER|(easetratit << V_ALPHASHIFT)|V_SNAPTOBOTTOM
 
 				v.drawScaled(x, y, easesubtit, pic, flags)
-				if img[1] == SPR_TV1P and p.mo then
-					v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+				if img[3] and img[3].type and img[3].type == "ENC" then
+					local enc = img[3]
+
+					if enc.skin and enc.color then
+						v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
+					end
+				else
+					if img[1] == SPR_TV1P and p.mo then
+						v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+					end
 				end
 			end
 

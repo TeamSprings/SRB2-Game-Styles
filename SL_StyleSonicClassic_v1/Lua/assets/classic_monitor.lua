@@ -279,12 +279,9 @@ local function P_MonitorThinker(a)
 				P_SpawnItemBox(a)
 			end
 		else
-			-- Dying State
-			a.flags = $ &~ MF_SOLID
-
 			-- Golden monitors
 			if a.info.flags & MF_GRENADEBOUNCE then
-				a.flags = $|MF_SOLID
+				a.flags = MF_SOLID
 
 				if not a.goldentimer then
 					a.goldentimer = 0
@@ -292,14 +289,30 @@ local function P_MonitorThinker(a)
 
 				a.goldentimer = $+1
 
-				if a.goldentimer == TICRATE then
-					local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
-					newitembox.scale = a.originscale
-					newitembox.alpha = FRACUNIT
-					newitembox.flags = a.flags|MF_SOLID
-					P_RemoveMobj(a)
+				if a.goldentimer == 5*TICRATE then
+					--local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
+					--newitembox.scale = a.originscale
+					--newitembox.alpha = FRACUNIT
+					--newitembox.flags = a.info.flags
+					--P_RemoveMobj(a)
+					P_SpawnItemBox(a)
+					a.flags = $|a.info.flags
+					a.health = 1
+
+					-- Static Animation
+					if (leveltime % 3) then
+						a.item.flags2 = $ &~ MF2_DONTDRAW
+						a.frame = frame_offset
+					else
+						a.item.flags2 = $|MF2_DONTDRAW
+						a.frame = frame_offset+1
+					end
+
 					return
 				end
+			else
+				-- Dying State
+				a.flags = $ &~ MF_SOLID
 			end
 
 			if a.item and a.item.valid then
@@ -332,7 +345,7 @@ local function P_MonitorDeath(a, d, s)
 		A_MonitorPop(a, 0, 0)
 	else
 		if a.special_case then
-			a.special_case(a, a.item)
+			a.special_case(a, a.item, a.target)
 		elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 			A_MonitorPop(a, 0, 0)
 		else
@@ -393,7 +406,7 @@ end
 addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
 addHook("MobjThinker", function(a)
 	P_MonitorThinker(a)
-	if a and a.health > 0 and a.item then
+	if a and a.valid and a.health > 0 and a.item then
 		life_up_thinker(a.item)
 	end
 end, MT_1UP_BOX)
@@ -471,6 +484,29 @@ local function P_CheckNewMonitors(start)
 	end
 end
 
+local encore_thinker = nil
+
 addHook("AddonLoaded", function()
+	if not encore_thinker and A_EncorePop and _G["MT_ENC_BOX"] then
+		encore_thinker = tbsrequire 'assets/compact/classic_encore'
+
+		addHook("MobjSpawn", function(a)
+			P_SpawnItemBox(a)
+			a.special_case = encore_thinker.pop
+		end, MT_ENC_BOX)
+		addHook("MobjThinker", function(a)
+			P_MonitorThinker(a)
+			if a and a.valid and a.health > 0 and a.item and a.item.valid then
+				encore_thinker.think(a.item)
+			end
+
+			return true
+		end, MT_ENC_BOX)
+		addHook("MobjDeath", P_MonitorDeath, MT_ENC_BOX)
+		addHook("MobjRemoved", P_MonitorRemoval, MT_ENC_BOX)
+
+		monitor_database[MT_ENC_BOX] = 1
+	end
+
 	P_CheckNewMonitors(MT_BOXSPARKLE)
 end)

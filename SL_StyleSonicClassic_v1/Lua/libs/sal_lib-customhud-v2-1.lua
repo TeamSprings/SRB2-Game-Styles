@@ -4,7 +4,7 @@
 -- USAGE: Main part of customhud is the ability to creating and overwriting existing HUD items, and adding support for other HUD modifications.
 -- This helps sort out HUD conflicts that are otherwise impossible to detect without the use of this library.
 
-local VERSIONNUM = {2, 6};
+local VERSIONNUM = {2, 7};
 local updating = nil;
 
 local function warn(str)
@@ -128,6 +128,11 @@ end
 
 local huditems = customhud.hudItems
 
+if (huditems == nil) then
+	customhud.hudItems = {}
+	huditems = customhud.hudItems
+end
+
 customhud.hookTypes = {
 	"game",
 	"scores",
@@ -185,6 +190,19 @@ function customhud.CreateNewItem(itemName)
 	return CreateNewItem(itemName);
 end
 
+function customhud.UpdateHudItemStatus(item)
+	-- Update status of default hud items
+	if (item.isDefaultItem != true) then
+		return;
+	end
+
+	if (item.enabled == true and item.type == "vanilla") then
+		hudenable(item.name);
+	else
+		huddisable(item.name);
+	end
+end
+
 for _,v in pairs(hooktypes) do
 	if (huditems[v] == nil) then
 		huditems[v] = {};
@@ -208,6 +226,8 @@ for _,v in pairs(defaultitems) do
 	if (updatingItem == false) then
 		item.type = "vanilla";
 		item.enabled = hudenabled(itemName);
+	else
+		customhud.UpdateHudItemStatus(item)
 	end
 
 	item.layer = INT32_MIN;
@@ -218,19 +238,6 @@ end
 
 function customhud.ItemExists(itemName)
 	return (FindItem(itemName) != nil);
-end
-
-function customhud.UpdateHudItemStatus(item)
-	-- Update status of default hud items
-	if (item.isDefaultItem != true) then
-		return;
-	end
-
-	if (item.enabled == true and item.type == "vanilla") then
-		hudenable(item.name);
-	else
-		huddisable(item.name);
-	end
 end
 
 function customhud.enable(itemName)
@@ -344,9 +351,48 @@ function customhud.SetupItem(itemName, modName, itemFunc, hook, layer)
 	return true;
 end
 
+COM_AddCommand("customhud_force_enableitem", function(_, itemName)
+	local item = customhud.FindItem(itemName);
+	if (item == nil) then
+		-- Item doesn't exist.
+		return;
+	end
+
+	customhud.enable(itemName)
+end, COM_LOCAL);
+
+COM_AddCommand("customhud_force_disableitem", function(_, itemName)
+	local item = customhud.FindItem(itemName);
+	if (item == nil) then
+		-- Item doesn't exist.
+		return;
+	end
+
+	customhud.disable(itemName)
+end, COM_LOCAL);
+
+COM_AddCommand("customhud_force_reset", function(_)
+	for _,v in pairs(defaultitems) do
+		customhud.enable(v[1])
+	end
+end, COM_LOCAL);
+
+COM_AddCommand("customhud_setmod", function(_, modName)
+	for _,hook in pairs(hooktypes) do
+		for _,item in pairs(huditems[hook]) do
+			if (item.funcs[modName])
+			or (modName == "vanilla" and item.isDefaultItem == true) then
+				item.type = modName
+
+				customhud.UpdateHudItemStatus(item)
+			end
+		end
+	end
+end, COM_LOCAL);
+
 COM_AddCommand("customhud_setitem", function(_, itemName, modName)
 	local item = customhud.FindItem(itemName);
-	if (item == nil)
+	if (item == nil) then
 		-- Item doesn't exist.
 		return;
 	end
@@ -354,6 +400,25 @@ COM_AddCommand("customhud_setitem", function(_, itemName, modName)
 	customhud.SetupItem(itemName, modName);
 end, COM_LOCAL);
 
+COM_AddCommand("customhud_getitemtype", function(_, itemName)
+	local item = customhud.FindItem(itemName);
+	if (item == nil) then
+		-- Item doesn't exist.
+		return;
+	end
+
+	print(item.type)
+end, COM_LOCAL);
+
+--COM_AddCommand("customhud_checkhuditemparam", function(_, item)
+	--if (not _G[item] or not hudinfo[_G[item]]) then
+		-- Item doesn't exist.
+		--warn("Invalid item")
+		--return;
+	--end
+
+	--print("X: "..hudinfo[_G[item]].x.."; Y: "..hudinfo[_G[item]].y)
+--end, COM_LOCAL);
 
 local function RunCustomHooks(hook, v, ...)
 	if (huditems[hook] == nil) then

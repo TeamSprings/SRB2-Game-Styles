@@ -171,6 +171,8 @@ end)
 
 local function Spring_Check(a, sp)
 	if not (a.player and a.valid) then return end
+	if not (sp and sp.valid) then return end
+
 	if not (sp.flags & MF_SPRING) then return end
 
 	if 	sp.z+sp.height > a.z

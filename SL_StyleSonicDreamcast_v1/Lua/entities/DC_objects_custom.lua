@@ -15,7 +15,7 @@ freeslot("MT_SA5RING_BOX", "S_SA5RING_BOX", "MT_SA5RING_ICON", "S_SA5RING_ICON1"
 "MT_SA25RING_BOX", "S_SA25RING_BOX", "MT_SA25RING_ICON", "S_SA25RING_ICON1", "S_SA25RING_ICON2",
 "MT_SA40RING_BOX", "S_SA40RING_BOX", "MT_SA40RING_ICON", "S_SA40RING_ICON1", "S_SA40RING_ICON2",
 "MT_SARANDRING_BOX", "S_SARANDRING_BOX", "MT_SARANDRING_ICON", "S_SARANDRING_ICON1", "S_SARANDRING_ICON2",
-"SPR_TVER")
+"SPR_TV_SA2RINGMONITORS")
 
 --
 --
@@ -39,8 +39,8 @@ mobjinfo[MT_SA5RING_BOX] = {
 }
 
 states[S_SA5RING_BOX] = {
-	sprite = SPR_TVRI,
-	frame = G,
+	sprite = SPR_TV_SA2RINGMONITORS,
+	frame = 21,
 	tics = 2,
 	nextstate = S_BOX_FLICKER
 }
@@ -59,7 +59,7 @@ mobjinfo[MT_SA5RING_ICON] = {
 }
 
 states[S_SA5RING_ICON1] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = A|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
@@ -68,7 +68,7 @@ states[S_SA5RING_ICON1] = {
 }
 
 states[S_SA5RING_ICON2] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = A,
 	action = A_RingBox,
 	tics = 18,
@@ -90,8 +90,8 @@ mobjinfo[MT_SA20RING_BOX] = {
 }
 
 states[S_SA20RING_BOX] = {
-	sprite = SPR_TVRI,
-	frame = H,
+	sprite = SPR_TV_SA2RINGMONITORS,
+	frame = 20,
 	tics = 2,
 	nextstate = S_BOX_FLICKER
 }
@@ -110,7 +110,7 @@ mobjinfo[MT_SA20RING_ICON] = {
 }
 
 states[S_SA20RING_ICON1] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = E|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
@@ -119,7 +119,7 @@ states[S_SA20RING_ICON1] = {
 }
 
 states[S_SA20RING_ICON2] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = E,
 	action = A_RingBox,
 	tics = 18,
@@ -141,8 +141,8 @@ mobjinfo[MT_SA25RING_BOX] = {
 }
 
 states[S_SA25RING_BOX] = {
-	sprite = SPR_TVRI,
-	frame = I,
+	sprite = SPR_TV_SA2RINGMONITORS,
+	frame = 22,
 	tics = 2,
 	nextstate = S_BOX_FLICKER
 }
@@ -161,7 +161,7 @@ mobjinfo[MT_SA25RING_ICON] = {
 }
 
 states[S_SA25RING_ICON1] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = I|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
@@ -170,7 +170,7 @@ states[S_SA25RING_ICON1] = {
 }
 
 states[S_SA25RING_ICON2] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = I,
 	action = A_RingBox,
 	tics = 18,
@@ -192,8 +192,8 @@ mobjinfo[MT_SA40RING_BOX] = {
 }
 
 states[S_SA40RING_BOX] = {
-	sprite = SPR_TVRI,
-	frame = J,
+	sprite = SPR_TV_SA2RINGMONITORS,
+	frame = 23,
 	tics = 2,
 	nextstate = S_BOX_FLICKER
 }
@@ -212,7 +212,7 @@ mobjinfo[MT_SA40RING_ICON] = {
 }
 
 states[S_SA40RING_ICON1] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = M|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
@@ -221,7 +221,7 @@ states[S_SA40RING_ICON1] = {
 }
 
 states[S_SA40RING_ICON2] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = M,
 	action = A_RingBox,
 	tics = 18,
@@ -243,8 +243,8 @@ mobjinfo[MT_SARANDRING_BOX] = {
 }
 
 states[S_SARANDRING_BOX] = {
-	sprite = SPR_TVRI,
-	frame = K,
+	sprite = SPR_TV_SA2RINGMONITORS,
+	frame = 24,
 	tics = 2,
 	nextstate = S_BOX_FLICKER
 }
@@ -264,7 +264,7 @@ mobjinfo[MT_SARANDRING_ICON] = {
 }
 
 states[S_SARANDRING_ICON1] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = Q|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
@@ -273,7 +273,7 @@ states[S_SARANDRING_ICON1] = {
 }
 
 states[S_SARANDRING_ICON2] = {
-	sprite = SPR_TVER,
+	sprite = SPR_TV_SA2RINGMONITORS,
 	frame = Q,
 	action = function(a, var1, var2)
 		if not (a.target or a.target.player) then return end

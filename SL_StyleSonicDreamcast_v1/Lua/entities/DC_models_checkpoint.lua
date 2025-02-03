@@ -278,7 +278,7 @@ addHook("MobjThinker", function(a)
 
 	end
 
-end,  MT_STARPOST)
+end, MT_STARPOST)
 
 local shields = {
 	{SH_WHIRLWIND, SPR_TVWW};
@@ -303,7 +303,7 @@ end
 local rewards = {
 	[1] = function(p)
 		P_GivePlayerRings(p, 5)
-		insertPlayerItemToHud(p, SPR_TVER, E)
+		insertPlayerItemToHud(p, SPR_TV_SA2RINGMONITORS, E)
 	end;
 	[2] = function(p)
 		P_GivePlayerRings(p, 10)
@@ -311,7 +311,7 @@ local rewards = {
 	end;
 	[3] = function(p)
 		P_GivePlayerRings(p, 20)
-		insertPlayerItemToHud(p, SPR_TVER, A)
+		insertPlayerItemToHud(p, SPR_TV_SA2RINGMONITORS, A)
 	end;
 	[4] = function(p)
 		p.powers[pw_sneakers] = sneakertics + 6 * TICRATE - TICRATE/2 - 1

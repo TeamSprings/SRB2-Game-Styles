@@ -11,7 +11,7 @@ local invincibilitytheme_cv = CV_RegisterVar{
 	name = "classic_invintheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4, sonicknuckles=5, genesis3d=6, saturn3d=7, mania=8}
+	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4, sonicknuckles=5, genesis3d=6, saturn3d=7, mania=8, kchaotix=9}
 }
 
 local invincibility_select = {
@@ -23,6 +23,7 @@ local invincibility_select = {
 	"_IN3G",
 	"_IN3S",
 	"_INSM",
+	"_INKC",
 }
 
 local supertheme_cv = CV_RegisterVar{
@@ -58,7 +59,7 @@ local bosstheme_cv = CV_RegisterVar{
 	name = "classic_bosstheme",
 	defaultvalue = "sonic1",
 	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3act1=5, sonicknucklesact1=6, sonic3act2=7, genesis3d1=8, genesis3d2=9, saturn3d=10, maniaact1=11, maniaact2=12}
+	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3act1=5, sonicknucklesact1=6, sonic3act2=7, genesis3d1=8, genesis3d2=9, saturn3d=10, maniaegg1=11, maniaegg2=12}
 }
 
 local boss_select = {

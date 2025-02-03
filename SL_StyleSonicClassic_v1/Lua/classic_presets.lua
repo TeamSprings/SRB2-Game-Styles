@@ -21,6 +21,8 @@ local presets = {
 		classic_sign = 1,
 		classic_monitor = 1,
 		classic_specialentrance = 1,
+		classic_sign_movement = 1,
+		classic_monitormaniajump = 0,
 
 		-- Player
 		classic_spindash = 0,
@@ -50,6 +52,8 @@ local presets = {
 		classic_sign = 1,
 		classic_monitor = 2,
 		classic_specialentrance = 2,
+		classic_sign_movement = 1,
+		classic_monitormaniajump = 0,
 
 		-- Player
 		classic_spindash = 0,
@@ -79,6 +83,8 @@ local presets = {
 		classic_sign = 1,
 		classic_monitor = 1,
 		classic_specialentrance = 1,
+		classic_sign_movement = 1,
+		classic_monitormaniajump = 0,
 
 		-- Player
 		classic_spindash = 1,
@@ -108,6 +114,8 @@ local presets = {
 		classic_sign = 1,
 		classic_monitor = 3,
 		classic_specialentrance = 3,
+		classic_sign_movement = 1,
+		classic_monitormaniajump = 0,
 
 		-- Player
 		classic_spindash = 0,
@@ -126,7 +134,7 @@ local presets = {
 
 	-- SONIC MANIA
 	[5] = {
-		classic_hud = 7,
+		classic_hud = 6,
 		classic_checkpoints = 6,
 		classic_emeralds = 5,
 		classic_invincibility = 2,
@@ -137,6 +145,8 @@ local presets = {
 		classic_sign = 1,
 		classic_monitor = 5,
 		classic_specialentrance = 3,
+		classic_sign_movement = 0,
+		classic_monitormaniajump = 1,
 
 		-- Player
 		classic_spindash = 0,

@@ -206,6 +206,8 @@ end
 --
 
 local levelend_select = {
+	[0]="_clear", -- vanilla yay...
+
 	"_LCS1",
 	"_LCJP",
 	"_LCUS",

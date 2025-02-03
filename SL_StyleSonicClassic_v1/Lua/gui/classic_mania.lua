@@ -10,6 +10,7 @@ local fillstretch = tbsrequire 'helpers/draw_stretchmiddley'
 local cuttriangle = tbsrequire 'helpers/draw_cuttrianglebg'
 local tiltedlines = tbsrequire 'helpers/draw_tiltedlines'
 local clamping = tbsrequire 'helpers/anim_clamp'
+local circles = tbsrequire 'helpers/draw_circle'
 local drawf = drawlib.draw
 local drawanim = drawlib.drawanim
 local textlen = drawlib.text_lenght
@@ -51,6 +52,11 @@ local function drawTextBG(v, x, y, width)
 	v.drawFill(x, y, nwidth, 17, 31)
 	v.draw(x + nwidth, y, corner2, 0)
 end
+
+local function drawTextBG_A(v, x, y, width)
+	drawTextBG(v, x, y + 17, width)
+end
+
 
 local function exprs(t, s, e, p)
 	return ease.linear(t, s, e) + ease.outsine(clamping(0, t-FRACUNIT/2, FRACUNIT/4), 0, p) - ease.outsine(clamping(0, t-3*FRACUNIT/4, FRACUNIT/4), 0, p)
@@ -210,16 +216,16 @@ return {
 			local patch_s_name = "STYLES_SMALIFE_"..skin_name
 
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 			else
-				v.draw((lives_x+10), (hudinfo[HUD_LIVES].y+13), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
+				v.draw((lives_x+9), (hudinfo[HUD_LIVES].y+13), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
 				for i = 1, 4 do
-					v.draw((lives_x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_ALLWHITE))
+					v.draw((lives_x+9+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_ALLWHITE))
 				end
 
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
 			end
 
 			if G_GametypeUsesLives() then
@@ -234,6 +240,42 @@ return {
 		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
+		local gotthrough = "THROUGH"
+
+		if act ~= "0" then
+			local act_x = (210+offsetx)*FRACUNIT
+			local act_y = 43*FRACUNIT
+
+			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
+			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
+
+			--drawTextBG_A(v, 166-offsetx-text_width2, 48, text_width2)
+			--drawTextBG_A(v, 186-offsetx-text_width2, 77, text_width2)
+
+			if tonumber(act) > 9 then
+				drawf(v, 'MAN2FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+			else
+				drawf(v, 'MAN1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+			end
+
+			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1)
+			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
+		else
+			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
+				gotthrough = $..' ZONE'
+			else
+				gotthrough = $..' ACT'
+			end
+			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
+			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
+
+			--drawTextBG_A(v, 166-offsetx-text_width2, 48, text_width2)
+			--drawTextBG_A(v, 186-offsetx-text_width2, 77, text_width2)
+
+			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left")
+			drawf(v, "MATAFNT", (200+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
+		end
+
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
@@ -246,32 +288,6 @@ return {
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
 			drawf(v, "MATAFNT", (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color1, "right", 1)
-		end
-
-		local gotthrough = "THROUGH"
-
-		if act ~= "0" then
-			local act_x = (210+offsetx)*FRACUNIT
-			local act_y = 43*FRACUNIT
-
-			if tonumber(act) > 9 then
-				drawf(v, 'MAN2FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
-			else
-				drawf(v, 'MAN1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
-			end
-
-			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1)
-			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
-		else
-			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				gotthrough = $..' ZONE'
-			else
-				gotthrough = $..' ACT'
-			end
-
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left")
-			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
 		end
 	end,
 
@@ -289,6 +305,9 @@ return {
 			end
 		end
 
+		local len = textlen(v, 'MATAFNT', str, 1)
+
+		drawTextBG_A(v, 160-offsetx-len/2, 40, len)
 		drawf(v, "MATAFNT", (160-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center", 1)
 	end,
 }
