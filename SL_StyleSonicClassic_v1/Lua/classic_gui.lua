@@ -18,6 +18,8 @@ local HOOK = customhud.SetupItem
 local hud_select = 1
 local lifeicon = 1
 local tallytitleft = 1
+local titletype = 1
+local titletypechange = -1
 local txtpadding = 0
 local prefix = "S1"
 local tallyft = "S1"
@@ -26,14 +28,7 @@ local debugft = "S1"
 local menu_toggle = false
 
 local get_emerald_sprite = CV_FindVar("classic_emeralds")
-
-local emeralds_sprites = {
-	SPR_CEMG,
-	SPR_EMERALD_S2,
-	SPR_EMERALD_CD,
-	SPR_EMERALD_S3,
-	SPR_EMERALD_MANIA,
-}
+local emeralds_sprites = tbsrequire('assets/tables/sprites/classic_emeralds')
 
 --
 --	External HUDs
@@ -61,6 +56,18 @@ COM_AddCommand("classic_menu", function(p)
 		menu_toggle = not (menu_toggle)
 	end
 end, COM_LOCAL)
+
+--
+-- SWITCHER ONLY WHEN STAGE RESTARTS
+--
+
+addHook("MapChange", function()
+	if titletypechange > 0 then
+		titletype = titletypechange
+
+		titletypechange = -1
+	end
+end)
 
 --
 --	CVARs
@@ -124,6 +131,22 @@ local font_cv = CV_RegisterVar{
 	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, mania=6, xtreme=7, chaotix=8}
 }
 
+local title_cv = CV_RegisterVar{
+	name = "classic_hudtitle",
+	defaultvalue = "sonic1",
+	flags = CV_CALL,
+	func = function(var)
+		local titles = {1, 2, 3, 4, 6}
+
+		if gamestate == GS_LEVEL then
+			titletypechange = titles[var.value]
+		else
+			titletype = titles[var.value]
+		end
+	end,
+	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, mania=5}
+}
+
 local hud_cv = CV_RegisterVar{
 	name = "classic_hud",
 	defaultvalue = "sonic1",
@@ -134,6 +157,9 @@ local hud_cv = CV_RegisterVar{
 
 		local lives = {1, 1, 2, 3, 4, 5, 6, 7}
 		CV_Set(lif_cv, lives[var.value])
+
+		local title = {1, 2, 3, 4, 4, 5, 4, 4}
+		CV_Set(title_cv, title[var.value])
 
 		hud_select = var.value
 	end,
@@ -606,10 +632,10 @@ HOOK("stagetitle", "classichud", function(v, p, t, e)
 		return
 	end
 
-	local exists = min(hud_select, 4)
+	local exists = min(titletype, 4)
 
-	if hud_data[hud_select].titlecard then
-		exists = hud_select
+	if hud_data[titletype].titlecard then
+		exists = titletype
 	end
 
 	if hud_hide_cv.value > 1 then

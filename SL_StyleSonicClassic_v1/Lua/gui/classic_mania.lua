@@ -258,8 +258,8 @@ return {
 				drawf(v, 'MAN1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
 			end
 
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1)
-			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
+			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		else
 			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				gotthrough = $..' ZONE'
@@ -272,8 +272,8 @@ return {
 			--drawTextBG_A(v, 166-offsetx-text_width2, 48, text_width2)
 			--drawTextBG_A(v, 186-offsetx-text_width2, 77, text_width2)
 
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left")
-			drawf(v, "MATAFNT", (200+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
+			drawf(v, "MATAFNT", (200+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		end
 
 		if mo and mo.valid then

@@ -85,24 +85,12 @@ local entrance_cv = CV_RegisterVar{
 	defaultvalue = "sonic1",
 	flags = CV_CALL|CV_NETVAR,
 	func = function(var)
-		if init then
+		if init or gamestate == GS_TITLESCREEN then
 			special_entrance = var.value
-
-			if special_entrance then
-				mobjinfo[MT_TOKEN].radius = 89*FRACUNIT
-				mobjinfo[MT_TOKEN].height = 128*FRACUNIT
-			else
-				mobjinfo[MT_TOKEN].radius = original_radius
-				mobjinfo[MT_TOKEN].height = original_height
-			end
-
 			init = nil
 		else
 			if multiplayer then
 				CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
-
-				mobjinfo[MT_TOKEN].radius = original_radius
-				mobjinfo[MT_TOKEN].height = original_height
 			else
 				-- first of many cheating measures
 				if change_var == -1 or anotherlvl then
@@ -385,15 +373,6 @@ local init_ch = true
 addHook("AddonLoaded", function()
 	if init_ch and change_var > -1 then
 		special_entrance = change_var
-
-		if special_entrance then
-			mobjinfo[MT_TOKEN].radius = 89*FRACUNIT
-			mobjinfo[MT_TOKEN].height = 128*FRACUNIT
-		else
-			mobjinfo[MT_TOKEN].radius = original_radius
-			mobjinfo[MT_TOKEN].height = original_height
-		end
-
 		change_var = -1
 
 		init_ch = nil
@@ -406,15 +385,6 @@ addHook("GameQuit", function()
 
 	if change_var > -1 then
 		special_entrance = change_var
-
-		if special_entrance then
-			mobjinfo[MT_TOKEN].radius = 89*FRACUNIT
-			mobjinfo[MT_TOKEN].height = 128*FRACUNIT
-		else
-			mobjinfo[MT_TOKEN].radius = original_radius
-			mobjinfo[MT_TOKEN].height = original_height
-		end
-
 		change_var = -1
 	end
 end)
@@ -425,7 +395,9 @@ end)
 
 addHook("MapThingSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
-	if not special_entrance or special_entrance == 3 then return end
+	if not special_entrance or special_entrance == 3 then
+		return
+	end
 
 	P_RemoveMobj(a)
 end, MT_TOKEN)
@@ -456,6 +428,14 @@ end, MT_SIGN)
 addHook("MobjSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
+
+	if special_entrance == 3 or special_entrance == 1 then
+		a.radius = 89*FRACUNIT
+		a.height = 128*FRACUNIT
+	else
+		a.radius = original_radius
+		a.height = original_height
+	end
 
 	a.state = All7Emeralds(emeralds) and giantring_hyper
 	or (special_entrance == 1 and giantring_endstage or giantring)
@@ -525,6 +505,8 @@ addHook("MobjCollide", function(a, k)
 end, MT_TOKEN)
 
 addHook("MobjThinker", function(a)
+	if (multiplayer and not splitscreen) then return end
+
 	-- Making sure that FOFs are loaded before checking, can't use mobj spawn due to order of things.
 	if leveltime > 2 and not a.styles_sizecheck then
 		P_GiantRingCheck(a)
@@ -567,6 +549,7 @@ end, MT_TOKEN)
 freeslot("SPR_SSS0")
 
 addHook("TouchSpecial", function(a, mt)
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 
 	if mt.player and mt.player.rings >= 25 and a.state == a.info.spawnstate and a.stars == nil then
@@ -589,6 +572,7 @@ addHook("TouchSpecial", function(a, mt)
 end,  MT_STARPOST)
 
 addHook("MobjCollide", function(a, mt)
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 
 	if mt.player and (mt.z < a.z+a.height+12*FRACUNIT) and (mt.z > a.z+a.height-32*FRACUNIT) and a.stars ~= nil and a.stars[1].valid and not a.countdownst then
@@ -597,6 +581,7 @@ addHook("MobjCollide", function(a, mt)
 end,  MT_STARPOST)
 
 addHook("MobjThinker", function(a, mt)
+	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 
 	if a.vangle == nil then

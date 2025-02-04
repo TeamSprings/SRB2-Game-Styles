@@ -21,6 +21,7 @@ addHook("GameQuit", function(quit)
 		"classic_hidehudop",
 		"classic_bluefade",
 		"classic_hudlayout",
+		"classic_hudtitle",
 		-- Gameplay
 		"classic_specialentrance",
 		"classic_endtally",

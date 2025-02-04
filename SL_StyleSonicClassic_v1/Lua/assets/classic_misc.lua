@@ -41,13 +41,7 @@ addHook("MobjThinker", function(a) a.sprite = checkpoint_current end, MT_STARPOS
 --	Emerald Switching!
 --
 
-local emeralds_sprites = {
-	SPR_CEMG,
-	freeslot("SPR_EMERALD_S2"),
-	freeslot("SPR_EMERALD_CD"),
-	freeslot("SPR_EMERALD_S3"),
-	freeslot("SPR_EMERALD_MANIA"),
-}
+local emeralds_sprites = tbsrequire('assets/tables/sprites/classic_emeralds')
 
 local emeralds_cv = CV_RegisterVar{
 	name = "classic_emeralds",
@@ -56,7 +50,7 @@ local emeralds_cv = CV_RegisterVar{
 	func = function(var)
 		switch = true
 	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, sonicmania=5}
+	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3D=5, sonicr=6, sonicmania=7}
 }
 
 --
