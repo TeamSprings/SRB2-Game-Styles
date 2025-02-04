@@ -279,7 +279,7 @@ states[S_SARANDRING_ICON2] = {
 		if not (a.target or a.target.player) then return end
 
 		local Randomize = {5, 10, 20, 25, 40, 50}
-		P_GivePlayerRings(a.target.player, Randomize[P_RandomKey(6)])
+		P_GivePlayerRings(a.target.player, Randomize[P_RandomRange(1, #Randomize)])
 		S_StartSound(a.target, a.info.seesound)
 
 	end,
