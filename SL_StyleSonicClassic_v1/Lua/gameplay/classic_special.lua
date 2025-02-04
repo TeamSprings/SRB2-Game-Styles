@@ -8,6 +8,9 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
+TODO: FOF checking
+TODO: 4th level of safety check, 1st checkpoint
+
 ]]
 
 local giantring = freeslot("S_GIANTRING_CLASSIC")
@@ -205,7 +208,7 @@ local function SP_SaveState(mobj, toucher)
 			maps_data[gamemap].delete = {}
 		end
 
-		if mobj.type == MT_TOKEN then
+		if mobj.type == MT_TOKEN and mobj.spawnpoint and mobj.spawnpoint.valid then
 			table.insert(maps_data[gamemap].delete, #mapthing)
 		end
 	end
@@ -224,9 +227,6 @@ local function SP_LoadState(map)
 
 		if data.delete then
 			if displayplayer.mo and data.player1 then
-				P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
-				displayplayer.mo.angle = data.angle
-				displayplayer.mo.scale = data.scale
 				displayplayer.starpostx = data.starpostx
 				displayplayer.starposty = data.starposty
 				displayplayer.starpostz = data.starpostz
@@ -242,64 +242,23 @@ local function SP_LoadState(map)
 				displayplayer.mo.flags2 = data.flags2
 				displayplayer.mo.eflags = data.eflags
 
-				displayplayer.powers[pw_flashing] = TICRATE
+				displayplayer.powers[pw_flashing] = 2*TICRATE
 
-				if displayplayer.mo.subsector and displayplayer.mo.subsector.sector then
-					local sector = displayplayer.mo.subsector.sector
+				local subsector = R_PointInSubsectorOrNil(data.x, data.y)
 
-					if (P_MobjFlip(displayplayer.mo) > 0 or not P_IsObjectOnGround(displayplayer.mo)) and sector.damagetype then
-						local safesc = sector
-						local found = false
+				if subsector and subsector.sector then
+					local sector = subsector.sector
 
-						searchBlockmap("lines", function(ref, line)
-							if line.frontsector then
-								local sect = line.frontsector
-								local lines_sector = sect.lines
-
-								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > displayplayer.mo.height then
-									safesc = sect
-									found = true
-									return true
-								end
-							end
-
-							if line.backsector then
-								local sect = line.backsector
-								local lines_sector = sect.lines
-
-								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > displayplayer.mo.height then
-									safesc = sect
-									found = true
-									return true
-								end
-							end
-
-							return nil
-						end, displayplayer.mo)
-
-						if found then
-							local max_y, min_y, max_x, min_x = INT32_MIN, INT32_MAX, INT32_MIN, INT32_MAX
-
-							local lines_sector = safesc.lines
-							for i = 1, #lines_sector do
-								local line = safesc.lines[i]
-								if line and line.valid then
-									max_y = max(line.v2.y, max_y)
-									min_y = min(line.v2.y, min_y)
-									max_x = max(line.v2.x, max_x)
-									min_x = min(line.v2.x, min_x)
-								end
-							end
-
-							local x = min_x + (max_x - min_x) / 2
-							local y = min_y + (max_y - min_y) / 2
-							local z = P_MobjFlip(displayplayer.mo) > 0 and safesc.floorheight or safesc.ceilingheight
-
-							P_SetOrigin(displayplayer.mo, x, y, z)
-						end
+					if sector.damagetype > 0 and displayplayer.starpostnum > 0 then
+						P_SetOrigin(displayplayer.mo, displayplayer.starpostx, displayplayer.starposty, displayplayer.starpostz)
+						displayplayer.mo.angle = data.starpostangle
+						displayplayer.mo.scale = data.starpostscale
+					elseif sector.damagetype == 0 then
+						P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
+						displayplayer.mo.angle = data.angle
+						displayplayer.mo.scale = data.scale
 					end
 				end
-
 
 				data.x = nil
 				data.y = nil
@@ -343,59 +302,19 @@ local function SP_LoadState(map)
 
 				secondarydisplayplayer.powers[pw_flashing] = TICRATE
 
-				if secondarydisplayplayer.mo.subsector and secondarydisplayplayer.mo.subsector.sector then
-					local sector = secondarydisplayplayer.mo.subsector.sector
+				local subsector = R_PointInSubsectorOrNil(data.x, data.y)
 
-					if (P_MobjFlip(secondarydisplayplayer.mo) > 0 or not P_IsObjectOnGround(secondarydisplayplayer.mo)) and sector.damagetype then
-						local safesc = sector
-						local found = false
+				if subsector and subsector.sector then
+					local sector = subsector.sector
 
-						searchBlockmap("lines", function(ref, line)
-							if line.frontsector then
-								local sect = line.frontsector
-								local lines_sector = sect.lines
-
-								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > secondarydisplayplayer.mo.height then
-									safesc = sect
-									found = true
-									return true
-								end
-							end
-
-							if line.backsector then
-								local sect = line.backsector
-								local lines_sector = sect.lines
-
-								if sect and #lines_sector > 4 and not sect.damagetype and (sect.ceilingheight-sect.floorheight) > secondarydisplayplayer.mo.height then
-									safesc = sect
-									found = true
-									return true
-								end
-							end
-
-							return nil
-						end, secondarydisplayplayer.mo)
-
-						if found then
-							local max_y, min_y, max_x, min_x = INT32_MIN, INT32_MAX, INT32_MIN, INT32_MAX
-
-							local lines_sector = safesc.lines
-							for i = 1, #lines_sector do
-								local line = safesc.lines[i]
-								if line and line.valid then
-									max_y = max(line.v2.y, max_y)
-									min_y = min(line.v2.y, min_y)
-									max_x = max(line.v2.x, max_x)
-									min_x = min(line.v2.x, min_x)
-								end
-							end
-
-							local x = min_x + (max_x - min_x) / 2
-							local y = min_y + (max_y - min_y) / 2
-							local z = P_MobjFlip(secondarydisplayplayer.mo) > 0 and safesc.floorheight or safesc.ceilingheight
-
-							P_SetOrigin(secondarydisplayplayer.mo, x, y, z)
-						end
+					if sector.damagetype > 0 and secondarydisplayplayer.starpostnum > 0 then
+						P_SetOrigin(secondarydisplayplayer.mo, secondarydisplayplayer.starpostx, secondarydisplayplayer.starposty, secondarydisplayplayer.starpostz)
+						secondarydisplayplayer.mo.angle = data.starpostangle
+						secondarydisplayplayer.mo.scale = data.starpostscale
+					elseif sector.damagetype == 0 then
+						P_SetOrigin(secondarydisplayplayer.mo, data.x, data.y, data.z)
+						secondarydisplayplayer.mo.angle = data.angle
+						secondarydisplayplayer.mo.scale = data.scale
 					end
 				end
 
@@ -423,7 +342,7 @@ local function SP_LoadState(map)
 			data.leveltime = 0
 
 			for _,v in ipairs(data.delete) do
-				if mapthings[v].mobj then
+				if mapthings[v] and mapthings[v].mobj then
 					local replacement = P_SpawnMobjFromMobj(mapthings[v].mobj, 0, 0, 0, MT_GFZFLOWER2)
 					P_RemoveMobj(mapthings[v].mobj)
 					replacement.state = giantring_used
