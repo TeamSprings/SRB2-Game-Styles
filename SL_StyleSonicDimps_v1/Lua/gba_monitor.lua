@@ -182,11 +182,11 @@ local function P_MonitorThinker(a)
 			end
 		else
 			-- Dying State
-			a.flags = $ &~ MF_SOLID
-			a.flags2 = $|MF2_DONTDRAW
 
 			-- Golden monitors
 			if a.info.flags & MF_GRENADEBOUNCE then
+				a.flags = MF_SOLID
+
 				if not a.goldentimer then
 					a.goldentimer = 0
 				end
@@ -195,12 +195,15 @@ local function P_MonitorThinker(a)
 
 				if a.goldentimer == 5*TICRATE then
 					P_SpawnItemBox(a)
-					a.flags = $|a.info.flags
+					a.flags = a.info.flags
 					a.health = 1
 					a.frame = monitor_style+1
 
 					return
 				end
+			else
+				a.flags = $ &~ MF_SOLID
+				a.flags2 = $|MF2_DONTDRAW
 			end
 
 			if a.item and a.item.valid then
@@ -282,7 +285,9 @@ local function P_MonitorDeath(a, d, s)
 		smuk.state = S_XPLD1
 		smuk.fuse = 32
 		smuk.scale = a.scale
-		a.state = S_INVISIBLE
+		if not (a.info.flags & MF_GRENADEBOUNCE) then
+			a.state = S_INVISIBLE
+		end
 		P_RemoveMobj(a.item)
 	end
 
