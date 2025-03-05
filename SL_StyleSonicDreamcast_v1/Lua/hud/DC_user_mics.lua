@@ -333,6 +333,17 @@ end, "game")
 
 local emerald = {EMERALD1, EMERALD2, EMERALD3, EMERALD4, EMERALD5, EMERALD6, EMERALD7}
 
+HOOK("powerstones", "classichud", function(v, p, t, e)
+	if not p.powers[pw_emeralds] then return end
+
+	for i = 1, 7 do
+		local em = emeralds_set[i]
+		if (p.powers[pw_emeralds] & em) then
+			v.draw(128 + (i-1) * 10, 192, v.cachePatch("TEMER"..i), V_SNAPTOBOTTOM)
+		end
+	end
+end, "game")
+
 -- random rotating rocks + add there damn 8th Peaceful Ruby.
 HOOK("coopemeralds", "dchud", function(v)
 	if mrce then

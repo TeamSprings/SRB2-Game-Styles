@@ -7,32 +7,20 @@ Contributors: Skydusk
 
 ]]
 
+local Options = tbsrequire('helpers/create_cvar')
+
 --
 -- Checkpoint Switching!
 --
 
 local switch = false
 
-local checkpoint_sprites = {
-	freeslot("SPR_STARPOST_S1"),
-	freeslot("SPR_STARPOST_BETA"),
-	SPR_STPT,
-	freeslot("SPR_STARPOST_CD"),
-	freeslot("SPR_STARPOST_S3"),
-	freeslot("SPR_STARPOST_MANIA")
-}
+local function switchon()
+	switch = true
+end
 
-local checkpoint_current = SPR_STARPOST_S1
-
-local checkpoints_cv = CV_RegisterVar{
-	name = "classic_checkpoints",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2beta=2, sonic2=3, soniccd=4, sonic3=5, sonicmania=6}
-}
+local starpost = Options:new("checkpoints", "assets/tables/sprites/checkpoint", switchon)
+local checkpoint_current = SPR_STPT
 
 -- Not most efficient way to do this...
 addHook("MobjThinker", function(a) a.sprite = checkpoint_current end, MT_STARPOST)
@@ -41,17 +29,7 @@ addHook("MobjThinker", function(a) a.sprite = checkpoint_current end, MT_STARPOS
 --	Emerald Switching!
 --
 
-local emeralds_sprites = tbsrequire('assets/tables/sprites/classic_emeralds')
-
-local emeralds_cv = CV_RegisterVar{
-	name = "classic_emeralds",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3D=5, sonicr=6, sonicmania=7}
-}
+local emeralds = Options:new("emeralds", "assets/tables/sprites/emeralds", switchon)
 
 --
 --	Explosion!
@@ -59,30 +37,16 @@ local emeralds_cv = CV_RegisterVar{
 
 freeslot("S_ERAEXPL1")
 
-local explosion_sprites = {
-	freeslot("SPR_EXPLOSION_S1"),
-	freeslot("SPR_EXPLOSION_S2"),
-	freeslot("SPR_EXPLOSION_S3")
-}
-
 local expl_state = S_ERAEXPL1
 
+local explosion = Options:new("explosions", "assets/tables/sprites/explosion", switchon)
+
 states[S_ERAEXPL1] = {
-	sprite = explosion_sprites[1],
+	sprite = states[S_SONIC3KBOSSEXPLOSION1].sprite or SPR_EXPLOSION_S1,
 	frame = FF_ANIMATE|FF_FULLBRIGHT|A,
 	tics = 21,
 	var1 = 6,
 	var2 = 3
-}
-
-local explosions_cv = CV_RegisterVar{
-	name = "classic_explosions",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, sonic3=3}
 }
 
 addHook("MobjSpawn", function(a, tm)
@@ -93,89 +57,29 @@ end, MT_SONIC3KBOSSEXPLODE)
 --	Dust!
 --
 
-local dust_sprites = {
-	{freeslot("SPR_DUST_S1"), 4},
-	{freeslot("SPR_DUST_S2"), 4},
-}
-
-local dust_cv = CV_RegisterVar{
-	name = "classic_dust",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2=2}
-}
+local dust = Options:new("dust", "assets/tables/sprites/dust", switchon)
 
 --
 --	Pity Shield!
 --
 
-local pity_sprites = {
-	freeslot("SPR_PITY_S1"),
-	freeslot("SPR_PITY_S2"),
-	freeslot("SPR_PITY_3B"),
-	freeslot("SPR_PITY_R"),
-}
-
-local pityicon_sprites = {
-	freeslot("SPR_TVPITY_S1"),
-	freeslot("SPR_TVPITY_S2"),
-	freeslot("SPR_TVPITY_3B"),
-	freeslot("SPR_TVPITY_R"),
-}
-
-local pity_cv = CV_RegisterVar{
-	name = "classic_pity",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, blast3d=3, sonicr=4}
-}
+local pity = Options:new("pity", "assets/tables/sprites/pity", switchon)
 
 --
 --	Invincibility!
 --
 
-local invincibility_sprites = {
-	freeslot("SPR_INVINCIBILITY_S1"),
-	SPR_IVSP,
-}
-
-local invincibility_cv = CV_RegisterVar{
-	name = "classic_invincibility",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, sonic2=2}
-}
+local invincibility = Options:new("invincibility", "assets/tables/sprites/invincibility", switchon)
 
 --
 --	Score Text!
 --
 
-local score_sprites = {
-	freeslot("SPR_SCORE_S1"),
-	SPR_SCOR,
-	freeslot("SPR_SCORE_CD"),
-	freeslot("SPR_SCORE_S3"),
-}
-
-local score_cv = CV_RegisterVar{
-	name = "classic_score",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4}
-}
+local score = Options:new("score", "assets/tables/sprites/score", switchon)
 
 --Damn game...
 addHook("MobjThinker", function(a)
-	a.sprite = score_sprites[score_cv.value]
+	a.sprite = Options:getvalue("score")[2]
 end, MT_SCORE)
 
 --
@@ -184,23 +88,11 @@ end, MT_SCORE)
 
 freeslot("SPR_SIGNS")
 
-local sign_cv = CV_RegisterVar{
-	name = "classic_sign",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		switch = true
-	end,
-	PossibleValue = {sonic1=1, soniccd=2}
-}
+local sign_opt = Options:new("sign", "assets/tables/sprites/sign", switchon)
+local sign_cv = sign_opt.cv
 
-local signmove_cv = CV_RegisterVar{
-	name = "classic_sign_movement",
-	flags = CV_NETVAR,
-	defaultvalue = "srb2",
-	flags = 0,
-	PossibleValue = {srb2=0, stand=1}
-}
+local signmove_opt = Options:new("sign_movement", "assets/tables/sprites/sign", nil, CV_NETVAR)
+local signmove_cv = signmove_opt.cv
 
 addHook("MobjThinker", function(a)
 	if signmove_cv.value then
@@ -222,12 +114,25 @@ addHook("MobjThinker", function(a)
 	end
 end, MT_SIGN)
 
+--
+--	Emblems!
+--
+
+local emblemsprites = Options:new("emblems", "assets/tables/sprites/emblems", nil)
+
+addHook("MobjThinker", function(a)
+	if a.health > 0 then
+		a.sprite = Options:getPureValue("emblems")
+		a.frame = ((a.frame & FF_FRAMEMASK) % 5)|(a.frame &~ FF_FRAMEMASK)
+	end
+end, MT_EMBLEM)
+
 -- ... this wouldn't be necessary if for some damn reason certain part of code didn't think this was part of "Hud rendering code"
 addHook("ThinkFrame", function()
 	if switch then
 		-- Checkpoint
 
-		checkpoint_current = checkpoint_sprites[checkpoints_cv.value]
+		checkpoint_current = Options:getvalue("checkpoints")[2]
 
 		states[S_STARPOST_IDLE].sprite = checkpoint_current
 		states[S_STARPOST_FLASH].sprite = checkpoint_current
@@ -237,7 +142,7 @@ addHook("ThinkFrame", function()
 
 		-- Emeralds
 
-		local sprite = emeralds_sprites[emeralds_cv.value]
+		local sprite = Options:getvalue("emeralds")[2]
 
 		states[S_CEMG1].sprite = sprite
 		states[S_CEMG2].sprite = sprite
@@ -257,24 +162,24 @@ addHook("ThinkFrame", function()
 
 		-- Explosions
 
-		if explosions_cv.value == 0 then
-			expl_state = S_SONIC3KBOSSEXPLOSION1
-		else
-			expl_state = S_ERAEXPL1
-			local expl_var1 = {4, 6, 5}
-			local expl_var2 = {3, 3, 3}
-			local expl_tics = {15, 21, 15}
+		local expl = Options:getvalue("explosions")[2]
 
-			states[S_ERAEXPL1].sprite = explosion_sprites[explosions_cv.value]
-			states[S_ERAEXPL1].tics = expl_tics[explosions_cv.value]
-			states[S_ERAEXPL1].var1 = expl_var1[explosions_cv.value]
-			states[S_ERAEXPL1].var2 = expl_var2[explosions_cv.value]
+		if expl then
+			expl_state = S_ERAEXPL1
+
+			states[S_ERAEXPL1].sprite = expl[1]
+			states[S_ERAEXPL1].tics = expl[2]
+			states[S_ERAEXPL1].var1 = expl[3]
+			states[S_ERAEXPL1].var2 = expl[4]
+		else
+			expl_state = S_SONIC3KBOSSEXPLOSION1
 		end
 
 		-- Dust
 
-		local sprite = dust_sprites[dust_cv.value][1]
-		local end_i = dust_sprites[dust_cv.value][2]
+		local _x = Options:getvalue("dust")[2]
+		local sprite = _x[1]
+		local end_i = _x[2]
 
 		states[S_XPLD_FLICKY].sprite = sprite
 
@@ -283,31 +188,33 @@ addHook("ThinkFrame", function()
 			states[S_XPLD1+i].frame = i
 			states[S_XPLD1+i].nextstate = S_XPLD1+i+1
 		end
+
 		states[S_XPLD1+end_i].nextstate = S_NULL
 
 		-- Pity
 
-		local sprite = pity_sprites[pity_cv.value]
+		local pity = Options:getvalue("pity")[2]
+		local pitycv_value = Options:getCV("pity")[1].value
+		local sprite = pity[1]
 
 		for i = 0, 11 do
 			states[S_PITY1+i].sprite = sprite
-			states[S_PITY1+i].frame = (pity_cv.value == 3 and $|FF_ADD or $ &~ FF_ADD)
+			states[S_PITY1+i].frame = (pitycv_value == 3 and $|FF_ADD or $ &~ FF_ADD)
 		end
 
-		local sprite = pityicon_sprites[pity_cv.value]
+		local sprite = pity[2]
+
 		states[S_PITY_ICON1].sprite = sprite
 		states[S_PITY_ICON2].sprite = sprite
 
 		-- Invincibility
 
-		local tics = {15, 32}
-		local var1 = {3, 31}
-		local var2 = {3, 1}
+		local invinc = Options:getvalue("invincibility")[2]
 
-		states[S_IVSP].sprite = invincibility_sprites[invincibility_cv.value]
-		states[S_IVSP].tics = tics[invincibility_cv.value]
-		states[S_IVSP].var1 = var1[invincibility_cv.value]
-		states[S_IVSP].var2 = var2[invincibility_cv.value]
+		states[S_IVSP].sprite = invinc[1]
+		states[S_IVSP].tics = invinc[2]
+		states[S_IVSP].var1 = invinc[3]
+		states[S_IVSP].var2 = invinc[4]
 
 		-- Signpost
 		local sign_frame = sign_cv.value == 1 and A or B

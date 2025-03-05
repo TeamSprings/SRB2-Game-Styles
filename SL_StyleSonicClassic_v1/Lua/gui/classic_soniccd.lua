@@ -241,10 +241,12 @@ return{
 			if G_GametypeUsesLives() then
 				v.draw(lives_x+17, hudinfo[HUD_LIVES].y+7, v.cachePatch('CDXLIFE'), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS)
 				drawf(v, 'S1TNUM', (lives_x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+4)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 
-			v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
-			v.drawScaled((lives_x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
+			--v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
+			--v.drawScaled((lives_x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 		end
 	end,
 

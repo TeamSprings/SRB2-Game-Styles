@@ -67,6 +67,8 @@ return {
 
 				if G_GametypeUsesLives() then
 					drawf(v, 'RUACNT', (hudinfo[HUD_LIVES].x+10)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+					v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+2, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
 			else
 				v.draw(hudinfo[HUD_LIVES].x-14, hudinfo[HUD_LIVES].y-6, v.cachePatch("LIF1RUAD"), hudinfo[HUD_LIVES].f|V_PERPLAYER)
@@ -74,6 +76,8 @@ return {
 
 				if G_GametypeUsesLives() then
 					drawf(v, 'RUACNT', (hudinfo[HUD_LIVES].x+6)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+					v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+2, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
 
 				bot_existance = nil
@@ -84,6 +88,8 @@ return {
 
 			if G_GametypeUsesLives() then
 				drawf(v, 'RUACNT', (hudinfo[HUD_LIVES].x-2)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), -1, 0, 0)
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+2, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		end
 	end,

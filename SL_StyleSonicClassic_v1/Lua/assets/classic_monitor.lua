@@ -7,11 +7,22 @@ Contributors: Skydusk
 
 ]]
 
-local life_up_thinker = tbsrequire 'helpers/monitor_1up'
-local slope_handler = tbsrequire 'helpers/mo_slope'
-
 freeslot("SPR_MONITORS_CLASSIC",  "SPR_MONITORS_GOLDEN", "SPR_MONITORS_BLUE", "SPR_MONITORS_RED",
 "S_DUMMYMONITOR", "S_DUMMYGMONITOR", "S_DUMMYBMONITOR", "S_DUMMYRMONITOR")
+
+local Options = tbsrequire('helpers/create_cvar')
+
+local life_up_thinker = tbsrequire 'helpers/monitor_1up'
+local slope_handler = tbsrequire 'helpers/mo_slope'
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local spawnhook = 	api:addHook("MonitorSpawn")
+local deathhook = 	api:addHook("MonitorDeath")
+local loothook = 	api:addHook("MonitorLoot")
+
+local remhook = 	api:addHook("MonitorRemoval")
 
 states[S_DUMMYMONITOR] = {
 	sprite = SPR_MONITORS_CLASSIC,
@@ -35,19 +46,14 @@ states[S_DUMMYRMONITOR] = {
 
 local frame_offset = 0
 local icon_height = 0
-local monitor_cv = CV_RegisterVar{
-	name = "classic_monitor",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		local sets = {13, 0, 3, 10, 6}
-		frame_offset = sets[var.value]
 
-		local heights = {14, 14, 20, 15, 14}
-		icon_height = heights[var.value]
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, sonic3=3, blast3d=4, mania=5}
-}
+local style = Options:new("monitor", "assets/tables/sprites/monitor", function(var)
+	local sets = {13, 0, 3, 10, 6}
+	frame_offset = sets[var.value]
+
+	local heights = {14, 14, 20, 15, 14}
+	icon_height = heights[var.value]
+end)
 
 local monitor_jump_cv = CV_RegisterVar{
 	name = "classic_monitormaniajump",
@@ -56,67 +62,11 @@ local monitor_jump_cv = CV_RegisterVar{
 	PossibleValue = {disabled=0, enabled=1}
 }
 
-local monitor_typesa_cv = CV_RegisterVar{
-	name = "classic_monitordistribution",
-	defaultvalue = "disabled",
-	flags = CV_NETVAR,
-	PossibleValue = {disabled=0, sonic1=1, sonic3=2, sonicmania=3}
-}
+local monitor_typesa_opt = Options:new("monitordistribution", "assets/tables/monitor_distrb", nil, CV_NETVAR)
+local monitor_typesa_cv = monitor_typesa_opt.cv
 
-local picks = {
-	[MT_ATTRACT_BOX] = true,
-	[MT_ARMAGEDDON_BOX] = true,
-	[MT_WHIRLWIND_BOX] = true,
-	[MT_ELEMENTAL_BOX] = true,
-	[MT_FORCE_BOX] = true,
-	[MT_ATTRACT_GOLDBOX] = true,
-	[MT_ARMAGEDDON_GOLDBOX] = true,
-	[MT_WHIRLWIND_GOLDBOX] = true,
-	[MT_ELEMENTAL_GOLDBOX] = true,
-	[MT_FORCE_GOLDBOX] = true,
-}
-
-local sets = {
-	[1] = { -- Sonic 1
-		[MT_ATTRACT_BOX] = MT_PITY_BOX,
-		[MT_ARMAGEDDON_BOX] = MT_PITY_BOX,
-		[MT_WHIRLWIND_BOX] = MT_PITY_BOX,
-		[MT_ELEMENTAL_BOX] = MT_PITY_BOX,
-		[MT_FORCE_BOX] = MT_PITY_BOX,
-		[MT_ATTRACT_GOLDBOX] = MT_PITY_GOLDBOX,
-		[MT_ARMAGEDDON_GOLDBOX] = MT_PITY_GOLDBOX,
-		[MT_WHIRLWIND_GOLDBOX] = MT_PITY_GOLDBOX,
-		[MT_ELEMENTAL_GOLDBOX] = MT_PITY_GOLDBOX,
-		[MT_FORCE_GOLDBOX] = MT_PITY_GOLDBOX,
-	},
-
-	[2] = { -- Sonic 3
-		[MT_ATTRACT_BOX] = MT_THUNDERCOIN_BOX,
-		[MT_ARMAGEDDON_BOX] = MT_BUBBLEWRAP_BOX,
-		[MT_WHIRLWIND_BOX] = MT_THUNDERCOIN_BOX,
-		[MT_ELEMENTAL_BOX] = MT_BUBBLEWRAP_BOX,
-		[MT_FORCE_BOX] = MT_FLAMEAURA_BOX,
-		[MT_ATTRACT_GOLDBOX] = MT_THUNDERCOIN_GOLDBOX,
-		[MT_ARMAGEDDON_GOLDBOX] = MT_BUBBLEWRAP_GOLDBOX,
-		[MT_WHIRLWIND_GOLDBOX] = MT_THUNDERCOIN_GOLDBOX,
-		[MT_ELEMENTAL_GOLDBOX] = MT_BUBBLEWRAP_GOLDBOX,
-		[MT_FORCE_GOLDBOX] = MT_FLAMEAURA_GOLDBOX,
-	},
-
-	[3] = { -- Mania
-		[MT_ATTRACT_BOX] = MT_FLAMEAURA_BOX,
-		[MT_ARMAGEDDON_BOX] = MT_PITY_BOX,
-		[MT_WHIRLWIND_BOX] = MT_THUNDERCOIN_BOX,
-		[MT_ELEMENTAL_BOX] = MT_BUBBLEWRAP_BOX,
-		[MT_FORCE_BOX] = MT_PITY_BOX,
-		[MT_ATTRACT_GOLDBOX] = MT_FLAMEAURA_GOLDBOX,
-		[MT_ARMAGEDDON_GOLDBOX] = MT_PITY_GOLDBOX,
-		[MT_WHIRLWIND_GOLDBOX] = MT_THUNDERCOIN_GOLDBOX,
-		[MT_ELEMENTAL_GOLDBOX] = MT_BUBBLEWRAP_GOLDBOX,
-		[MT_FORCE_GOLDBOX] = MT_PITY_GOLDBOX,
-	},
-}
-
+local MonitorSprites, P_MarioExistsThink, P_MarioMonitorThink = unpack(tbsrequire('assets/compact/classic_mario'))
+local picks, sets = tbsrequire 'assets/tables/monitor_sets'
 
 local function P_SpawnItemBox(a)
 	if not multiplayer and monitor_typesa_cv.value and picks[a.type] then
@@ -153,73 +103,8 @@ local function P_SpawnItemBox(a)
 		a.color = SKINCOLOR_APPLE
 		a.colorized = true
 	end
-end
 
---Define which sprites we'll use
-local MonitorSprites = {
-	[SPR_TVRI] = 0, --S_RING_BOX
-	[SPR_TVPI] = 12, --S_PITY_BOX
-	[SPR_TVAT] = 3, --S_ATTRACT_BOX
-	[SPR_TVFO] = 9, --S_FORCE_BOX
-	[SPR_TVAR] = 5, --S_ARMAGEDDON_BOX
-	[SPR_TVWW] = 6, --S_WHIRLWIND_BOX
-	[SPR_TVEL] = 4, --S_ELEMENTAL_BOX
-	[SPR_TVSS] = 2, --S_SNEAKERS_BOX
-	[SPR_TVIV] = 1, --S_INVULN_BOX
-	[SPR_TVEG] = 10, --S_EGGMAN_BOX
-	[SPR_TVFL] = 11, --S_FLAMEAURA_BOX
-	[SPR_TVBB] = 7, --S_BUBBLEWRAP_BOX
-	[SPR_TVZP] = 8, --S_THUNDERCOIN_BOX
-}
-
---Sorry SMS Alfredo
---Since you didn't reponded to me, at least I rewritten it for my needs
-local function P_MarioExistsThink(a, typepw)
-	if not mariocoins then return false end
-	-- Optimalization, INT32 feels too much tbh.
-	local marioconfirmed, maxdistance = false, 1000*FRACUNIT
-
-	if (mariocoins.value and typepw == 0) or (consoleplayer and consoleplayer.valid and IsMario(consoleplayer)) then
-		marioconfirmed = true
-	elseif not mariopowerup.value and typepw ~= 0 and typepw ~= 1 and typepw ~= 10 then
-		marioconfirmed = false
-	elseif multiplayer then
-		for p in players.iterate do
-			if not (p.mo and p.mo.valid and not p.bot and not p.spectator and not p.playerstate) then return end
-
-			local dist = P_AproxDistance(p.mo.x - a.x, p.mo.y - a.y)
-
-			if dist < maxdistance then
-				marioconfirmed = IsMario(mo)
-				maxdistance = dist
-			end
-		end
-	end
-
-	return marioconfirmed
-end
-
-local function P_MarioMonitorThink(a, sprite, oldframe)
-	if MonitorSprites[sprite] == nil or not mariocoins then return end
-	local levelttl, typepw = mapheaderinfo[gamemap].lvlttl, MonitorSprites[sprite]
-
-	if (typepw == 9 and mapheaderinfo[gamemap].weather == PRECIP_SNOW) then
-		typepw = 7
-
-	elseif mapspecific[levelttl] then
-		typepw = mapspecific[levelttl](typepw)
-	end
-
-	local marioconfirmed = P_MarioExistsThink(a, typepw)
-
-	if marioconfirmed then
-		a.sprite = SPR_MMON
-		a.frame = typepw
-		a.spriteyoffset = -FRACUNIT*16
-	else
-		a.sprite = sprite
-		a.frame = oldframe
-	end
+	spawnhook(a.type, a, a.item, a.caps)
 end
 
 local function P_MonitorThinker(a)
@@ -340,30 +225,35 @@ local function P_MonitorDeath(a, d, s)
 	S_StartSound(a, a.info.deathsound)
 
 	local boxicon
-
-	if P_MarioExistsThink(a.item) then
-		A_MonitorPop(a, 0, 0)
-	else
-		if a.special_case then
-			a.special_case(a, a.item, a.target)
-		elseif mobjinfo[a.type].damage == MT_UNKNOWN then
+	if not loothook(a.type, a, a.item) then
+		if P_MarioExistsThink(a.item) then
 			A_MonitorPop(a, 0, 0)
 		else
-			boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
-			boxicon.scale = a.item.scale
-			boxicon.target = a.target
+			if a.special_case then
+				a.special_case(a, a.item, a.target)
+			elseif mobjinfo[a.type].damage == MT_UNKNOWN then
+				A_MonitorPop(a, 0, 0)
+			else
+				boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
+				boxicon.scale = a.item.scale
+				boxicon.target = a.target
 
-			-- Clipped code from Source code for life icons
-			if boxicon.type == MT_1UP_ICON and boxicon.target then
-				-- Spawn the lives icon.
-				local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
-				livesico.target = boxicon
-				livesico.color = boxicon.target.player.mo.color
-				livesico.skin = boxicon.target.player.mo.skin
-				livesico.state = S_PLAY_ICON1
-				livesico.dispoffset = 2
+				-- Clipped code from Source code for life icons
+				if boxicon.type == MT_1UP_ICON and boxicon.target then
+					-- Spawn the lives icon.
+					local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
+					livesico.target = boxicon
+					livesico.color = boxicon.target.player.mo.color
+					livesico.skin = boxicon.target.player.mo.skin
+					livesico.state = S_PLAY_ICON1
+					livesico.dispoffset = 2
 
-				boxicon.state = S_1UP_NICON1
+					boxicon.state = S_1UP_NICON1
+				end
+
+				if (a.spawnpoint and a.spawnpoint.args[0]) then
+					P_LinedefExecute(a.spawnpoint.args[0], a.target, nil)
+				end
 			end
 		end
 	end
@@ -381,12 +271,13 @@ local function P_MonitorDeath(a, d, s)
 
 	local itemrespawnvalue = CV_FindVar("respawnitemtime").value
 
-	if (itemrespawnvalue and G_GametypeHasSpectators()) then
+	if (itemrespawnvalue ~= nil and G_GametypeHasSpectators()) then
 		a.fuse = itemrespawnvalue*TICRATE + 2
 	end
 
 	a.once_already = true
 
+	deathhook(a.type, a, a.item, a.caps, boxicon)
 	return true
 end
 
@@ -397,6 +288,8 @@ local function P_MonitorRemoval(a, d)
 	if a.item and a.item.valid then
 		P_RemoveMobj(a.item)
 	end
+
+	remhook(a.type, a, a.item, a.caps)
 end
 
 --
@@ -457,6 +350,8 @@ local function P_ExcludeMonitors(...)
 		monitor_database[item] = 1
 	end
 end
+
+rawset(_G, "Styles_addMonitor", P_AddMonitor)
 
 local only_monitors_with = {
 	[S_BOX_POP1] = true,

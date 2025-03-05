@@ -97,8 +97,25 @@ HOOK("time", "dchud", function(v, p, t, e)
 
 	font_drawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, font_scale, time_string, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
 
+
+	--local imax = 8
+	--local angmax = (360/imax)*ANG1
+
+	--for i = 1, 8 do
+	--	local anlg = (i * angmax) + (leveltime * ANG1) / 8
+
+	--	local x = (cos(anlg) * 40) / FRACUNIT
+	--	local y = (sin(anlg) * 10) / FRACUNIT
+
+	--	v.drawString(160 + x, 100 + y, "LMAO")
+	--end
+
 	return true
 end, "game")
+
+---@diagnostic disable-next-line
+
+local tokenstyle_cv = CV_FindVar("dc_keystyle")
 
 -- RINGS
 HOOK("rings", "dchud", function(v, p, t, e)
@@ -122,7 +139,7 @@ HOOK("rings", "dchud", function(v, p, t, e)
 
 	if token then
 		if token > 1 or not p.styles_keytouch then
-			v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, v.cachePatch('SA2CHAO'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+			v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, v.cachePatch(tokenstyle_cv.value and 'SA2CHAO' or 'SA2HEROESKEY'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
 		end
 
 		if p.styles_keytouch and p.styles_keytouch.dur > 0 then
@@ -148,7 +165,7 @@ HOOK("rings", "dchud", function(v, p, t, e)
 			local heightgreenextra = (winheight/winscale - 200)/2
 
 			local dur = p.styles_keytouch.dur
-			local key_sprite = v.getSpritePatch(SPR_SA2K, p.styles_keytouch.frame)
+			local key_sprite = v.getSpritePatch(p.styles_keytouch.sprite, p.styles_keytouch.frame)
 
 			local scale = 	ease.linear	(dur, font_scale/5, oscale)
 			local x = 		ease.outsine(dur, hudinfo[HUD_RINGS].x-widthgreenextra+78+FixedInt(FixedMul(key_sprite.leftoffset, scale)), ox/FRACUNIT)
@@ -164,7 +181,7 @@ end, "game")
 addHook("PlayerThink", function(p)
 	if p.styles_keytouch and p.styles_keytouch.dur > 920 then
 		p.styles_keytouch.dur = p.styles_keytouch.dur-FRACUNIT/18
-		p.styles_keytouch.frame = ((p.styles_keytouch.frame & FF_FRAMEMASK)+2) % 69
+		p.styles_keytouch.frame = ((p.styles_keytouch.frame & FF_FRAMEMASK)+2) % p.styles_keytouch.loop
 	else
 		p.styles_keytouch = nil
 	end
@@ -181,7 +198,6 @@ HOOK("lives", "dchud", function(v, p, t, e)
 		return
 	end
 
-	if not G_GametypeUsesLives() then return false end
 	if not p.mo then return end
 
 	local skin_name = string.upper(skins[p.mo.skin].name)
@@ -207,9 +223,13 @@ HOOK("lives", "dchud", function(v, p, t, e)
 		v.draw(hudinfo[HUD_LIVES].x+20, hudinfo[HUD_LIVES].y+6, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
 	end
 
-	-- number
-	local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
-	font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+55)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+	if G_GametypeUsesLives() then
+		-- number
+		local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
+		font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+55)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+	elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+		v.draw(hudinfo[HUD_LIVES].x+38, hudinfo[HUD_LIVES].y-3, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+	end
 
 	return true
 end, "game")

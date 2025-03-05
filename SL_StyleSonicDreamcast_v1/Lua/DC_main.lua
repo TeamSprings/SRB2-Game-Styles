@@ -67,6 +67,14 @@ CV_RegisterVar({
 })
 
 CV_RegisterVar({
+	name = "dc_keystyle",
+	defaultvalue = "heroes",
+	PossibleValue = {heroes = 0, chao = 1},
+	category = "Adventure Style - Eyecandy",
+	displayname = "Key Style",
+})
+
+CV_RegisterVar({
 	name = "dc_checkpoints",
 	defaultvalue = "On",
 	flags = CV_NETVAR,

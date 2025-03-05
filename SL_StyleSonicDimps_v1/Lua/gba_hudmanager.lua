@@ -236,6 +236,17 @@ local emeralds_set = {
 	EMERALD7,
 }
 
+HOOK("powerstones", "classichud", function(v, p, t, e)
+	if not p.powers[pw_emeralds] then return end
+
+	for i = 1, 7 do
+		local em = emeralds_set[i]
+		if (p.powers[pw_emeralds] & em) then
+			v.draw(128 + (i-1) * 10, 192, v.cachePatch("TEMER"..i), V_SNAPTOBOTTOM)
+		end
+	end
+end, "game")
+
 HOOK("coopemeralds", "gbahud", function(v)
 	if multiplayer then return end
 
@@ -417,7 +428,7 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 	drawan(v, 'ADV1TAFNT', 92*FRACUNIT, 122*FRACUNIT, FRACUNIT, "RING BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FRACUNIT/10)
 	drawan(v, 'ADVNUM', 175*FRACUNIT, 119*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FRACUNIT/10)
 	return true
-end, "game")
+end, "game", 8)
 
 --
 -- MONITOR DISPLAY

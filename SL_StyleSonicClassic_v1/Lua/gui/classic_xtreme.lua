@@ -36,6 +36,8 @@ return{
 
 			if G_GametypeUsesLives() then
 				drawf(v, 'XTTNUM', (lives_x+19)*FRACUNIT, (hudinfo[HUD_LIVES].y+3)*FRACUNIT, FRACUNIT, 'X'..p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		end
 	end,

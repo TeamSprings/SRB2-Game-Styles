@@ -2,10 +2,16 @@ Contributors:
 
     "Skydusk",
 	"Trimint123",
+	"bitten2up"
 
 Libraries:
 
     "TehRealSal",
+
+Sprite Sources:
+
++ Sprite Resources, only those most obvious stuff that came from there like HUD stuff.
+But even then, it didn't went without some corrections/additions/edits and such. A lot of S3K font was missing for example.
 
 Audio Sources:
 

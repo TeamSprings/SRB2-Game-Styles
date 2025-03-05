@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-
+local Options = tbsrequire 'helpers/create_cvar'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local calc_help = tbsrequire 'helpers/c_inter'
 
@@ -28,7 +28,7 @@ local debugft = "S1"
 local menu_toggle = false
 
 local get_emerald_sprite = CV_FindVar("classic_emeralds")
-local emeralds_sprites = tbsrequire('assets/tables/sprites/classic_emeralds')
+local emeralds_sprites = tbsrequire('assets/tables/sprites/emeralds')
 
 --
 --	External HUDs
@@ -76,26 +76,18 @@ end)
 local layout_val = 1
 local layouts = tbsrequire('gui/definitions/classic_layouts')
 
-local layout_cv = CV_RegisterVar{
-	name = "classic_hudlayout",
-	defaultvalue = "classic",
-	flags = CV_CALL,
-	func = function(var)
-		layout_val = var.value
-	end,
-	PossibleValue = {classic=1, bonus=2, blast3d=3}
-}
+local layout_opt = Options:new("hudlayout", "gui/cvars/layouts", function(var)
+	layout_val = var.value
+end)
 
-local lif_cv = CV_RegisterVar{
-	name = "classic_lifeicon",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		local set = {1, 3, 4, 5, 6, 7, 8}
-		lifeicon = set[var.value]
-	end,
-	PossibleValue = {sonic1=1, soniccd=2, sonic3=3, blast3d=4, mania=5, xtreme=6, chaotix=7}
-}
+local layout_cv = layout_opt.cv
+
+local lif_opt = Options:new("lifeicon", "gui/cvars/lifeicon", function(var)
+	local set = {1, 3, 4, 5, 6, 7, 8}
+	lifeicon = set[var.value]
+end)
+
+local lif_cv = lif_opt.cv
 
 local fade_cv = CV_RegisterVar{
 	name = "classic_bluefade",
@@ -104,67 +96,55 @@ local fade_cv = CV_RegisterVar{
 	PossibleValue = {off = 0, tally = 1},
 }
 
-local font_cv = CV_RegisterVar{
-	name = "classic_hudfont",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		local prefixes = {"S1", "ST", "CD", "S3", "3B", "MA", "XT", "KC"}
-		prefix = prefixes[var.value]
-		tallyft = prefix
+local font_opt = Options:new("hudfont", "gui/cvars/hudfont", function(var)
+	local prefixes = {"S1", "ST", "CD", "S3", "3B", "MA", "XT", "KC"}
+	prefix = prefixes[var.value]
+	tallyft = prefix
 
-		local paddingset = {0, 0, 0, 0, -1, -1, 0}
-		txtpadding = paddingset[var.value]
+	local paddingset = {0, 0, 0, 0, -1, -1, 0}
+	txtpadding = paddingset[var.value]
 
-		local debugprefixes = {"S1", "S1", "S1", "S3", "S3", "S3", "S3", "S3"}
-		debugft = debugprefixes[var.value]
+	local debugprefixes = {"S1", "S1", "S1", "S3", "S3", "S3", "S3", "S3"}
+	debugft = debugprefixes[var.value]
 
-		local tallyfonts = {1, 2, 3, 4, 4, 6, 4, 4}
-		tallytitleft = tallyfonts[var.value]
+	local tallyfonts = {1, 2, 3, 4, 4, 6, 4, 4}
+	tallytitleft = tallyfonts[var.value]
 
-		if var.value > 4 then
-			CV_Set(fade_cv, 1)
-		else
-			CV_Set(fade_cv, 0)
-		end
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, mania=6, xtreme=7, chaotix=8}
-}
+	if var.value > 4 then
+		CV_Set(fade_cv, 1)
+	else
+		CV_Set(fade_cv, 0)
+	end
+end)
 
-local title_cv = CV_RegisterVar{
-	name = "classic_hudtitle",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		local titles = {1, 2, 3, 4, 6}
+local font_cv = font_opt.cv
 
-		if gamestate == GS_LEVEL then
-			titletypechange = titles[var.value]
-		else
-			titletype = titles[var.value]
-		end
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, mania=5}
-}
+local title_opt = Options:new("hudtitle", "gui/cvars/hudtitle", function(var)
+	local titles = {1, 2, 3, 4, 6}
 
-local hud_cv = CV_RegisterVar{
-	name = "classic_hud",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		local prefixes = {1, 2, 3, 4, 5, 6, 7, 8}
-		CV_Set(font_cv, prefixes[var.value])
+	if gamestate == GS_LEVEL then
+		titletypechange = titles[var.value]
+	else
+		titletype = titles[var.value]
+	end
+end)
 
-		local lives = {1, 1, 2, 3, 4, 5, 6, 7}
-		CV_Set(lif_cv, lives[var.value])
+local title_cv = title_opt.cv
 
-		local title = {1, 2, 3, 4, 4, 5, 4, 4}
-		CV_Set(title_cv, title[var.value])
+local hud_opt = Options:new("hud", "gui/cvars/hudtypes", function(var)
+	local prefixes = {1, 2, 3, 4, 5, 6, 7, 8}
+	CV_Set(font_cv, prefixes[var.value])
 
-		hud_select = var.value
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, blast3d=5, mania=6, xtreme=7, chaotix=8}
-}
+	local lives = {1, 1, 2, 3, 4, 5, 6, 7}
+	CV_Set(lif_cv, lives[var.value])
+
+	local title = {1, 2, 3, 4, 4, 5, 4, 4}
+	CV_Set(title_cv, title[var.value])
+
+	hud_select = var.value
+end)
+
+local hud_cv = hud_opt.cv
 
 local debugmode_coordinates = CV_RegisterVar{
 	name = "classic_debug",
@@ -202,7 +182,7 @@ HOOK("lives", "classichud", function(v, p, t, e)
 	local mo = p.mo and p.mo or p.realmo
 	hud_data[lifeicon].lives(v, p, t, e, prefix, mo, hide_offset_x)
 	return true
-end, "game")
+end, "game", 1, 3)
 
 local tally_totalcalculation = 0
 
@@ -220,46 +200,53 @@ HOOK("score", "classichud", function(v, p, t, e)
 
 	local layout_opt = layouts[layout_val]
 
+	local hideoffset = layout_opt.score_move_dir*hidefull_offset_x
+
 	if debugmode_coordinates.value then
-		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x+layout_opt.xoffset_score,
-		hudinfo[HUD_SCORE].y+layout_opt.yoffset_score,
-		v.cachePatch(prefix..'TSCODB'),
-		hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
+		if layout_opt.scoregraphic then
+			v.draw(hudinfo[HUD_SCORE].x+hideoffset+layout_opt.xoffset_score,
+			hudinfo[HUD_SCORE].y+layout_opt.yoffset_score,
+			v.cachePatch(prefix..'TSCODB'),
+			layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER)
+		end
 
 		-- Debug Mode
 		local bitf = FRACUNIT
 		local pvx, pvy = abs(mo.x/bitf)/4, abs(mo.y/bitf)/4
 		local cvx, cvy = abs(t.x/bitf)/4, abs(t.y/bitf)/4
 
-		local xval = hudinfo[HUD_SCORE].x+32+hidefull_offset_x+layout_opt.xoffset_score
+		local xval = hudinfo[HUD_SCORE].x + 32 +hideoffset + layout_opt.xoffset_score + layout_opt.xoffset_debugnum
 
 		if debugmode_coordinates.value == 2 then
 			local pvz, cvz = abs(mo.z/bitf)/4, abs(t.z/bitf)/4
 
 			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
-			string.upper(string.format("%04x%04x%04x", pvx, pvy, pvz)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
+			string.upper(string.format("%04x%04x%04x", pvx, pvy, pvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.debugalligment)
 			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
-			string.upper(string.format("%04x%04x%04x", cvx, cvy, cvz)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
+			string.upper(string.format("%04x%04x%04x", cvx, cvy, cvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.debugalligment)
 		else
 			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
-			string.upper(string.format("%04x%04x", pvx, pvy)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
+			string.upper(string.format("%04x%04x", pvx, pvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.debugalligment)
 			drawf(v, debugft..'DBM', xval*FRACUNIT, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FRACUNIT, FRACUNIT,
-			string.upper(string.format("%04x%04x", cvx, cvy)), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "left")
+			string.upper(string.format("%04x%04x", cvx, cvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.debugalligment)
 		end
 	else
-		-- no debug
-		v.draw(hudinfo[HUD_SCORE].x+hidefull_offset_x+layout_opt.xoffset_score, hudinfo[HUD_SCORE].y+layout_opt.yoffset_score, v.cachePatch(prefix..'TSCORE'), hudinfo[HUD_SCORE].f|V_HUDTRANS|V_PERPLAYER)
+		if layout_opt.scoregraphic then
+			-- no debug
+			v.draw(hudinfo[HUD_SCORE].x+hideoffset+layout_opt.xoffset_score, hudinfo[HUD_SCORE].y+layout_opt.yoffset_score, v.cachePatch(prefix..'TSCORE'), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER)
+		end
+
 		drawf(v, prefix..'TNUM',
-		(hudinfo[HUD_SCORENUM].x+hidefull_offset_x+layout_opt.xoffset_scorenum+layout_opt.xoffset_score)*FRACUNIT,
+		(hudinfo[HUD_SCORENUM].x+hideoffset+layout_opt.xoffset_scorenum+layout_opt.xoffset_score)*FRACUNIT,
 		(hudinfo[HUD_SCORENUM].y+layout_opt.yoffset_scorenum+layout_opt.yoffset_score)*FRACUNIT,
 		FRACUNIT,
 		p.score,
-		hudinfo[HUD_SCORENUM].f|V_HUDTRANS|V_PERPLAYER,
-		v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER,
+		v.getColormap(TC_DEFAULT, 1), layout_opt.scorenumalligment, txtpadding)
 	end
 
 	return true
-end, "game")
+end, "game", 1, 3)
 
 local time_display_settings = CV_FindVar("timerres")
 
@@ -311,23 +298,31 @@ HOOK("time", "classichud", function(v, p, t, e)
 		time_string = mint..":"..sect
 	end
 
-	local tics_xcor = hudinfo[show_tic and HUD_TICS or HUD_SECONDS].x+hidefull_offset_x+layout_opt.xoffset_time+layout_opt.xoffset_timenum
+	local hideoffset = layout_opt.time_move_dir*hidefull_offset_x
+
+	local tics_xcor = hudinfo[show_tic and HUD_TICS or HUD_SECONDS].x+hideoffset+layout_opt.xoffset_time+layout_opt.xoffset_timenum
 
 	-- drawing
 	if countdown and tics < 10*TICRATE and (leveltime % red_flashing_timer)/red_flashing_thred then
-		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x+layout_opt.xoffset_time, (hudinfo[HUD_TIME].y+layout_opt.yoffset_time), v.cachePatch(prefix..'TRTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
+		if layout_opt.timegraphic then
+			v.draw(hudinfo[HUD_TIME].x+hideoffset+layout_opt.xoffset_time, (hudinfo[HUD_TIME].y+layout_opt.yoffset_time), v.cachePatch(prefix..'TRTIME'), layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER)
+		end
+
 		if prefix == "KC" then
-			drawf(v, prefix..'RNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'RNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.timenumalligment, txtpadding)
 		else
-			drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, hudinfo[HUD_SECONDS].y*FRACUNIT, FRACUNIT, time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.timenumalligment, txtpadding)
 		end
 	else
-		v.draw(hudinfo[HUD_TIME].x+hidefull_offset_x+layout_opt.xoffset_time, hudinfo[HUD_TIME].y+layout_opt.yoffset_time, v.cachePatch(prefix..'TTIME'), hudinfo[HUD_TIME].f|V_HUDTRANS|V_PERPLAYER)
-		drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, hudinfo[HUD_SECONDS].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		if layout_opt.timegraphic then
+			v.draw(hudinfo[HUD_TIME].x+hideoffset+layout_opt.xoffset_time, hudinfo[HUD_TIME].y+layout_opt.yoffset_time, v.cachePatch(prefix..'TTIME'), layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER)
+		end
+
+		drawf(v, prefix..'TNUM', tics_xcor*FRACUNIT, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FRACUNIT, FRACUNIT, time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.timenumalligment, txtpadding)
 	end
 
 	return true
-end, "game")
+end, "game", 1, 3)
 
 HOOK("rings", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
@@ -340,24 +335,32 @@ HOOK("rings", "classichud", function(v, p, t, e)
 
 	local layout_opt = layouts[layout_val]
 
+	local hideoffset = layout_opt.rings_move_dir*hidefull_offset_x
+
 	local option = layout_val > 1 and hudinfo[HUD_RINGSNUM].x or (time_display_settings.value > 1 and hudinfo[HUD_RINGSNUMTICS].x or hudinfo[HUD_RINGSNUM].x)
 
-	local x_num = (option + hide_offset_x + layout_opt.xoffset_rings + layout_opt.xoffset_ringsnum)*FRACUNIT
+	local x_num = (option + hideoffset + layout_opt.xoffset_rings + layout_opt.xoffset_ringsnum)*FRACUNIT
 
 	if p.rings < 1 and (leveltime % red_flashing_timer)/red_flashing_thred then
-		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRRING'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
+		if layout_opt.ringsgraphic then
+			v.draw(hudinfo[HUD_RINGS].x + hideoffset + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRRING'), layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER)
+		end
+
 		if prefix == "KC" then
-			drawf(v, prefix..'RNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'RNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.ringsnumalligment, txtpadding)
 		else
-			drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+			drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.ringsnumalligment, txtpadding)
 		end
 	else
-		v.draw(hudinfo[HUD_RINGS].x + hide_offset_x + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRINGS'), hudinfo[HUD_RINGS].f|V_HUDTRANS|V_PERPLAYER)
-		drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGSNUM].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+		if layout_opt.ringsgraphic then
+			v.draw(hudinfo[HUD_RINGS].x + hideoffset + layout_opt.xoffset_rings, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings, v.cachePatch(prefix..'TRINGS'), layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER)
+		end
+
+		drawf(v, prefix..'TNUM', x_num, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FRACUNIT, FRACUNIT, p.rings, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), layout_opt.ringsnumalligment, txtpadding)
 	end
 
 	return true
-end, "game")
+end, "game", 1, 3)
 
 HOOK("styles_hudhide_manager", "classichud", function(v, p, t, e)
 	if hud_hide_cv.value then
@@ -394,7 +397,7 @@ HOOK("styles_hudhide_manager", "classichud", function(v, p, t, e)
 		hidefull_offset_x = 0
 	end
 	return true
-end, "game")
+end, "game", 1, 3)
 
 local fake_timebonus = 0
 local fake_ringbonus = 0
@@ -413,6 +416,16 @@ local emeralds_set = {
 	EMERALD7,
 }
 
+HOOK("powerstones", "classichud", function(v, p, t, e)
+	if not p.powers[pw_emeralds] then return end
+
+	for i = 1, 7 do
+		local em = emeralds_set[i]
+		if (p.powers[pw_emeralds] & em) then
+			v.draw(128 + (i-1) * 10, 192, v.cachePatch("TEMER"..i), V_SNAPTOBOTTOM)
+		end
+	end
+end, "game", 1, 3)
 
 HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	if not p.exiting then return end
@@ -553,12 +566,10 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				hud_data[1].tallyspecial(v, p, min((timed+89)*24, 0), color, color2)
 			end
 
-			local sprite = emeralds_sprites[get_emerald_sprite.value]
-
 			if (timed % 2) then
 				for i = 1, 7 do
 					if emeralds & emeralds_set[i] then
-						v.draw(50+i*30, 120, v.getSpritePatch(sprite, i-1, 0, 0), 0)
+						v.draw(50+i*30, 120, v.getSpritePatch(Options:getvalue("emeralds")[2], i-1, 0, 0), 0)
 					end
 				end
 			end
@@ -625,7 +636,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 	end
 
 	return true
-end, "game")
+end, "game", 1, 3)
 
 HOOK("stagetitle", "classichud", function(v, p, t, e)
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
@@ -650,7 +661,7 @@ HOOK("stagetitle", "classichud", function(v, p, t, e)
 	end
 
 	return true
-end, "titlecard")
+end, "titlecard", 1, 3)
 
 HOOK("coopemeralds", "classichud", function(v)
 	if multiplayer then return end
@@ -659,7 +670,7 @@ HOOK("coopemeralds", "classichud", function(v)
 		return
 	end
 
-	local sprite = emeralds_sprites[get_emerald_sprite.value]
+	local sprite = Options:getPureValue("emeralds")
 
 	for i = 1, 7 do
 		if emeralds & emeralds_set[i] then
@@ -668,13 +679,13 @@ HOOK("coopemeralds", "classichud", function(v)
 	end
 
 	return true
-end, "scores")
+end, "scores", 1, 3)
 
 local em_timer = 0
 
 HOOK("intermissionemeralds", "classichud", function(v)
 	if not (maptol & TOL_NIGHTS) then return end
-	local sprite = emeralds_sprites[get_emerald_sprite.value]
+	local sprite = Options:getPureValue("emeralds")
 
 	if em_timer/2 then
 		for i = 1, 7 do
@@ -686,7 +697,7 @@ HOOK("intermissionemeralds", "classichud", function(v)
 
 	em_timer = (em_timer+1) % 4
 	return true
-end, "intermission")
+end, "intermission", 1, 3)
 
 --
 --	MENU
@@ -742,9 +753,40 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 
 				v.draw(x_off, y, v.cachePatch(menu_select == i and "S3KBUTTON2" or "S3KBUTTON1"), V_SNAPTOLEFT)
 				v.drawString(x_off, y+8, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT, "center")
-				if item.cv then
+				if item.opt then
+					local set = Options:getvalue(item.opt)
+
+					if set then
+						local opt = set[1]
+						local num = set[3]
+
+						if num ~= nil then
+							drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.upper(string.format("%02x", num)), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
+						end
+
+						if opt ~= nil then
+							local font = "center"
+							local yfnt = y+28
+
+							if string.len(opt) > 14 then
+								font = "thin-center"
+								yfnt = $ + 1
+							end
+
+							v.drawString(x_off, yfnt, "\x8C"..opt, V_SNAPTOLEFT, font)
+						end
+					end
+				elseif item.cv then
 					drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
-					v.drawString(x_off, y+28, "\x8C"..item.cv.string, V_SNAPTOLEFT, "center")
+					local font = "center"
+					local yfnt = y+28
+
+					if string.len(item.cv.string) > 14 then
+						font = "thin-center"
+						yfnt = $ + 1
+					end
+
+					v.drawString(x_off, yfnt, "\x8C"..item.cv.string, V_SNAPTOLEFT, font)
 				end
 			elseif type(item) == "string" then
 				local y = 100+i*60-z
@@ -770,7 +812,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 		end
 	end
 	return true
-end, "game", 2)
+end, "game", 16, 3)
 
 addHook("PlayerThink", function(p)
 	if menu_toggle then
@@ -816,12 +858,22 @@ addHook("PlayerCmd", function(p, cmd)
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
-			if cmd.sidemove < -25 and classic_menu_vars[menu_select].cv then
+			if cmd.sidemove < -25 and (classic_menu_vars[menu_select].cv or classic_menu_vars[menu_select].opt) then
 				local cv = classic_menu_vars[menu_select].cv
+				local ming = classic_menu_vars[menu_select].minv
+				local maxg = classic_menu_vars[menu_select].maxv
+
+				if classic_menu_vars[menu_select].opt then
+					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
+
+					cv = opt[1]
+					ming = opt[2]
+					maxg = opt[3]
+				end
 
 				local value = cv.value-1
-				if value < classic_menu_vars[menu_select].minv then
-					value = classic_menu_vars[menu_select].maxv
+				if value < ming then
+					value = maxg
 				end
 
 				CV_Set(cv, value)
@@ -830,12 +882,22 @@ addHook("PlayerCmd", function(p, cmd)
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
-			if cmd.sidemove > 25 and classic_menu_vars[menu_select].cv then
+			if cmd.sidemove > 25 and (classic_menu_vars[menu_select].cv or classic_menu_vars[menu_select].opt) then
 				local cv = classic_menu_vars[menu_select].cv
+				local ming = classic_menu_vars[menu_select].minv
+				local maxg = classic_menu_vars[menu_select].maxv
+
+				if classic_menu_vars[menu_select].opt then
+					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
+
+					cv = opt[1]
+					ming = opt[2]
+					maxg = opt[3]
+				end
 
 				local value = cv.value+1
-				if value > classic_menu_vars[menu_select].maxv then
-					value = classic_menu_vars[menu_select].minv
+				if value > maxg then
+					value = ming
 				end
 
 				CV_Set(cv, value)

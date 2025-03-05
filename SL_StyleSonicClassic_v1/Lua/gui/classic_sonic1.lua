@@ -92,11 +92,12 @@ return{
 				v.draw(lives_x, hudinfo[HUD_LIVES].y, v.cachePatch('S2LIVBLANK2'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 
-			drawf(v, 'HUS2NAM', (lives_x+17)*FRACUNIT, (hudinfo[HUD_LIVES].y+1)*FRACUNIT, FRACUNIT, string.upper(''..skins[p.mo.skin].hudname), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), 0, 1)
-
 			if G_GametypeUsesLives() then
+				drawf(v, 'HUS2NAM', (lives_x+17)*FRACUNIT, (hudinfo[HUD_LIVES].y+1)*FRACUNIT, FRACUNIT, string.upper(''..skins[p.mo.skin].hudname), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), 0, 1)
 				v.draw(lives_x+22, hudinfo[HUD_LIVES].y+10, v.cachePatch('S2CROSS'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				drawf(v, 'LIFENUM', (lives_x+17+lifenamelenght)*FRACUNIT, (hudinfo[HUD_LIVES].y+9)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "right", 1)
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		end
 	end,

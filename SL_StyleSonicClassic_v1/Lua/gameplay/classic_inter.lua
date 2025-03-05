@@ -7,15 +7,29 @@ Contributors: Skydusk
 
 ]]
 
+local Options = tbsrequire('helpers/create_cvar')
+
+local list = tbsrequire 'gameplay/compact/specialpacks'
 local calc_help = tbsrequire 'helpers/c_inter'
 
 -- Global that should have been exposed! Bruh.
 local TMEF_SKIPTALLY = 1
 
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local setuphook = 	api:addHook("TallySetup")
+local endhook = 	api:addHook("TallyEnd")
+local skiphook = 	api:addHook("TallySkip")
+local prerankhook = api:addHook("PreRankSetup") -- Unused for other styles
+local rankhook = 	api:addHook("RankSetup") -- Unused for other styles
+
 --
 --	Console Variable
 --
 
+local specialpackdetected = nil
 local end_tallyenabled = 1
 local change_var = -1
 
@@ -32,6 +46,17 @@ local endtally_cv = CV_RegisterVar{
 	end,
 	PossibleValue = {disabled=0, enabled=1}
 }
+
+addHook("AddonLoaded", function()
+	if list and not specialpackdetected then
+		for _,v in ipairs(list) do
+			if _G[v] then
+				specialpackdetected = true
+				return
+			end
+		end
+	end
+end)
 
 addHook("PlayerSpawn", function(p)
 	if change_var > -1 then
@@ -205,30 +230,10 @@ end
 --	In-Game Handler (SP only)
 --
 
-local levelend_select = {
-	[0]="_clear", -- vanilla yay...
-
-	"_LCS1",
-	"_LCJP",
-	"_LCUS",
-	"_LCS3",
-	"_LC3G",
-	"_LC3S",
-	"_LCKC",
-	"_LCSM",
-}
-
-local levelendtheme_cv = CV_FindVar("classic_levelendtheme")
-
-local function G_GetLevelEndMusic()
-	if levelend_select[levelendtheme_cv.value] then
-		return levelend_select[levelendtheme_cv.value]
-	end
-end
-
 local function G_StylesTallyBackend(p)
 	if (multiplayer and not splitscreen) or not end_tallyenabled then return end
 	if not (p.mo and p.mo.valid) then return end
+	if specialpackdetected then return end
 	if p.bot then return end
 
 	if marathonmode then return end
@@ -288,15 +293,19 @@ local function G_StylesTallyBackend(p)
 					p.powers[pw_extralife] = 0
 					p.powers[pw_super] = 0
 
+					local getTrack = Options:getvalue("levelendtheme")[2]
+
 					S_StopMusic(p)
-					S_ChangeMusic(G_GetLevelEndMusic(), false, p, 0, 0, 0, 0)
+					S_ChangeMusic(getTrack, false, p, 0, 0, 0, 0)
 					--p.styles_lasttrack = nil
-					p.styles_tallytrack = G_GetLevelEndMusic()
+					p.styles_tallytrack = getTrack
 					p.styles_tallyposms = 0
 					p.styles_tallystoplooping = nil
 					p.styles_tallysoundlenght = S_GetMusicLength()
 
 					p.mo.flags = $|MF_NOCLIPTHING
+
+					setuphook("General", p)
 				-- Background Process
 				elseif p.styles_tallytimer ~= nil then
 					p.exiting = 5
@@ -310,6 +319,8 @@ local function G_StylesTallyBackend(p)
 						if p.cmd.buttons & BT_SPIN then
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
 							calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+
+							skiphook("Generic", p)
 						else
 							if p.styles_tallytimer < p.styles_tallyfakecounttimer - 1 then
 								calc_help.addScore(p, 222)
@@ -350,6 +361,8 @@ local function G_StylesTallyBackend(p)
 						p.styles_tallylastscore = p.score
 						p.styles_tallylastlives = p.lives
 						G_ExitLevel()
+
+						endhook("General", p)
 						return
 					end
 				end

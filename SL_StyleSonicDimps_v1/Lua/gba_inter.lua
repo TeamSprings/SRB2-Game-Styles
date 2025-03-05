@@ -12,6 +12,16 @@ local calc_help = tbsrequire 'helpers/c_inter'
 -- Global that should have been exposed! Bruh.
 local TMEF_SKIPTALLY = 1
 
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local setuphook = 	api:addHook("TallySetup")
+local endhook = 	api:addHook("TallyEnd")
+local skiphook = 	api:addHook("TallySkip")
+local prerankhook = api:addHook("PreRankSetup") -- Unused for other styles
+local rankhook = 	api:addHook("RankSetup") -- Unused for other styles
+
 --
 --	Console Variable
 --
@@ -246,6 +256,8 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallysoundlenght = S_GetMusicLength()
 
 					p.exiting = 5
+
+					setuphook("General", p)
 				-- Background Process
 				elseif p.styles_tallytimer ~= nil then
 					p.exiting = 5
@@ -256,6 +268,8 @@ local function G_StylesTallyBackend(p)
 						if p.cmd.buttons & BT_SPIN then
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
 							P_AddPlayerScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+
+							skiphook("Generic", p)
 						else
 							if p.styles_tallytimer < p.styles_tallyfakecounttimer - 1 then
 								P_AddPlayerScore(p, 222)
@@ -300,6 +314,8 @@ local function G_StylesTallyBackend(p)
 						p.styles_tallylastscore = p.score
 						p.styles_tallylastlives = p.lives
 						G_ExitLevel()
+
+						endhook("General", p)
 						return
 					end
 				end

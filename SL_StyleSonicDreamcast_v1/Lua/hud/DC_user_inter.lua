@@ -37,7 +37,7 @@ local interm_size = FRACUNIT-3*FRACUNIT/8
 local music = "_ADVLCEAR"
 
 HOOK("ingameintermission", "dchud", function(v, p, t, e)
-	if not (p.exiting and p.tallytimer) then return true end
+	if not (p.exiting and p.styles_tallytimer) then return true end
 	-- Ease and timing
 
 	local textscaling = {}
@@ -45,29 +45,29 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	local xcnt = {}
 
 	for i = 1,5 do
-		textscaling[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), interm_size, 3*FRACUNIT/2)
-		transparency[i] = ease.linear(max(min(p.tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
+		textscaling[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), interm_size, 3*FRACUNIT/2)
+		transparency[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 	end
 
-	local fade = ease.linear(max(min(p.tallytimer-8*TICRATE-5, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 16, 0)
+	local fade = ease.linear(max(min(p.styles_tallytimer-8*TICRATE-5, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 16, 0)
 
-	local fadewhite = abs(abs(ease.linear(max(min(p.tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
+	local fadewhite = abs(abs(ease.linear(max(min(p.styles_tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
 
-	local rankamp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), FRACUNIT, 3*FRACUNIT/2)
-	local ranktrp = ease.linear(max(min(p.tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
+	local rankamp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), FRACUNIT, 3*FRACUNIT/2)
+	local ranktrp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 
-	local calculationtime = ease.linear(max(min(p.tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), Y_GetTimeBonus(p.realtime), 0)
+	local calculationtime = ease.linear(max(min(p.styles_tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), Y_GetTimeBonus(p.realtime), 0)
 
 
 	-- Sound effects
 
 	-- stop music
-	if p.tallytimer == 13*TICRATE-1 then
+	if p.styles_tallytimer == 13*TICRATE-1 then
 		S_FadeOutStopMusic(MUSICRATE, p)
 	end
 
 	-- rank sound
-	if p.tallytimer == 2*TICRATE then S_StartSound(nil, sfx_rank, p) end
+	if p.styles_tallytimer == 2*TICRATE then S_StartSound(nil, sfx_rank, p) end
 
 	--
 	--	SET-UP
@@ -78,7 +78,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	v.fadeScreen(0xFF00, fade)
 
 	local z1, z2 = 56, 125
-	local scale = ease.linear(max(min(p.tallytimer-8*TICRATE, TICRATE/4), 0)*FRACUNIT/(TICRATE/4), FRACUNIT-FRACUNIT/4, 1)
+	local scale = ease.linear(max(min(p.styles_tallytimer-8*TICRATE, TICRATE/4), 0)*FRACUNIT/(TICRATE/4), FRACUNIT-FRACUNIT/4, 1)
 	local x1 = FixedDiv(162*scale, scale)
 	local index = 5
 
@@ -194,7 +194,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	end
 
 	return true
-end, "game")
+end, "game", 8)
 
 --
 --	TITLE CARD
@@ -252,6 +252,7 @@ local function THTHTHfunc(num)
 	return ord..str
 end
 
+local ac = 1
 
 HOOK("stagetitle", "dchud", function(v, p, t, et)
 	if t > et-1 then return end
@@ -286,6 +287,10 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 	-- Sound Effects / Music
 
 	if (leveltime <= et) then
+		if t == 4 then
+			ac = 1
+		end
+
 
 		if consoleplayer and consoleplayer == p then
 			hud.sa2musicstop = (t <= (2*TICRATE+9) and 2 or 0)
@@ -295,8 +300,9 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 			end
 		end
 
-		if (t == TICRATE/2) then
+		if ac and (t == TICRATE/2) then
 			S_StartSound(nil, sfx_advtts, p)
+			ac = nil
 		end
 	end
 

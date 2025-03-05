@@ -12,6 +12,16 @@ local helper = 	tbsrequire 'helpers/c_inter'
 -- Global that should have been exposed! Bruh.
 local TMEF_SKIPTALLY = 1
 
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local setuphook = 	api:addHook("TallySetup")
+local endhook = 	api:addHook("TallyEnd")
+local skiphook = 	api:addHook("TallySkip")
+local prerankhook = api:addHook("PreRankSetup") -- Currently unused, will be used unlike in other styles
+local rankhook = 	api:addHook("RankSetup") -- Currently unused, will be used unlike in other styles
+
 --
 --	Console Variable
 --
@@ -39,7 +49,7 @@ addHook("PlayerSpawn", function(p)
 		change_var = -1
 	end
 
-	p.tallytimer = nil
+	p.styles_tallytimer = nil
 	p.startscore = p.score
 end)
 
@@ -208,11 +218,11 @@ local function G_StylesTallyBackend(p)
 			if not skiptally then
 				if p.yusonictable and p.yusonictable.endlvl then
 					p.yusonictable.endlvl = 0
-					if p.tallytimer then
-						if p.tallytimer > 12*TICRATE or (p.yusonictable.bosskiller and p.tallytimer >= 10*TICRATE) then
+					if p.styles_tallytimer then
+						if p.styles_tallytimer > 12*TICRATE or (p.yusonictable.bosskillerstyles_tallytimerlytimer >= 10*TICRATE) then
 							p.mo.state = S_PLAY_STND
 							A_ForceStop(p.mo)
-						elseif (p.tallytimer >= 10*TICRATE and p.tallytimer <= 12*TICRATE) and not (p.yusonictable.bosskiller) then
+						elseif (p.styles_tallytimer >= 10*TICRATE and p.styles_tallytimer <= 12*TICRATE) and not (p.yusonictable.bosskiller) then
 							p.mo.momx = 2*cos(p.mo.angle)
 							p.mo.momy = 2*sin(p.mo.angle)
 							p.rmomx = 2*FRACUNIT
@@ -220,7 +230,7 @@ local function G_StylesTallyBackend(p)
 							if p.mo.state ~= S_PLAY_WALK then
 								p.mo.state = S_PLAY_WALK
 							end
-						elseif p.tallytimer < 10*TICRATE then
+						elseif p.styles_tallytimer < 10*TICRATE then
 							if p.yusonictable.bosskiller then
 								if p.mo.state ~= S_PLAY_FLY then
 									p.mo.state = S_PLAY_FLY
@@ -234,7 +244,7 @@ local function G_StylesTallyBackend(p)
 									p.mo.frame = 10
 								end
 							end
-							if p.tallytimer == 10*TICRATE-1 then
+							if p.styles_tallytimer == 10*TICRATE-1 then
 								p.yusonictable.tauntcd = 120
 							end
 						end
@@ -244,7 +254,7 @@ local function G_StylesTallyBackend(p)
 				p.mo.flags = $|MF_NOCLIPTHING
 
 				if p.exiting == 2*TICRATE+10 then
-					p.tallytimer = 13*TICRATE
+					p.styles_tallytimer = 13*TICRATE
 					p.exiting = 2*TICRATE+9
 					p.styles_teleportToGround = true
 
@@ -258,23 +268,25 @@ local function G_StylesTallyBackend(p)
 						p.mo.advposecamera.state = S_INVISIBLE
 						p.awayviewmobj = p.mo.advposecamera
 					end
-				elseif p.tallytimer then
-					if p.tallytimer == 1 then
+				elseif p.styles_tallytimer then
+					if p.styles_tallytimer == 1 then
 						p.exiting = 1
 					else
 						p.exiting = 2*TICRATE+9
 					end
 
-					if p.tallytimer == 8*TICRATE then S_StartSound(p.mo, sfx_advtal, p) end
+					if p.styles_tallytimer == 8*TICRATE then S_StartSound(p.mo, sfx_advtal, p) end
 
-					if p.tallytimer == 11*TICRATE then
+					if p.styles_tallytimer == 11*TICRATE then
 						p.styles_tallytrack = "_ADVCLEAR"
 
 						P_PlayJingleMusic(p, p.styles_tallytrack, 0, false)
 						p.styles_tallyposms = 0
 						p.styles_tallystoplooping = nil
 						p.styles_tallysoundlenght = S_GetMusicLength()
-					elseif p.tallytimer < 11*TICRATE then
+
+						setuphook("General", p)
+					elseif p.styles_tallytimer < 11*TICRATE then
 						p.powers[pw_invulnerability] = 0
 						p.powers[pw_sneakers] = 0
 						p.powers[pw_extralife] = 0
@@ -305,15 +317,17 @@ local function G_StylesTallyBackend(p)
 					end
 
 					-- cha-ching! sound
-					if p.tallytimer == 5*TICRATE then
+					if p.styles_tallytimer == 5*TICRATE then
 						S_StartSound(nil, sfx_advchi, p)
 					end
 
-					if p.cmd.buttons & BT_SPIN and p.tallytimer > 4*TICRATE+1 then
-						p.tallytimer = 4*TICRATE
+					if p.cmd.buttons & BT_SPIN and p.styles_tallytimer > 4*TICRATE+1 then
+						p.styles_tallytimer = 4*TICRATE
 						-- I wanted to do it but whatever, Demnyx you have this one
 						S_StartSound(p.mo, sfx_advchi)
 						S_StopSoundByID(p.mo, sfx_advtal)
+
+						skiphook("Generic", p)
 					end
 
 					if p.styles_teleportToGround then
@@ -321,11 +335,11 @@ local function G_StylesTallyBackend(p)
 						p.styles_teleportToGround = nil
 					end
 
-					p.tallytimer = $-1
-					local angeasemath = ease.insine(max(min(p.tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
-					local distance = ease.insine(max(min(p.tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 100*FRACUNIT, 300*FRACUNIT)/FRACUNIT
-					local aim = ease.insine(max(min(p.tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 0, -35*ANG1)
-					local zdistance = ease.insine(max(min(p.tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), p.mo.z+p.mo.height/2, p.mo.z+FixedMul(p.mo.height, 3*FRACUNIT))
+					p.styles_tallytimer = $-1
+					local angeasemath = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
+					local distance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 100*FRACUNIT, 300*FRACUNIT)/FRACUNIT
+					local aim = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 0, -35*ANG1)
+					local zdistance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), p.mo.z+p.mo.height/2, p.mo.z+FixedMul(p.mo.height, 3*FRACUNIT))
 					P_MoveOrigin(p.mo.advposecamera, p.mo.x-distance*cos(angeasemath), p.mo.y-distance*sin(angeasemath), zdistance)
 					p.mo.advposecamera.angle = angeasemath
 					p.awayviewmobj = p.mo.advposecamera
@@ -340,6 +354,7 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallylastscore = p.score + helper.Y_GetAllBonus(p)
 				end
 
+				endhook("General", p)
 				G_ExitLevel()
 			end
 		end

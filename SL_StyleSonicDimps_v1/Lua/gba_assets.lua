@@ -51,3 +51,19 @@ states[S_STARPOST_FLASH].sprite = SPR_GBPT
 states[S_STARPOST_STARTSPIN].sprite = SPR_GBPT
 states[S_STARPOST_SPIN].sprite = SPR_GBPT
 states[S_STARPOST_ENDSPIN].sprite = SPR_GBPT
+
+local embspr = freeslot("SPR_STYLES_REDSTARRING")
+
+local redringstate = freeslot("S_STYLES_REDSTARRING")
+states[redringstate] = {
+	sprite = embspr,
+	frame = A|FF_ANIMATE,
+	var1 = 23,
+	var2 = 1,
+}
+
+addHook("MobjThinker", function(a)
+	if a.health > 0 and a.state ~= redringstate then
+		a.state = redringstate
+	end
+end, MT_EMBLEM)

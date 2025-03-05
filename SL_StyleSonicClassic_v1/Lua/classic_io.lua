@@ -11,7 +11,7 @@ addHook("GameQuit", function(quit)
 	if not quit then return end
 	local finalpos = 0
 	local forced_variables = {
-		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		"classic_presets",
 		-- HUD
 		"classic_hud",
@@ -41,6 +41,8 @@ addHook("GameQuit", function(quit)
 		"classic_dust",
 		"classic_pity",
 		"classic_invincibility",
+		"classic_tokensprite",
+		"classic_emblems",
 		"classic_score",
 		"classic_sign",
 		"classic_sign_movement",

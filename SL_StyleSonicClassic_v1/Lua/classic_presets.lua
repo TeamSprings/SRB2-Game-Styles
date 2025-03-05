@@ -7,6 +7,8 @@ Contributors: Skydusk
 
 ]]
 
+local Options = tbsrequire 'helpers/create_cvar'
+
 local presets = {
 	-- SONIC 1
 	[1] = {
@@ -164,20 +166,14 @@ local presets = {
 	},
 }
 
-local presets_cv = CV_RegisterVar{
-	name = "classic_presets",
-	defaultvalue = "sonic1",
-	flags = CV_CALL,
-	func = function(var)
-		if presets[var.value] then
-			local preset = presets[var.value]
-			for strcvar, change in pairs(preset) do
-				local cvar = CV_FindVar(strcvar)
-				if cvar then
-					CV_Set(cvar, change)
-				end
+local presets_opt = Options:new("presets", "helpers/cvar_presets", function(var)
+	if presets[var.value] then
+		local preset = presets[var.value]
+		for strcvar, change in pairs(preset) do
+			local cvar = CV_FindVar(strcvar)
+			if cvar then
+				CV_Set(cvar, change)
 			end
 		end
-	end,
-	PossibleValue = {sonic1=1, sonic2=2, soniccd=3, sonic3=4, sonicmania=5}
-}
+	end
+end)

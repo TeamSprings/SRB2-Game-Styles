@@ -72,6 +72,8 @@ states[giantring_endstage] = {
 	var2 = 1,
 }
 
+local Options = tbsrequire('helpers/create_cvar')
+
 local original_radius = mobjinfo[MT_TOKEN].radius
 local original_height = mobjinfo[MT_TOKEN].height
 
@@ -79,31 +81,30 @@ local special_entrance = 1
 local change_var = -1
 local init = true
 local anotherlvl = nil
+local specialpackdetected = false
 
-local entrance_cv = CV_RegisterVar{
-	name = "classic_specialentrance",
-	defaultvalue = "sonic1",
-	flags = CV_CALL|CV_NETVAR,
-	func = function(var)
-		if init or gamestate == GS_TITLESCREEN then
-			special_entrance = var.value
-			init = nil
+local token_sprite = Options:new("tokensprite", "assets/tables/sprites/tokens", nil)
+
+local entrance_opt = Options:new("specialentrance", "gameplay/cvars/specialtoken", function(var)
+	if init or gamestate == GS_TITLESCREEN then
+		special_entrance = var.value
+		init = nil
+	else
+		if multiplayer then
+			CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
 		else
-			if multiplayer then
-				CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
-			else
-				-- first of many cheating measures
-				if change_var == -1 or anotherlvl then
-					print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
-					anotherlvl = nil
-				end
+			-- first of many cheating measures
+			if change_var == -1 or anotherlvl then
+				print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
+				anotherlvl = nil
 			end
-
-			change_var = var.value
 		end
-	end,
-	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, sonic3=3}
-}
+
+		change_var = var.value
+	end
+end, CV_NETVAR)
+
+local entrance_cv = entrance_opt.cv
 
 --
 --	Functions
@@ -214,6 +215,12 @@ local function SP_LoadState(map)
 		local data = maps_data[map]
 
 		if data.delete then
+			local checkpoint_trigger = 0
+
+			--
+			--	PLAYER 1
+			--
+
 			if displayplayer.mo and data.player1 then
 				displayplayer.starpostx = data.starpostx
 				displayplayer.starposty = data.starposty
@@ -222,6 +229,7 @@ local function SP_LoadState(map)
 				displayplayer.starposttime = max(data.starposttime, data.leveltime)
 				displayplayer.starpostangle = data.starpostangle
 				displayplayer.starpostscale = data.starpostscale
+				checkpoint_trigger = data.starpostnum
 
 				displayplayer.style_additionaltime = max(data.starposttime, data.leveltime)
 				displayplayer.mo.alpha = FRACUNIT
@@ -269,6 +277,10 @@ local function SP_LoadState(map)
 				displayplayer.style_additionaltime = 0
 			end
 
+			--
+			--	PLAYER 2
+			--
+
 			if splitscreen and secondarydisplayplayer and secondarydisplayplayer.mo and data.player2 then
 				P_SetOrigin(secondarydisplayplayer.mo, data.p2x, data.p2y, data.p2z)
 				secondarydisplayplayer.mo.angle = data.p2angle
@@ -280,6 +292,7 @@ local function SP_LoadState(map)
 				secondarydisplayplayer.starposttime = max(data.p2starposttime, data.leveltime)
 				secondarydisplayplayer.starpostangle = data.p2starpostangle
 				secondarydisplayplayer.starpostscale = data.p2starpostscale
+				checkpoint_trigger = max(checkpoint_trigger, data.p2starpostnum)
 
 				secondarydisplayplayer.style_additionaltime = max(data.p2starposttime, data.leveltime)
 				secondarydisplayplayer.mo.alpha = FRACUNIT
@@ -340,6 +353,20 @@ local function SP_LoadState(map)
 					replacement.styles_sizecheck = true
 				end
 			end
+
+			if checkpoint_trigger then
+				for mobj in mobjs.iterate() do
+					if mobj.type ~= MT_STARPOST then
+						continue
+					end
+
+					if mobj.health > checkpoint_trigger then
+						continue
+					end
+
+					mobj.state = S_STARPOST_FLASH
+				end
+			end
 		else
 			displayplayer.style_additionaltime = 0
 			if splitscreen and secondarydisplayplayer then
@@ -357,7 +384,7 @@ addHook("MapLoad", function()
 		last_map = nil
 	end
 
-	if maps_data[gamemap] then
+	if maps_data[gamemap] and not specialpackdetected then
 		SP_LoadState(gamemap)
 	else
 		for p in players.iterate do
@@ -369,6 +396,7 @@ addHook("MapLoad", function()
 end)
 
 local init_ch = true
+local list = tbsrequire 'gameplay/compact/specialpacks'
 
 addHook("AddonLoaded", function()
 	if init_ch and change_var > -1 then
@@ -376,6 +404,15 @@ addHook("AddonLoaded", function()
 		change_var = -1
 
 		init_ch = nil
+	end
+
+	if list and not specialpackdetected then
+		for _,v in ipairs(list) do
+			if _G[v] then
+				specialpackdetected = true
+				return
+			end
+		end
 	end
 end)
 
@@ -395,6 +432,8 @@ end)
 
 addHook("MapThingSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
+	if specialpackdetected then return end
+
 	if not special_entrance or special_entrance == 3 then
 		return
 	end
@@ -405,6 +444,7 @@ end, MT_TOKEN)
 addHook("MapThingSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 1 then return end
+	if specialpackdetected then return end
 
 	if not All7Emeralds(emeralds) then
 		a.ring = P_SpawnMobjFromMobj(a, -200*cos(a.angle+ANGLE_90), -200*sin(a.angle+ANGLE_90), 128*FRACUNIT, MT_TOKEN)
@@ -415,6 +455,7 @@ end, MT_SIGN)
 addHook("MobjThinker", function(a)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 1 then return end
+	if specialpackdetected then return end
 
 	if a.ring and a.ring.valid then
 		if consoleplayer and consoleplayer.rings >= 50 then
@@ -428,6 +469,7 @@ end, MT_SIGN)
 addHook("MobjSpawn", function(a)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
+	if specialpackdetected then return end
 
 	if special_entrance == 3 or special_entrance == 1 then
 		a.radius = 89*FRACUNIT
@@ -447,12 +489,14 @@ end, MT_TOKEN)
 addHook("TouchSpecial", function(a, k)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return end
+	if specialpackdetected then return end
 	return true
 end, MT_TOKEN)
 
 addHook("MobjCollide", function(a, k)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance then return false end
+	if specialpackdetected then return end
 	if not k.player then return false end
 
 	if a.levelcountdown then
@@ -505,7 +549,24 @@ addHook("MobjCollide", function(a, k)
 end, MT_TOKEN)
 
 addHook("MobjThinker", function(a)
-	if (multiplayer and not splitscreen) then return end
+	-- Token Sprite Switching
+
+	if not special_entrance or specialpackdetected or (multiplayer and not splitscreen) then
+		local sprite = Options:getPureValue("tokensprite")
+
+		if a.health > 0 and a.state ~= sprite[1] then
+			a.state = sprite[1]
+			a.spritexscale = sprite[2]
+			a.spriteyscale = sprite[2]
+			a.extravalue1 = 1991
+		elseif a.health < 1 and a.extravalue1 then
+			a.spritexscale = FRACUNIT
+			a.spriteyscale = FRACUNIT
+			a.extravalue1 = 0
+		end
+
+		return
+	end
 
 	-- Making sure that FOFs are loaded before checking, can't use mobj spawn due to order of things.
 	if leveltime > 2 and not a.styles_sizecheck then
@@ -551,6 +612,7 @@ freeslot("SPR_SSS0")
 addHook("TouchSpecial", function(a, mt)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
+	if specialpackdetected then return end
 
 	if mt.player and mt.player.rings >= 25 and a.state == a.info.spawnstate and a.stars == nil then
 		a.stars = {}
@@ -574,6 +636,7 @@ end,  MT_STARPOST)
 addHook("MobjCollide", function(a, mt)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
+	if specialpackdetected then return end
 
 	if mt.player and (mt.z < a.z+a.height+12*FRACUNIT) and (mt.z > a.z+a.height-32*FRACUNIT) and a.stars ~= nil and a.stars[1].valid and not a.countdownst then
 		SP_SaveState(a)
@@ -583,6 +646,7 @@ end,  MT_STARPOST)
 addHook("MobjThinker", function(a, mt)
 	if (multiplayer and not splitscreen) then return end
 	if not special_entrance or special_entrance ~= 2 then return end
+	if specialpackdetected then return end
 
 	if a.vangle == nil then
 		a.vangle = 0

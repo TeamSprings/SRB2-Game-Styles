@@ -1,0 +1,14 @@
+return {
+	{"_BOS1", "s1",			"Sonic 1"},
+	{"_BOS2", "s2",			"Sonic 2"},
+	{"_BOCJ", "cdjp",		"Sonic CD JP"},
+	{"_BOCU", "cdus",		"Sonic CD US"},
+	{"_BS31", "s3a1",		"Sonic 3 Act 1"},
+	{"_BSK1", "ska1",		"Sonic & Knuckles Act 1"},
+	{"_BS32", "s3a2",		"Sonic 3 Act 2"},
+	{"_B3D1", "b3d1",		"Sonic 3D Blast Theme 1"},
+	{"_B3D2", "b3d2",		"Sonic 3D Blast Theme 2"},
+	{"_B3D3", "b3d3",		"Sonic 3D Blast Theme 3"},
+	{"_BOM1", "mania1",		"Sonic Mania Eggman 1"},
+	{"_BOM2", "mania2",		"Sonic Mania Eggman 2"},
+}

@@ -7,53 +7,44 @@ Contributors: Skydusk
 
 ]]
 
+local Options = tbsrequire('helpers/create_cvar')
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
 --
---	CD Nonsense!
+--	Options
 --
 
-local spindash_cv = CV_RegisterVar{
-	name = "classic_spindash",
-	defaultvalue = "genesis",
-	flags = CV_NETVAR,
-	PossibleValue = {genesis=0, soniccd=1}
-}
+local spindash_opt = Options:new("spindash", "gameplay/cvars/spindash", nil, CV_NETVAR)
 
-local springtwirl_cv = CV_RegisterVar{
-	name = "classic_springtwirl",
-	defaultvalue = "disabled",
-	flags = CV_NETVAR,
-	PossibleValue = {disabled=0, soniccd=1}
-}
+local springtwirl_opt = Options:new("springtwirl", "gameplay/cvars/springtwirl", nil, CV_NETVAR)
 
-local springtwalk_cv = CV_RegisterVar{
-	name = "classic_springairwalk",
-	defaultvalue = "disabled",
-	flags = CV_NETVAR,
-	PossibleValue = {disabled=0, genesis=1}
-}
+local springtwalk_opt = Options:new("springairwalk", "gameplay/cvars/springairwalk", nil, CV_NETVAR)
 
-local springtroll_cv = CV_RegisterVar{
-	name = "classic_springroll",
-	defaultvalue = "disabled",
-	flags = CV_NETVAR,
-	PossibleValue = {disabled=0, diagonalonly=1, genesis=2}
-}
+local springtroll_opt = Options:new("springroll", "gameplay/cvars/springroll", nil, CV_NETVAR)
 
-local thok_cv = CV_RegisterVar{
-	name = "classic_thok",
-	defaultvalue = "enabled",
-	flags = CV_NETVAR,
-	PossibleValue = {enabled=0, disabled=1}
-}
+local thok_opt = Options:new("thok", "gameplay/cvars/thok", nil, CV_NETVAR)
 
---local grounding_cv = CV_RegisterVar{
---	name = "classic_groundrot",
---	defaultvalue = "disabled",
---	flags = 0,
---	PossibleValue = {disabled=0, chunky=1, full=2}
---}
+--local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
+
+--
+--	Cvars
+--
+
+local spindash_cv = spindash_opt.cv
+
+local springtwirl_cv = springtwirl_opt.cv
+
+local springtwalk_cv = springtwalk_opt.cv
+
+local springtroll_cv = springtroll_opt.cv
+
+local thok_cv = thok_opt.cv
+
+--local grounding_cv = grounding_opt.cv
+
+--
+--	Thinker
+--
 
 addHook("PlayerThink", function(p)
 	if not p.mo then return end

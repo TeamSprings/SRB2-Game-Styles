@@ -358,20 +358,46 @@ states[S_CEMG7] = {
 --
 
 freeslot("SPR_SA2K")
+freeslot("SPR_STYLES_HEROES_KEY")
 
 ---@diagnostic disable-next-line
-states[S_TOKEN] = {
+
+local heroes_key = freeslot("S_STYLES_HEROES_SPKEY")
+local chao_key = freeslot("S_STYLES_CHAO_SPKEY")
+
+states[heroes_key] = {
+	sprite = SPR_STYLES_HEROES_KEY,
+	frame = FF_ANIMATE|A,
+	tics = 50,
+	var1 = 49,
+	var2 = 1,
+	nextstate = heroes_key,
+}
+
+states[chao_key] = {
 	sprite = SPR_SA2K,
 	frame = FF_ANIMATE|A,
 	tics = 70,
 	var1 = 69,
 	var2 = 1,
-	nextstate = S_TOKEN,
+	nextstate = chao_key,
 }
 
-addHook("MapThingSpawn", function(mo)
-	mo.spritexscale = mo.spritexscale/2
-	mo.spriteyscale = mo.spriteyscale/2
+local tokenstyle_cv = CV_FindVar("dc_keystyle")
+
+addHook("MobjThinker", function(mo)
+	if mo.health > 0 then
+		local curstate = tokenstyle_cv.value and chao_key or heroes_key
+
+		if mo.state ~= curstate then
+			mo.state = curstate
+			mo.spritexscale = FRACUNIT/2
+			mo.spriteyscale = FRACUNIT/2
+		end
+	else
+		mo.spritexscale = FRACUNIT
+		mo.spriteyscale = FRACUNIT
+	end
 end, MT_TOKEN)
 
 addHook("TouchSpecial", function(mo, pmo)
@@ -390,8 +416,11 @@ addHook("TouchSpecial", function(mo, pmo)
 		y = mo.y,
 		z = mo.z,
 
+		sprite = mo.sprite,
 		frame = mo.frame,
 		dur = FRACUNIT,
+
+		loop = states[tokenstyle_cv.value and chao_key or heroes_key].var1 + 1,
 	}
 end, MT_TOKEN)
 
@@ -537,7 +566,7 @@ sfxinfo[freeslot("sfx_goalrn")].caption = "Goal Ring Ambience"
 ---@diagnostic disable-next-line
 mobjinfo[goalring] = {
 	spawnstate = goalring_state,
-	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP,
+	flags = MF_SCENERY|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT,
 }
 
 ---@diagnostic disable-next-line
@@ -550,13 +579,14 @@ states[goalring_state] = {
 
 addHook("MobjSpawn", function(mo)
 	if Disable_Miscs then return end
-	local gr = P_SpawnMobjFromMobj(mo, 0, 0, 0, goalring)
+	if GoalRing then return end
+
+	local gr = P_SpawnMobjFromMobj(mo, 0, 0, 8, goalring)
 	gr.scale = $+FRACUNIT/4
 	P_RemoveMobj(mo)
 end, MT_SIGN)
 
 addHook("MobjThinker", function(a)
-	if Disable_Miscs then return end
 	if not consoleplayer then return end
 
 	if consoleplayer.exiting and a.spritexscale then
@@ -569,3 +599,83 @@ addHook("MobjThinker", function(a)
 	end
 
 end, goalring)
+
+--
+--	EMBLEM
+--
+
+local embspr = freeslot("SPR_EMBLEM_ADVENTURE")
+
+addHook("MobjThinker", function(a)
+	if a.cusval == 1998 then
+		a.state = S_INVISIBLE
+		a.sprite = embspr
+		a.frame = (a.frame &~ FF_FRAMEMASK) &~ FF_PAPERSPRITE
+		if a.extravalue2 then
+			a.extravalue2 = $ - 1
+		else
+			a.scale = 11*a.scale/10
+			a.alpha = 9*a.alpha/10
+		end
+
+		if a.scale < FRACUNIT/8 then
+			P_RemoveMobj(a)
+			return
+		end
+	else
+		a.sprite = embspr
+		a.frame = (a.frame &~ FF_FRAMEMASK)|FF_PAPERSPRITE
+		a.angle = $ + ANG2
+	end
+
+	a.spriteyoffset = 32*FRACUNIT
+end, MT_EMBLEM)
+
+addHook("MobjDeath", function(a)
+	if embspr == a.sprite and a.state ~= S_INVISIBLE then
+		a.state = S_INVISIBLE
+		a.sprite = embspr
+		a.frame = A
+		a.cusval = 1998
+		a.extravalue2 = TICRATE
+		a.fuse = TICRATE*30
+	end
+end, MT_EMBLEM)
+
+
+--
+--	EMERALD SHARD
+--
+
+--addHook("MobjThinker", function(a)
+	--if not (a.glow1 and a.glow1.valid) then
+		--a.glow1 = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_OVERLAY)
+		--a.glow1.colorized = true
+		--a.glow1.spriteyscale = -a.scale*3
+	--end
+
+	--if not (a.glow2 and a.glow2) then
+		--a.glow2 = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_OVERLAY)
+		--a.glow2.colorized = true
+		--a.glow2.spriteyscale = -a.scale*6
+	--end
+
+--end, MT_EMERHUNT)
+
+--
+--	RINGS
+--
+
+local ringclt = freeslot("S_STYLES_ADV_RINGCLT")
+
+states[ringclt] = {
+	sprite = freeslot("SPR_STYLES_ADV_RINGCLT"),
+	frame = A|FF_ADD|FF_ANIMATE,
+	tics = 16,
+	var1 = 7,
+	var2 = 2,
+}
+
+mobjinfo[MT_RING].deathstate = ringclt
+mobjinfo[MT_REDTEAMRING].deathstate = ringclt
+mobjinfo[MT_BLUETEAMRING].deathstate = ringclt

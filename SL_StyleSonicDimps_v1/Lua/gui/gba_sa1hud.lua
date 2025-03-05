@@ -40,6 +40,13 @@ return {
 
 	time = function(v, p, t, e, font_type)
 		local timestr = timeget(p)
+
+		local y_off = -24
+
+		if G_GametypeHasTeams() then
+			y_off = 0
+		end
+
 		drawf(v, font_type, (hudinfo[HUD_SECONDS].x-72)*FRACUNIT, (hudinfo[HUD_SECONDS].y-11)*FRACUNIT, FRACUNIT, timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 	end,
 
@@ -72,6 +79,8 @@ return {
 
 			if G_GametypeUsesLives() then
 				drawf(v, font_type, (hudinfo[HUD_LIVES].x+14)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+8, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		else
 			if bot_existance and not bot_existance.valid then
@@ -82,6 +91,8 @@ return {
 
 			if G_GametypeUsesLives() then
 				drawf(v, font_type, (hudinfo[HUD_LIVES].x+5)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(hudinfo[HUD_LIVES].x+5, hudinfo[HUD_LIVES].y+8, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		end
 	end,

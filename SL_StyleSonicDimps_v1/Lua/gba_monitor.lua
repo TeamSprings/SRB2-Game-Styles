@@ -10,8 +10,19 @@ Contributors: Skydusk
 local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local spawnhook = 	api:addHook("MonitorSpawn")
+local deathhook = 	api:addHook("MonitorDeath")
+local loothook = 	api:addHook("MonitorLoot")
+
+local remhook = 	api:addHook("MonitorRemoval")
+
 local monitor_style = A
 local monitor_iconoffset = 1
+
 
 CV_RegisterVar{
 	name = "gba_monitorstyle",
@@ -58,6 +69,8 @@ local function P_SpawnItemBox(a)
 		a.color = SKINCOLOR_APPLE
 		a.colorized = true
 	end
+
+	spawnhook(a.type, a, a.item)
 end
 
 --Define which sprites we'll use
@@ -245,29 +258,35 @@ local function P_MonitorDeath(a, d, s)
 	local boxicon
 	local extras
 
-	if P_MarioExistsThink(a.item) then
-		A_MonitorPop(a, 0, 0)
-	else
-		if a.special_case then
-			extras = a.special_case(a, a.item, a.target)
-		elseif mobjinfo[a.type].damage == MT_UNKNOWN then
+	if not loothook(a.type, a, a.item) then
+		if P_MarioExistsThink(a.item) then
 			A_MonitorPop(a, 0, 0)
 		else
-			boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
-			boxicon.scale = a.item.scale
-			boxicon.target = a.target
+			if a.special_case then
+				extras = a.special_case(a, a.item, a.target)
+			elseif mobjinfo[a.type].damage == MT_UNKNOWN then
+				A_MonitorPop(a, 0, 0)
+			else
+				boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
+				boxicon.scale = a.item.scale
+				boxicon.target = a.target
 
-			-- Clipped code from Source code for life icons
-			if boxicon.type == MT_1UP_ICON and boxicon.target then
-				-- Spawn the lives icon.
-				local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
-				livesico.target = boxicon
-				livesico.color = boxicon.target.player.mo.color
-				livesico.skin = boxicon.target.player.mo.skin
-				livesico.state = S_PLAY_ICON1
-				livesico.dispoffset = 2
+				-- Clipped code from Source code for life icons
+				if boxicon.type == MT_1UP_ICON and boxicon.target then
+					-- Spawn the lives icon.
+					local livesico = P_SpawnMobjFromMobj(boxicon, 0, 0, 0, MT_OVERLAY)
+					livesico.target = boxicon
+					livesico.color = boxicon.target.player.mo.color
+					livesico.skin = boxicon.target.player.mo.skin
+					livesico.state = S_PLAY_ICON1
+					livesico.dispoffset = 2
 
-				boxicon.state = S_1UP_NICON1
+					boxicon.state = S_1UP_NICON1
+				end
+
+				if (a.spawnpoint and a.spawnpoint.args[0]) then
+					P_LinedefExecute(a.spawnpoint.args[0], a.target, nil)
+				end
 			end
 		end
 	end
@@ -299,6 +318,7 @@ local function P_MonitorDeath(a, d, s)
 
 	a.once_already = true
 
+	deathhook(a.type, a, a.item, a.caps, boxicon)
 	return true
 end
 
@@ -309,6 +329,8 @@ local function P_MonitorRemoval(a, d)
 	if a.item and a.item.valid then
 		P_RemoveMobj(a.item)
 	end
+
+	remhook(a.type, a, a.item, a.caps)
 end
 
 --

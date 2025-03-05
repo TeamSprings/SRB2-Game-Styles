@@ -7,120 +7,68 @@ Contributors: Skydusk
 
 ]]
 
-local invincibilitytheme_cv = CV_RegisterVar{
-	name = "classic_invintheme",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4, sonicknuckles=5, genesis3d=6, saturn3d=7, mania=8, kchaotix=9}
-}
+local Options = tbsrequire('helpers/create_cvar')
 
-local invincibility_select = {
-	"_INS1",
-	"_INJP",
-	"_INUS",
-	"_INS3",
-	"_INSK",
-	"_IN3G",
-	"_IN3S",
-	"_INSM",
-	"_INKC",
-}
+local Music = {
+	-- Looping themes
 
-local supertheme_cv = CV_RegisterVar{
-	name = "classic_supertheme",
-	defaultvalue = "sonic2",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic2=1, sonic3=2, sonicknuckles=3, sonic3unused=4, mania=5}
-}
+	["_inv"] = {	-- Invulnerability theme
+		option = Options:new("invintheme", "assets/tables/jingles/invul"),
 
-local supertheme_select = {
-	"_SES2",
-	"_INS3",
-	"_INSK",
-	"_SESU",
-	"_SESM",
-}
+		loop = true,
 
-local lifeuptheme_cv = CV_RegisterVar{
-	name = "classic_oneuptheme",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic3=2, sonicknuckles=3, mania=4}
-}
+		startfade = 0,
+		endfade = MUSICRATE/4,
+	},
+	["_super"] = {	-- Super Sonic theme
+		option = Options:new("supertheme", "assets/tables/jingles/super"),
 
-local lifetheme_select = {
-	"_1US1",
-	"_1US3",
-	"_1USK",
-	"_1USM",
-}
+		loop = true,
 
-local bosstheme_cv = CV_RegisterVar{
-	name = "classic_bosstheme",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic2=2, soniccdjp=3, soniccdus=4, sonic3act1=5, sonicknucklesact1=6, sonic3act2=7, genesis3d1=8, genesis3d2=9, saturn3d=10, maniaegg1=11, maniaegg2=12}
-}
+		startfade = 0,
+		endfade = MUSICRATE/8,
+	},
+	["VSBOSS"] = {	-- Boss theme
+		option = Options:new("bosstheme", "assets/tables/jingles/boss"),
 
-local boss_select = {
-	"_BOS1",
-	"_BOS2",
-	"_BOCJ",
-	"_BOCU",
-	"_BS31",
-	"_BSK1",
-	"_BS32",
-	"_B3D1",
-	"_B3D2",
-	"_B3D3",
-	"_BOM1",
-	"_BOM2",
-}
+		loop = true,
 
-local levelendtheme_cv = CV_RegisterVar{
-	name = "classic_levelendtheme",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, soniccdjp=2, soniccdus=3, sonic3=4, genesis3d=5, saturn3d=6, kchaotix=7, mania=8}
-}
+		startfade = 0,
+		endfade = MUSICRATE/4,
+	},
+	["_drown"] = {	-- Drowning theme
+		option = Options:new("drowntheme", "assets/tables/jingles/drown"),
 
-local levelend_select = {
-	"_LCS1",
-	"_LCJP",
-	"_LCUS",
-	"_LCS3",
-	"_LC3G",
-	"_LC3S",
-	"_LCKC",
-	"_LCSM",
-}
+		loop = true,
 
-local drowntheme_cv = CV_RegisterVar{
-	name = "classic_drowntheme",
-	defaultvalue = "sonic1",
-	flags = 0,
-	PossibleValue = {vanilla=0, sonic1=1, sonic3=2, mania=3}
-}
+		startfade = 0,
+		endfade = MUSICRATE/4,
+	},
+	["_shoes"] = {	-- Speed Shoes theme
+		option = Options:new("shoestheme", "assets/tables/jingles/shoes"),
 
-local drown_select = {
-	"_DRS1",
-	"_DRS3",
-	"_DRSM",
-}
+		loop = true,
 
-local shoestheme_cv = CV_RegisterVar{
-	name = "classic_shoestheme",
-	defaultvalue = "soniccdjp",
-	flags = 0,
-	PossibleValue = {vanilla=0, soniccdjp=1, soniccdus=2, mania=3}
-}
+		startfade = 0,
+		endfade = MUSICRATE/4,
+	},
 
-local shoes_select = {
-	"_SHJP",
-	"_SHUS",
-	"_SHSM",
-}
+	-- Simple themes
 
+	["_clear"] = {   -- Clear theme
+		option = Options:new("levelendtheme", "assets/tables/jingles/tally"),
+
+		startfade = 0,
+		endfade = MUSICRATE/16,
+	},
+
+
+	-- Simple jingles
+
+	["_1up"] = {   -- 1UP theme
+		option = Options:new("oneuptheme", "assets/tables/jingles/lives"),
+	},
+}
 
 -- Music manager
 local current_track = ""
@@ -191,94 +139,27 @@ addHook("MusicChange", function(oldname, newname, mflags, looping, position, pre
 
 	our_track = false
 
-	if newname == "_clear" then
-		if levelend_select[levelendtheme_cv.value] then
-			music_change = levelend_select[levelendtheme_cv.value]
+	if Music[newname] then
+		local data = Music[newname]
+		local option = data.option
 
-			forced_prefadems = 0
-			forced_fadeinms = MUSICRATE/16
-			current_track = music_change
-
-			our_track = true
+		if data.loop then
+			forced_looping = true
 		end
-	end
 
-	if oldname == levelend_select[levelendtheme_cv.value] then
+		if data.startfade then
+			forced_prefadems = data.startfade
+		end
+
+		if data.endfade then
+			forced_fadeinms = data.endfade
+		end
+
+		if option.values[option.cv.value] then
+			music_change = option.values[option.cv.value]
+		end
+
 		our_track = true
-		return music_change
-	else
-		if newname == "_1up" then
-			if lifetheme_select[lifeuptheme_cv.value] then
-				music_change = lifetheme_select[lifeuptheme_cv.value]
-
-				current_track = music_change
-
-				our_track = true
-			end
-		end
-
-		if newname == "_inv" then
-			if invincibility_select[invincibilitytheme_cv.value] then
-				music_change = invincibility_select[invincibilitytheme_cv.value]
-
-				current_track = music_change
-
-				forced_looping = true
-				forced_prefadems = 0
-				forced_fadeinms = MUSICRATE/4
-
-				our_track = true
-			end
-		end
-
-		if newname == "_super" then
-			if supertheme_select[supertheme_cv.value] then
-				music_change = supertheme_select[supertheme_cv.value]
-
-				current_track = music_change
-
-				forced_looping = true
-				forced_prefadems = 0
-				forced_fadeinms = MUSICRATE/8
-				our_track = true
-			end
-		end
-
-		if newname == "_drown" then
-			if drown_select[drowntheme_cv.value] then
-				music_change = drown_select[drowntheme_cv.value]
-
-				current_track = music_change
-
-				our_track = true
-			end
-		end
-
-		if newname == "_shoes" then
-			if shoes_select[shoestheme_cv.value] then
-				music_change = shoes_select[shoestheme_cv.value]
-
-				current_track = music_change
-
-				forced_looping = true
-				forced_prefadems = 0
-				forced_fadeinms = MUSICRATE/4
-				our_track = true
-			end
-		end
-
-		if newname == "VSBOSS" then
-			if boss_select[bosstheme_cv.value] then
-				music_change = boss_select[bosstheme_cv.value]
-
-				current_track = music_change
-
-				forced_looping = true
-				forced_prefadems = 0
-				forced_fadeinms = MUSICRATE/4
-				our_track = true
-			end
-		end
 	end
 
 	old_typetrack = current_typetrack

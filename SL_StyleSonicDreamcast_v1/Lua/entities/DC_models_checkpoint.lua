@@ -21,6 +21,23 @@ addHook("MapChange", function()
 	MapthingCheckpoints.dis = {}
 end)
 
+local function P_CheckPlayerCheckpoint(checkpoint_value)
+	if checkpoint_value == 0 then return end
+
+	for _,v in ipairs(MapthingCheckpoints.thg) do
+		if v.health > checkpoint_value then
+			continue
+		end
+
+		v.angv = 110
+		v.state = S_STARPOST_FLASH
+	end
+end
+
+addHook("PlayerSpawn", function(p)
+	p.styles_checkpoints_check = 2
+end)
+
 local function P_SpawnCheckPoint(a)
 		-- Set up of Adventure Checkpoint
 		a.state = S_INVISIBLE
@@ -243,6 +260,7 @@ addHook("MobjThinker", function(a)
 		if a.angv == 110 then
 			if (a.stick[1].frame & FF_PAPERSPRITE) or (a.stick[2] and a.stick[2].frame & FF_PAPERSPRITE) then
 				for id,stick in ipairs(a.stick) do
+					stick.rollangle = ANGLE_270
 					stick.frame = I &~ FF_PAPERSPRITE
 				end
 			end
@@ -373,6 +391,15 @@ addHook("PlayerThink", function(p)
 
 	if p.checkpointtime then
 		p.checkpointtime = $ - 1
+	end
+
+	if p.styles_checkpoints_check then
+		p.styles_checkpoints_check = $ - 1
+
+		if p.styles_checkpoints_check == 0 then
+			P_CheckPlayerCheckpoint(p.starpostnum)
+			p.styles_checkpoints_check = nil
+		end
 	end
 end)
 

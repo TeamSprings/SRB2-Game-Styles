@@ -49,30 +49,11 @@ function helper.slopeRotBase(mo, slope)
 	helper.cameraSpriteRot(mo, slope.xydirection, 0, slope.zangle)
 end
 
-function helper.slopeRotBaseGenesis(mo, slope)
-	-- Reset
-	if not slope then
-		if mo.rollangle then
-			mo.rollangle = ease.linear(FRACUNIT/4, mo.rollangle, FixedAngle(0))
-		end
-		return
-	end
-
-	helper.cameraSpriteRot(mo, slope.xydirection, 0, FixedAngle(AngleFixed(slope.zangle)/(8*FRACUNIT)*FRACUNIT))
-end
-
-
 -- Use this function for automatic groundslope rotation
 -- It is right now more so a macro, but it can change...
 function helper.slopeRotation(mo)
 	helper.slopeRotBase(mo, mo.standingslope)
 	mo.style_rollangle_was_enabled = true
 end
-
-function helper.slopeRotationGenesis(mo)
-	helper.slopeRotBaseGenesis(mo, mo.standingslope)
-	mo.style_rollangle_was_enabled = true
-end
-
 
 return helper

@@ -51,11 +51,20 @@ return {
 
 	time = function(v, p, t, e, font_type)
 		local timestr = timeget(p)
-		drawf(v, font_type, 160*FRACUNIT, (hudinfo[HUD_SECONDS].y-22)*FRACUNIT, FRACUNIT, "T"..timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "center", 0, 0)
+		local y_off = -22
+
+		if G_GametypeHasTeams() then
+			y_off = 4
+		end
+
+		drawf(v, font_type, 160*FRACUNIT, (hudinfo[HUD_SECONDS].y + y_off)*FRACUNIT, FRACUNIT, "T"..timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "center", 0, 0)
 	end,
 
 	rings = function(v, p, t, e, font_type)
-		v.draw(8, 1, v.cachePatch(list_pw[p.charability] and list_pw[p.charability] or "RINGMADV3"), hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+		if p.mo then
+			v.draw(8, 1, v.cachePatch(list_pw[p.charability] and list_pw[p.charability] or "RINGMADV3"), hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+		end
+
 		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FRACUNIT, (hudinfo[HUD_SECONDS].y-21)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 3, '0')
 		if p.rings < 1 and (leveltime % 10) / 5 then
 			drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FRACUNIT, (hudinfo[HUD_SECONDS].y-21)*FRACUNIT, FRACUNIT, "RRR", hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 0)
@@ -76,6 +85,8 @@ return {
 
 				if G_GametypeUsesLives() then
 					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+					v.draw(hudinfo[HUD_LIVES].x+25, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
 			else
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p.mo.color, p)
@@ -84,6 +95,8 @@ return {
 
 				if G_GametypeUsesLives() then
 					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+					v.draw(hudinfo[HUD_LIVES].x+25, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
 			end
 		else
@@ -91,6 +104,8 @@ return {
 
 			if G_GametypeUsesLives() then
 				drawf(v, font_type, (hudinfo[HUD_LIVES].x+17)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
+				v.draw(hudinfo[HUD_LIVES].x+17, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
 		end
 	end,

@@ -13,11 +13,12 @@ addHook("GameQuit", function(quit)
 	if not quit then return end
 	local finalpos = 0
 	local forced_variables = {
-		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		"dc_endtally",
 		"dc_replaceshields",
 		"dc_ringboxrandomizer",
 		"dc_itembox",
+		"dc_keystyle",
 		"dc_checkpoints",
 		"dc_shields",
 		"dc_miscassets",
