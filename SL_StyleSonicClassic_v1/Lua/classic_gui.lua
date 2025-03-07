@@ -20,6 +20,7 @@ local lifeicon = 1
 local tallytitleft = 1
 local titletype = 1
 local titletypechange = -1
+local tallyrecoloring = "SPECIALSTAGE_SONIC1_TALLY1"
 local txtpadding = 0
 local prefix = "S1"
 local tallyft = "S1"
@@ -107,7 +108,7 @@ local font_opt = Options:new("hudfont", "gui/cvars/hudfont", function(var)
 	local debugprefixes = {"S1", "S1", "S1", "S3", "S3", "S3", "S3", "S3"}
 	debugft = debugprefixes[var.value]
 
-	local tallyfonts = {1, 2, 3, 4, 4, 6, 4, 4}
+	local tallyfonts = {1, 2, 3, 4, 5, 6, 4, 4}
 	tallytitleft = tallyfonts[var.value]
 
 	if var.value > 4 then
@@ -120,7 +121,7 @@ end)
 local font_cv = font_opt.cv
 
 local title_opt = Options:new("hudtitle", "gui/cvars/hudtitle", function(var)
-	local titles = {1, 2, 3, 4, 6}
+	local titles = {1, 2, 3, 4, 6, 5}
 
 	if gamestate == GS_LEVEL then
 		titletypechange = titles[var.value]
@@ -138,8 +139,20 @@ local hud_opt = Options:new("hud", "gui/cvars/hudtypes", function(var)
 	local lives = {1, 1, 2, 3, 4, 5, 6, 7}
 	CV_Set(lif_cv, lives[var.value])
 
-	local title = {1, 2, 3, 4, 4, 5, 4, 4}
+	local title = {1, 2, 3, 4, 6, 5, 4, 4}
 	CV_Set(title_cv, title[var.value])
+
+	local recolorersinsp = {
+		"SPECIALSTAGE_SONIC1_TALLY1",
+		"SPECIALSTAGE_SONIC2_TALLY",
+		"SPECIALSTAGE_SONICCD_TALLY",
+		"SPECIALSTAGE_SONIC3_TALLY",
+		"SPECIALSTAGE_SONIC3DB_TALLY",
+		nil, -- mania
+		"SPECIALSTAGE_SONIC1_TALLY1",
+		"SPECIALSTAGE_SONIC1_TALLY1",
+	}
+	tallyrecoloring = recolorersinsp[var.value]
 
 	hud_select = var.value
 end)
@@ -552,10 +565,10 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 
 		if specialstage_togg then
 			local color = v.getColormap(TC_DEFAULT, SKINCOLOR_YELLOW)
-			local color2 = v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC1_TALLY1")
+			local color2 = v.getColormap(TC_DEFAULT, 0, tallyrecoloring)
 
 			if tallytitleft and hud_data[tallytitleft].tallyspecialbg then
-				hud_data[tallytitleft].tallyspecialbg(v, p, min((timed+89)*24, 0), color, color2, timerfade)
+				hud_data[tallytitleft].tallyspecialbg(v, p, min((timed+89)*24, 0), color, color2, 15+min(p.styles_tallytimer+80, 0))
 			else
 				hud_data[1].tallyspecialbg(v, p, min((timed+89)*24, 0), color, color2, timerfade)
 			end
@@ -590,7 +603,13 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
 			end
 		else
-			if hud_data[tallytitleft].tallytitle then
+			if tallytitleft and hud_data[tallytitleft].tallybg then
+				hud_data[tallytitleft].tallybg(v, p, min((timed+89)*24, 0), color, color2, 15+min(p.styles_tallytimer+80, 0))
+			else
+				hud_data[1].tallybg(v, p, min((timed+89)*24, 0), color, color2, timerfade)
+			end
+
+			if tallytitleft and hud_data[tallytitleft].tallytitle then
 				hud_data[tallytitleft].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
 			else
 				hud_data[1].tallytitle(v, p, min((timed+89)*24, 0), cached_tallyskincolor)
