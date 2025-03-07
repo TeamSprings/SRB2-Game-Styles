@@ -5,6 +5,8 @@ Contributors: Skydusk
 
 ]]
 
+local nametrim = tbsrequire 'helpers/string_trimnames'
+local maniacircles = tbsrequire 'helpers/draw_maniacircles'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local fillstretch = tbsrequire 'helpers/draw_stretchmiddley'
 local cuttriangle = tbsrequire 'helpers/draw_cuttrianglebg'
@@ -86,7 +88,7 @@ return {
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
-		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
+		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		--local scale = FRACUNIT
 		local offset = (#lvlt)*FRACUNIT
@@ -239,7 +241,7 @@ return {
 	tallytitle = function(v, p, offsetx)
 		local mo = p.mo
 
-		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
+		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		local gotthrough = "THROUGH"
@@ -281,7 +283,7 @@ return {
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
-			local skin_name = string.gsub(string.upper(skin.realname), "%d", "")
+			local skin_name = nametrim(string.upper(skin.realname))
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 
 			drawf(v, "MATAFNT", (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_2, "right", 1)
@@ -301,7 +303,7 @@ return {
 			str = " GOT THEM ALL"
 
 			if mo then
-				str = string.upper(mo.skin)..str
+				str = string.upper(nametrim(mo.skin))..str
 			else
 				str = "YOU"..str
 			end
@@ -310,7 +312,15 @@ return {
 		local len = textlen(v, 'MATAFNT', str, 1)
 
 		drawTextBG_A(v, 160-offsetx-len/2, 40, len)
-		drawf(v, "MATAFNT", (160-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center", 1)
+		drawf(v, "MATAFNT", (160-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "center", 1)
+	end,
+
+	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
+		v.fadeScreen(65, max(min(fading*10/15, 10), 0))
+		local angl = leveltime*ANG1
+
+		maniacircles(v, 160, 100, (sin(angl)*60)/FRACUNIT+100, angl+ANGLE_180, 53, 53)
+		maniacircles(v, 160, 100, (cos(angl)*60)/FRACUNIT+100, angl, 136, 65)
 	end,
 }
 

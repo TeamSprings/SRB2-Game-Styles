@@ -1,3 +1,13 @@
+--https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+--https://stackoverflow.com/questions/27755514/circle-with-thickness-drawing-algorithm (M Oehm)
+local function V_DrawLine_x(v, x_1, x_2, y, color)
+	v.drawFill(x_1, y, x_2-x_1, 1, color)
+end
+
+local function V_DrawLine_y(v, x, y_1, y_2, color)
+	v.drawFill(x, y_1, 1, y_2-y_1, color)
+end
+
 -- Draws hollowed circle, with option of both inner and outer radius
 --https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
 --https://stackoverflow.com/questions/27755514/circle-with-thickness-drawing-algorithm (M Oehm)
