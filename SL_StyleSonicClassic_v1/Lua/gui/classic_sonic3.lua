@@ -5,6 +5,7 @@ Contributors: Skydusk
 
 ]]
 
+local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 local fontlen = drawlib.lenght
@@ -42,7 +43,7 @@ return{
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
-		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
+		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		--local scale = FRACUNIT
 		local offset = (#lvlt)*FRACUNIT
@@ -135,7 +136,7 @@ return{
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
-			local skin_name = string.gsub(string.upper(skin.realname), "%d", "")
+			local skin_name = nametrim(string.upper(skin.realname), "%d", "")
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
 

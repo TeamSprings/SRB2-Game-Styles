@@ -5,6 +5,7 @@ Contributors: Skydusk
 
 ]]
 
+local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 local fontlen = drawlib.lenght
@@ -15,7 +16,7 @@ return{
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
-		local lvlt = string.lower(""..mapheaderinfo[gamemap].lvlttl)
+		local lvlt = string.lower(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		local scale = FRACUNIT
 		local offset = 0 --(#lvlt)*FRACUNIT
@@ -143,6 +144,10 @@ return{
 		end
 
 		drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, str, 0, color2, "center")
+	end,
+
+	tallybg = function(v, p, offsetx, color, color2, fading)
+		return
 	end,
 
 	tallyspecialbg = function(v, p, offsetx, color, color2, fading)

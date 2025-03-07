@@ -5,6 +5,7 @@ Contributors: Skydusk
 
 ]]
 
+local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 local fontlen = drawlib.lenght
@@ -26,7 +27,7 @@ return{
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
-		local lvlt = string.lower(""..mapheaderinfo[gamemap].lvlttl)
+		local lvlt = string.lower(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = ''..mapheaderinfo[gamemap].actnum
 		local rightflg = v.levelTitleWidth(lvlt)
 		local zonelenght = v.levelTitleWidth('zone')
@@ -136,6 +137,6 @@ return{
 			end
 		end
 
-		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, 0)
+		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, V_PURPLEMAP)
 	end,
 }
