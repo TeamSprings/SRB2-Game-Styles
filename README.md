@@ -1,9 +1,11 @@
 # Game Styles
 
 Series of game modifications meant to turn SRB2 game feel to something more similar to official Sonic games (Classics to Adventure) 
-##### Requires SRB2 2.2.15+
 
-##### Links: [Download](https://github.com/TeamSprings/SRB2-Game-Styles/releases), [Message Board](https://mb.srb2.org/addons/game-styles.8024/)
+##### [Download](https://github.com/TeamSprings/SRB2-Game-Styles/releases)
+##### [Message Board](https://mb.srb2.org/addons/game-styles.8024/)
+
+##### Requires SRB2 2.2.15+
 
 ##### 
 
