@@ -30,6 +30,7 @@ local function P_CheckPlayerCheckpoint(checkpoint_value)
 		end
 
 		v.angv = 110
+		v.styles_giveaway = 1
 		v.state = S_STARPOST_FLASH
 	end
 end
@@ -179,7 +180,7 @@ addHook("MobjThinker", function(a)
 	if a.ohnomorecheckpoints ~= nil then
 		ang = R_PointToAngle2(a.x, a.y, MapthingCheckpoints.dis[a.idmt].x or 0, MapthingCheckpoints.dis[a.idmt].y or 0)
 
-		if a.pads[2] then
+		if a.base[2] or a.stick[2] or a.bulb[2] or a.pads[2] then
 			P_TryMove(a, a.x+25*cos(ang), a.y+25*sin(ang), true)
 			P_RemoveMobj(a.base[2])
 			P_RemoveMobj(a.stick[2])
@@ -188,6 +189,8 @@ addHook("MobjThinker", function(a)
 			--print("yes, checkpoints are cleaned")
 			a.pads[2], a.base[2], a.stick[2], a.bulb[2] = nil,nil,nil,nil
 		end
+
+		a.ohnomorecheckpoints = nil
 	end
 
 	for id,pad in ipairs(a.pads) do
@@ -362,11 +365,15 @@ local rewards = {
 }
 
 addHook("TouchSpecial", function(a,t)
-	if t.player and t.player.starposttime < leveltime then
+	if not a.styles_timerecord then
+		a.styles_timerecord = 0
+	end
+
+	if t.player and a.styles_timerecord == 0 and a.state ~= S_STARPOST_FLASH then
 
 		t.player.checkpointtime = TICRATE*3
 
-		if not (Disable_Checkpoints or a.giveaway) then
+		if not (Disable_Checkpoints or a.styles_giveaway) then
 			if t.player.rings > 19 then
 				local rewardsplit = t.player.rings/20
 				if rewardsplit < 5 then
@@ -375,9 +382,12 @@ addHook("TouchSpecial", function(a,t)
 					rewards[5](t.player)
 				end
 			end
-			a.giveaway = 1
 		end
+
+		a.styles_timerecord = leveltime
 	end
+
+	a.styles_giveaway = 1
 end, MT_STARPOST)
 
 addHook("PlayerThink", function(p)

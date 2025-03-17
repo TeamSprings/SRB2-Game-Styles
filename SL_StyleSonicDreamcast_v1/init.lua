@@ -1,11 +1,11 @@
 local gameString = "DC"
 
-local packVersion = '3.200'
-rawset(_G, "Style_AdventureVersion", 3200)
+local packVersion = '3.245'
+rawset(_G, "Style_AdventureVersion", 3245)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Adventure Style '..packVersion..'] '
-local version = '2.2.14'
+local version = '2.2.15'
 
 --[[
 	Sonic Adventure Stylized Pack for SRB2
@@ -13,7 +13,6 @@ local version = '2.2.14'
 ]]
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
-assert((SUBVERSION > 13), packType.."Mod requires features from "..version.."+")
 
 if not tbsrequire then
 	local cache_lib = {}
@@ -48,7 +47,7 @@ local function macro_dofile(prefix, ...)
 	end
 end
 
-if VERSION == 202 and SUBVERSION > 13 and not Style_DimpsVersion and not Style_ClassicVersion then
+if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_ClassicVersion then
 	local start_metric = getTimeMicros()
 	print(packType.."Loading")
 
@@ -66,16 +65,20 @@ if VERSION == 202 and SUBVERSION > 13 and not Style_DimpsVersion and not Style_C
 		"models_shields.lua",
 		"flickies.lua")
 
-	macro_dofile(gameString, "game.lua")
+	macro_dofile(gameString,
+		"game.lua",
+		"player.lua"
+	)
 
 	macro_dofile("hud/"..gameString,
 		"user_game.lua",
 		"user_inter.lua",
 		"user_mics.lua")
 
-	macro_dofile(gameString, "jingles.lua")
-
-	macro_dofile(gameString, "save.lua")
+	macro_dofile(gameString,
+		"jingles.lua",
+		"save.lua"
+	)
 
 	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
 elseif Style_DimpsVersion or Style_ClassicVersion then
@@ -93,7 +96,7 @@ else
 	local function MisVersion_Notification(v)
 		v.drawFill(0, 95, 320, 30, 38)
 		v.drawString(160, 100, "ADVENTURE STYLE WON'T BE LOADED IN THIS VERSION OF SRB2", V_ORANGEMAP, "thin-center")
-		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.14+ or Nighty Build of SRB2", 0, "thin-center")
+		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.15 OR NEWER VERSION", 0, "thin-center")
 	end
 
 	hud.add(MisVersion_Notification, "title")

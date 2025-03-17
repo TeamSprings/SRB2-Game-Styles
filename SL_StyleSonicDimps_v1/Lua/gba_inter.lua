@@ -183,6 +183,39 @@ local function G_InitiateNewExit()
 end
 
 --
+--	Grant Emerald
+--
+
+local emeralds_set = {
+	EMERALD1,
+	EMERALD2,
+	EMERALD3,
+	EMERALD4,
+	EMERALD5,
+	EMERALD6,
+	EMERALD7,
+}
+
+local function G_StylesGrantEmerald(p)
+	if gamemap >= sstage_start and gamemap < sstage_end then
+		local em_selection = gamemap - sstage_start + 1
+
+		if emeralds_set[em_selection] then
+			p.styles_granted = emeralds_set[em_selection]
+			emeralds = $ | p.styles_granted
+		end
+	elseif gamemap >= smpstage_start and gamemap <= smpstage_end then
+		local em_selection = gamemap - smpstage_start + 1
+
+		if emeralds_set[em_selection] then
+			p.styles_granted = emeralds_set[em_selection]
+			emeralds = $ | p.styles_granted
+		end
+	end
+end
+
+
+--
 --	In-Game Handler (SP only)
 --
 
@@ -197,7 +230,9 @@ local function G_StylesTallyBackend(p)
 		return
 	end
 
-	if G_GametypeUsesCoopStarposts() and G_GametypeUsesLives() then
+	local specialstage = G_IsSpecialStage(gamemap)
+
+	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
 
 		if p.exiting and not lastspecialsector then
 			-- Handles cases with skiptally, hopefully.
@@ -224,6 +259,10 @@ local function G_StylesTallyBackend(p)
 		if G_EnoughPlayersFinished() then
 			if not skiptally then
 				p.mo.flags = $|MF_NOCLIPTHING
+
+				if not stagefailed then
+					G_StylesGrantEmerald(p)
+				end
 
 				-- STOP
 				if p.yusonictable and p.yusonictable.endlvl then
@@ -290,6 +329,14 @@ local function G_StylesTallyBackend(p)
 						S_StopMusic(p)
 					elseif cur_music then
 						if cur_music ~= p.styles_tallytrack or not (S_MusicPlaying(p)) then
+							if not p.styles_tallytrack then
+								p.styles_tallytrack = "_CLEAR"
+
+								if mapheaderinfo[gamemap].bonustype > 0 then
+									p.styles_tallytrack = "_CLEZO"
+								end
+							end
+
 							S_ChangeMusic(p.styles_tallytrack, false, p, 0, p.styles_tallyposms, 0, 0)
 
 							if p.styles_tallystoplooping or (p.styles_tallysoundlenght - MUSICRATE <= p.styles_tallyposms) then

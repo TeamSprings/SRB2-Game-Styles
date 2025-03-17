@@ -189,6 +189,7 @@ mobjinfo[MT_EXTRAINVRAY] = {
 }
 
 -- Type of rays
+-- TODO: Clean up this mess
 
 local n_1 = freeslot("S_INVINCIBILITYRAY1")
 states[n_1] = {
@@ -200,56 +201,7 @@ states[n_1] = {
 	nextstate = n_1
 }
 
-local n_2 = freeslot("S_INVINCIBILITYRAY2")
-states[n_2] = {
-	sprite = SPR_INV1,
-	frame = 9|FF_PAPERSPRITE|FF_TRANS60|FF_ADD|FF_SEMIBRIGHT|FF_ANIMATE,
-	tics = 16,
-	var1 = 7,
-	var2 = 2,
-	nextstate = n_2
-}
-
-local n_3 = freeslot("S_INVINCIBILITYRAY3")
-states[n_3] = {
-	sprite = SPR_INV1,
-	frame = 17|FF_PAPERSPRITE|FF_TRANS60|FF_ADD|FF_SEMIBRIGHT|FF_ANIMATE,
-	tics = 16,
-	var1 = 7,
-	var2 = 2,
-	nextstate = n_3
-}
-
-local n_4 = freeslot("S_INVINCIBILITYRAY4")
-states[n_4] = {
-	sprite = SPR_INV1,
-	frame = 25|FF_PAPERSPRITE|FF_TRANS60|FF_ADD|FF_SEMIBRIGHT|FF_ANIMATE,
-	tics = 16,
-	var1 = 7,
-	var2 = 2,
-	nextstate = n_4
-}
-
-local n_5 = freeslot("S_INVINCIBILITYRAY5")
-states[n_5] = {
-	sprite = SPR_INV1,
-	frame = 33|FF_PAPERSPRITE|FF_TRANS60|FF_ADD|FF_SEMIBRIGHT|FF_ANIMATE,
-	tics = 16,
-	var1 = 7,
-	var2 = 2,
-	nextstate = n_5
-}
-
-
-local table_of_states = {
-	--n_1
-	n_2,
-	n_3,
-	n_4,
-	n_5
-}
-
-local amount_rays = 20
+local amount_rays = 1
 local mid_index = amount_rays + 1
 local angle_div = 360*FRACUNIT/amount_rays
 
@@ -257,27 +209,27 @@ local function invincibilityModel(a, p)
 	if Disable_Shields then return end
 	if not (p.mo and p.mo.valid) then return end
 	if not a.raylist and p.powers[pw_invulnerability] then
-		a.raylist = {}
-
-		for i = 1,amount_rays do
-			local ray = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_EXTRAINVRAY)
-			ray.state = table_of_states[P_RandomRange(1, #table_of_states)]
-			ray.scale = a.scale/4
-			ray.tics = (i * 3) % 16
-			ray.transparencytimer = (50+15*i) % 50
-			ray.offsh = FixedAngle((P_RandomRange(-4, 4) + i) * angle_div)
-			ray.offsv = FixedAngle((P_RandomRange(-4, 4) + i) * angle_div)
-			table.insert(a.raylist, ray)
-		end
+		local ray = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_OVERLAY)
+		ray.state = n_1
+		ray.spritexscale = 2*FRACUNIT/9
+		ray.spriteyscale = 2*FRACUNIT/9
+		ray.target = p.mo
+		ray.fuse = 8
+		ray.dispoffset = 20
+		a.raylist = {ray}
 	end
 
 	if a.raylist and not a.raylist[mid_index] then
-		a.raylist[mid_index] = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_ROTATEOVERLAY)
-		a.raylist[mid_index].target = a
-		a.raylist[mid_index].scale = 5*FRACUNIT/4
-		a.raylist[mid_index].state = S_INVISIBLE
-		a.raylist[mid_index].sprite = SPR_INV1
-		a.raylist[mid_index].frame = A|FF_ADD|FF_TRANS40|FF_SEMIBRIGHT
+		local mid = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_ROTATEOVERLAY)
+		mid.target = a
+		mid.scale = 5*FRACUNIT/4
+		mid.state = S_INVISIBLE
+		mid.sprite = SPR_INV1
+		mid.frame = A|FF_ADD|FF_TRANS40|FF_SEMIBRIGHT
+		mid.fuse = 8
+		mid.dispoffset = 20
+
+		a.raylist[mid_index] = mid
 	end
 
 	if a.raylist and not p.powers[pw_invulnerability] then
@@ -292,18 +244,9 @@ local function invincibilityModel(a, p)
 			local x,y,z
 			if k == mid_index then
 				P_MoveOrigin(v, a.x, a.y, a.z + FixedMul(p.mo.height/2, a.scale))
-			else
-				v.angle = v.offsh
-
-				x = 64*FixedMul(cos(v.angle), cos(v.offsv))
-				y = 64*FixedMul(sin(v.angle), cos(v.offsv))
-				z = 64*sin(v.offsv)+FixedMul(a.scale, 3*a.height/5)
-
-				P_MoveOrigin(v, a.x+(x or 0), a.y+(y or 0), a.z+(z or 0))
-				v.momx = a.momx
-				v.momy = a.momy
-				v.momz = a.momz
 			end
+
+			v.fuse = 8
 		end
 	end
 end

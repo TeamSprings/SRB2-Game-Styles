@@ -45,6 +45,14 @@ local tryx, tryy = 0, 0
 
 local moveoffset = 4+8
 
+--local function G_EncoreModeColors()
+--	if GT_ENCORE and gametype == GT_ENCORE then
+--		return
+--	else
+--		return
+--	end
+--end
+
 local function drawTextBG(v, x, y, width)
 	local nwidth = max(0, width)
 	local corner1 = v.cachePatch("INTMASKEW1")

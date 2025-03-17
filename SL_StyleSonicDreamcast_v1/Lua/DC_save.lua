@@ -22,6 +22,7 @@ addHook("GameQuit", function(quit)
 		"dc_checkpoints",
 		"dc_shields",
 		"dc_miscassets",
+		"dc_playereffects",
 		"dc_hud_rankdisplay",
 	}
 

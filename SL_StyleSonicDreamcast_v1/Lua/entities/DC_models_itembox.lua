@@ -356,6 +356,8 @@ local function P_MonitorThinker(a)
 				else
 					a.spritexscale = FRACUNIT
 					a.spriteyscale = FRACUNIT
+					a.caps.spritexscale = FRACUNIT
+					a.caps.spriteyscale = FRACUNIT
 					if a.item and a.item.valid then
 						a.item.scale = a.originscale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24)
 					end

@@ -356,6 +356,17 @@ local fake_ringbonus = 0
 HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 	if p.styles_tallytimer == nil then return end
 
+	local specialstage_togg = G_IsSpecialStage(gamemap)
+
+	if specialstage_togg then
+		local timerfade = 15+min(p.styles_tallytimer+80, 0)
+		if timerfade == 15 then
+			v.fadeScreen(0, 10)
+		else
+			v.fadeScreen(0xFB00, max(min(timerfade*31/15, 31), 0))
+		end
+	end
+
 	if p.styles_tallytimer and p.styles_tallytimer == -98 then
 		fake_timebonus = calc_help.Y_GetTimeBonus(p.realtime)
 		fake_ringbonus = calc_help.Y_GetRingsBonus(p.rings)
@@ -379,7 +390,7 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 				fake_ringbonus = 0
 			end
 
-			if not (p.styles_tallytimer % 3) then
+			if not (specialstage_togg or (p.styles_tallytimer % 3)) then
 				S_StartSound(nil, sfx_ptally, p)
 			end
 		end
@@ -395,15 +406,32 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 	local width, fxw = v.height()
 	local height, fxh = v.height()
 	local scale = v.dupy()
+	local txt = "CHAOS EMERALDS  "
 
-	local act = tostring(mapheaderinfo[gamemap].actnum)
-	if act ~= "0" then
-		act = "ACT"..act
+	local special_offy = 0
+
+	if specialstage_togg then
+		special_offy = 20
+
+		for i = 1, 7 do
+			local x = 8+i*38
+	
+			v.draw(x-3, 93, v.cachePatch("CHAOSEMPTY"), 0)
+			if emeralds & emeralds_set[i] then
+				v.draw(x, 95, v.cachePatch("CHAOS"..i), 0)
+			end
+		end	
 	else
-		act = "ZONE"
-	end
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+		if act ~= "0" then
+			act = "ACT"..act
+		else
+			act = "ZONE"
+		end
 
-	local txt = string.upper(skins[p.skin].realname).." GOT THROUGH "..act.."               "
+		txt = string.upper(skins[p.skin].realname).." GOT THROUGH "..act.."               "
+	end	
+	
 	local name = string.rep(txt, 8)
 	local name_lenght = 0
 
@@ -422,11 +450,14 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 	v.drawFill(offset_x, 166-offset_ytxtb, width/scale*2, 20, 1|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
 	drawScroll(v, 'ADV1MENFNT', offset_x*FRACUNIT, (171-offset_ytxtb)*FRACUNIT, FRACUNIT, name, V_SNAPTOLEFT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, name_lenght+((3*leveltime) % (name_lenght+1)), width/scale*2)
 
-	drawan(v, 'ADV1TAFNT', 92*FRACUNIT, 100*FRACUNIT, FRACUNIT, "TIME BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', first_up, scale_updraw, 8*FRACUNIT/10)
-	drawan(v, 'ADVNUM', 175*FRACUNIT, 97*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', secon_up, scale_updraw, 8*FRACUNIT/10)
+	drawan(v, 'ADV1TAFNT', 92*FRACUNIT, (100+special_offy)*FRACUNIT, FRACUNIT, "TIME BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', first_up, scale_updraw, 8*FRACUNIT/10)
+	drawan(v, 'ADVNUM', 175*FRACUNIT, (97+special_offy)*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', secon_up, scale_updraw, 8*FRACUNIT/10)
 
-	drawan(v, 'ADV1TAFNT', 92*FRACUNIT, 122*FRACUNIT, FRACUNIT, "RING BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FRACUNIT/10)
-	drawan(v, 'ADVNUM', 175*FRACUNIT, 119*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FRACUNIT/10)
+	if not specialstage_togg then
+		drawan(v, 'ADV1TAFNT', 92*FRACUNIT, (122+special_offy)*FRACUNIT, FRACUNIT, "RING BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FRACUNIT/10)
+		drawan(v, 'ADVNUM', 175*FRACUNIT, (119+special_offy)*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FRACUNIT/10)
+	end
+	
 	return true
 end, "game", 8)
 

@@ -132,7 +132,7 @@ return{
 			end
 		end
 
-		drawf(v, 'S3BTFNT', 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_PURPLE), "center")
+		drawf(v, 'S3BTFNT', 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC3DB_TALLY"), "center")
 	end,
 
 	tallybg = function(v, p, offsetx, color, color2, fading)

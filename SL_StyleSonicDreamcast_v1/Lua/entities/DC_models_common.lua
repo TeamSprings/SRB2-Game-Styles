@@ -677,5 +677,6 @@ states[ringclt] = {
 }
 
 mobjinfo[MT_RING].deathstate = ringclt
+mobjinfo[MT_FLINGRING].deathstate = ringclt
 mobjinfo[MT_REDTEAMRING].deathstate = ringclt
 mobjinfo[MT_BLUETEAMRING].deathstate = ringclt

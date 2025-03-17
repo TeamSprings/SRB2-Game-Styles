@@ -1,7 +1,7 @@
 local gameString = "gba"
 
-local packVersion = '3.200'
-rawset(_G, "Style_DimpsVersion", 3200)
+local packVersion = '3.245'
+rawset(_G, "Style_DimpsVersion", 3245)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Dimps Style '..packVersion..'] '
@@ -13,7 +13,6 @@ local version = '2.2.14'
 ]]
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
-assert((SUBVERSION > 13), packType.."Mod requires features from "..version.."+")
 
 freeslot("SKINCOLOR_COMPRESSORGBA", "SKINCOLOR_COMPRESSORGBA2")
 freeslot("SKINCOLOR_COMPRESSORGBAP2", "SKINCOLOR_COMPRESSORGBA2P2")
@@ -52,7 +51,7 @@ local function macro_dofile(prefix, ...)
 	end
 end
 
-if VERSION == 202 and SUBVERSION > 13 and not Style_ClassicVersion and not Style_AdventureVersion then
+if VERSION == 202 and SUBVERSION > 14 and not Style_ClassicVersion and not Style_AdventureVersion then
 	local start_metric = getTimeMicros()
 	print(packType.."Loading")
 
@@ -85,7 +84,7 @@ else
 	local function MisVersion_Notification(v)
 		v.drawFill(0, 95, 320, 30, 38)
 		v.drawString(160, 100, "DIMPS STYLE WON'T BE LOADED IN THIS VERSION OF SRB2", V_ORANGEMAP, "thin-center")
-		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.14+ or Nighty Build of SRB2", 0, "thin-center")
+		v.drawString(160, 110, "PLEASE DOWNLOAD 2.2.15 OR NEWER VERSION", 0, "thin-center")
 	end
 
 	hud.add(MisVersion_Notification, "title")

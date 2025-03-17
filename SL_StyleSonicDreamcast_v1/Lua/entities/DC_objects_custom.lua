@@ -60,7 +60,7 @@ mobjinfo[MT_SA5RING_ICON] = {
 
 states[S_SA5RING_ICON1] = {
 	sprite = SPR_TV_SA2RINGMONITORS,
-	frame = A|FF_ANIMATE,
+	frame = E|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
 	var2 = 4,
@@ -69,7 +69,7 @@ states[S_SA5RING_ICON1] = {
 
 states[S_SA5RING_ICON2] = {
 	sprite = SPR_TV_SA2RINGMONITORS,
-	frame = A,
+	frame = E,
 	action = A_RingBox,
 	tics = 18,
 }
@@ -111,7 +111,7 @@ mobjinfo[MT_SA20RING_ICON] = {
 
 states[S_SA20RING_ICON1] = {
 	sprite = SPR_TV_SA2RINGMONITORS,
-	frame = E|FF_ANIMATE,
+	frame = A|FF_ANIMATE,
 	tics = 18,
 	var1 = 3,
 	var2 = 4,
@@ -120,7 +120,7 @@ states[S_SA20RING_ICON1] = {
 
 states[S_SA20RING_ICON2] = {
 	sprite = SPR_TV_SA2RINGMONITORS,
-	frame = E,
+	frame = A,
 	action = A_RingBox,
 	tics = 18,
 }

@@ -104,6 +104,17 @@ CV_RegisterVar({
 })
 
 CV_RegisterVar({
+	name = "dc_playereffects",
+	defaultvalue = "off",
+	flags = CV_NETVAR,
+	PossibleValue = {off=0, sa1=1, sa2=2, heroes=3},
+	category = "Adventure Style - Eyecandy",
+	displayname = "Player Effects",
+	--func = disable_assets,
+})
+
+
+CV_RegisterVar({
 	name = "dc_hud_rankdisplay",
 	defaultvalue = "No",
 	flags = 0,

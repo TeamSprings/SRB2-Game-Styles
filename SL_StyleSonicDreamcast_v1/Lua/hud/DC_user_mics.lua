@@ -144,6 +144,10 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 				end
 			end
 
+			if pic.width == 24 then
+				v.drawScaled(x, y, easesubtit, v.cachePatch("SA2ICONPWBORDER"), flags)
+			end
+
 			offset = $ + incs
 		end
 	end
@@ -198,6 +202,10 @@ local score_graphic = {
 	"SCOREADDSA2A",
 }
 
+local score_add_current = nil
+local score_add_timer = nil
+
+
 rawset(_G, "dc_addscoreprompt", function(score_level)
 	table.insert(score_add, {graphic = score_graphic[max(min(score_level, #score_graphic), 1)], x = 160, tics = 5*TICRATE})
 end)
@@ -206,9 +214,39 @@ COM_AddCommand("dc_addfakescore", function(p, num)
 	dc_addscoreprompt(tonumber(num))
 end)
 
+addHook("MobjSpawn", function(mo)
+	if multiplayer then return end
+	mo.flags2 = $|MF2_DONTDRAW
+end, MT_SCORE)
+
+addHook("MobjRemoved", function(mo)
+	if multiplayer then return end
+
+	local cur = (mo.frame & FF_FRAMEMASK)
+
+	if cur > 0 then
+		score_add_current = score_add_current and $+1 or 1
+		score_add_timer = 2*TICRATE
+	end
+end, MT_SCORE)
+
 local y_offset = 0
 
 HOOK("scoreadditives", "dchud", function(v, p, t, e)
+
+	-- Base Score Combos (Unrelated to SA2:Blast)
+
+	if score_add_timer then
+		score_add_timer = $ - 1
+
+		if score_add_timer == 0 then
+			dc_addscoreprompt(score_add_current or 1)
+
+			score_add_current = nil
+			score_add_timer = nil
+		end
+	end
+
 	-- Gamma Support
 
 	if p and p.valid and p.mo and p.mo.valid and p.mo.gammaVars then

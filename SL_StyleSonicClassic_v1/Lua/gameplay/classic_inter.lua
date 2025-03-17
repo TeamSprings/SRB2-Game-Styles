@@ -215,14 +215,18 @@ local emeralds_set = {
 local function G_StylesGrantEmerald(p)
 	if gamemap >= sstage_start and gamemap < sstage_end then
 		local em_selection = gamemap - sstage_start + 1
-		p.styles_granted = emeralds_set[em_selection]
 
-		emeralds = $ | p.styles_granted
+		if emeralds_set[em_selection] then
+			p.styles_granted = emeralds_set[em_selection]
+			emeralds = $ | p.styles_granted
+		end
 	elseif gamemap >= smpstage_start and gamemap <= smpstage_end then
 		local em_selection = gamemap - smpstage_start + 1
-		p.styles_granted = emeralds_set[em_selection]
 
-		emeralds = $ | p.styles_granted
+		if emeralds_set[em_selection] then
+			p.styles_granted = emeralds_set[em_selection]
+			emeralds = $ | p.styles_granted
+		end
 	end
 end
 
@@ -341,6 +345,10 @@ local function G_StylesTallyBackend(p)
 						S_StopMusic(p)
 					elseif cur_music then
 						if cur_music ~= p.styles_tallytrack or not (S_MusicPlaying(p)) then
+							if not p.styles_tallytrack then
+								p.styles_tallytrack = Options:getvalue("levelendtheme")[2]
+							end
+
 							S_ChangeMusic(p.styles_tallytrack, false, p, 0, p.styles_tallyposms, 0, 0)
 
 							if p.styles_tallysoundlenght - MUSICRATE <= p.styles_tallyposms then

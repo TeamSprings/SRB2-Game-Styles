@@ -9,6 +9,21 @@ Taken from Classic Style, will be expanded upon maybe.
 
 ]]
 
+local ringclt = freeslot("S_STYLES_DIMPS_RINGCLT")
+
+states[ringclt] = {
+	sprite = freeslot("SPR_STYLES_DIMPS_RINGCLT"),
+	frame = A|FF_TRANS30|FF_ANIMATE,
+	tics = 16,
+	var1 = 7,
+	var2 = 2,
+}
+
+mobjinfo[MT_RING].deathstate = ringclt
+mobjinfo[MT_FLINGRING].deathstate = ringclt
+mobjinfo[MT_REDTEAMRING].deathstate = ringclt
+mobjinfo[MT_BLUETEAMRING].deathstate = ringclt
+
 --
 -- Checkpoint Switching!
 --
