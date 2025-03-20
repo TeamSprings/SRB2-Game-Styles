@@ -296,7 +296,7 @@ local function G_StylesTallyBackend(p)
 
 					p.exiting = 5
 
-					setuphook("General", p)
+					setuphook(p.realmo and p.realmo.skin or p.skin, p)
 				-- Background Process
 				elseif p.styles_tallytimer ~= nil then
 					p.exiting = 5
@@ -308,7 +308,7 @@ local function G_StylesTallyBackend(p)
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
 							P_AddPlayerScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
 
-							skiphook("Generic", p)
+							skiphook(p.realmo and p.realmo.skin or p.skin, p)
 						else
 							if p.styles_tallytimer < p.styles_tallyfakecounttimer - 1 then
 								P_AddPlayerScore(p, 222)
@@ -362,7 +362,7 @@ local function G_StylesTallyBackend(p)
 						p.styles_tallylastlives = p.lives
 						G_ExitLevel()
 
-						endhook("General", p)
+						endhook(p.realmo and p.realmo.skin or p.skin, p)
 						return
 					end
 				end

@@ -323,7 +323,7 @@ local function G_StylesTallyBackend(p)
 						p.styles_tallystoplooping = nil
 						p.styles_tallysoundlenght = S_GetMusicLength()
 
-						setuphook("General", p)
+						setuphook(p.realmo and p.realmo.skin or p.skin, p)
 					elseif p.styles_tallytimer < 11*TICRATE then
 						p.powers[pw_invulnerability] = 0
 						p.powers[pw_sneakers] = 0
@@ -369,7 +369,7 @@ local function G_StylesTallyBackend(p)
 						S_StartSound(p.mo, sfx_advchi)
 						S_StopSoundByID(p.mo, sfx_advtal)
 
-						skiphook("Generic", p)
+						skiphook(p.realmo and p.realmo.skin or p.skin, p)
 					end
 
 					if p.styles_teleportToGround then
@@ -396,7 +396,7 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallylastscore = p.score + helper.Y_GetAllBonus(p)
 				end
 
-				endhook("General", p)
+				endhook(p.realmo and p.realmo.skin or p.skin, p)
 				G_ExitLevel()
 			end
 		end
