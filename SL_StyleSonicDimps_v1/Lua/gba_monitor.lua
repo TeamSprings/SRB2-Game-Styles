@@ -262,8 +262,8 @@ local function P_MonitorDeath(a, d, s)
 		if P_MarioExistsThink(a.item) then
 			A_MonitorPop(a, 0, 0)
 		else
-			if a.special_case then
-				extras = a.special_case(a, a.item, a.target, d, s)
+			if a.styles_special_case then
+				extras = a.styles_special_case(a, a.item, a.target, d, s)
 			elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 				A_MonitorPop(a, 0, 0)
 			else
@@ -416,7 +416,7 @@ addHook("AddonLoaded", function()
 
 		addHook("MobjSpawn", function(a)
 			P_SpawnItemBox(a)
-			a.special_case = encore_thinker.pop
+			a.styles_special_case = encore_thinker.pop
 		end, MT_ENC_BOX)
 		addHook("MobjThinker", function(a)
 			P_MonitorThinker(a)
