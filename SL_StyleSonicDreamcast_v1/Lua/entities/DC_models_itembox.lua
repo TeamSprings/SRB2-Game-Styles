@@ -455,12 +455,12 @@ local function P_MonitorDeath(a, d, s)
 		local boxicon
 		local extras
 
-		if not loothook(a.type, a, a.item) then
+		if not loothook(a.type, a, a.item, d, s) then
 			if P_MarioExistsThink(a.item) then
 				A_MonitorPop(a, 0, 0)
 			else
 				if a.special_case then
-					extras = a.special_case(a, a.item, a.target)
+					extras = a.special_case(a, a.item, a.target, d, s)
 				elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 					A_MonitorPop(a, 0, 0)
 				else
@@ -518,7 +518,7 @@ local function P_MonitorDeath(a, d, s)
 		a.once_already = true
 		a.settedup = nil
 
-		deathhook(a.type, a, a.item, a.caps, boxicon)
+		deathhook(a.type, a, a.item, a.caps, boxicon, d, s)
 		return true
 	end
 end
@@ -554,7 +554,7 @@ local function P_MonitorRemoval(a, d)
 	end
 
 	a.settedup = nil
-	remhook(a.type, a, a.item, a.caps)
+	remhook(a.type, a, a.item, a.caps, d)
 end
 
 addHook("MobjMoveCollide", function(a, mt)
