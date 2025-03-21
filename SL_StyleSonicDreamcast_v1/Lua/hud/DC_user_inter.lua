@@ -32,6 +32,8 @@ sfxinfo[freeslot("sfx_rank")].caption = "rank drop!"
 sfxinfo[freeslot("sfx_advchi")].caption = "cha-ching!"
 sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
+local emeralds_set = {EMERALD1, EMERALD2, EMERALD3, EMERALD4, EMERALD5, EMERALD6, EMERALD7}
+
 local interm_size = FRACUNIT-3*FRACUNIT/8
 
 local music = "_ADVLCEAR"
@@ -39,6 +41,8 @@ local music = "_ADVLCEAR"
 HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if not (p.exiting and p.styles_tallytimer) then return true end
 	-- Ease and timing
+
+	local specialstage_togg = G_IsSpecialStage(gamemap)
 
 	local textscaling = {}
 	local transparency = {}
@@ -50,24 +54,21 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	end
 
 	local fade = ease.linear(max(min(p.styles_tallytimer-8*TICRATE-5, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 16, 0)
+	local fadewhite = 0
 
-	local fadewhite = abs(abs(ease.linear(max(min(p.styles_tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
+	if not specialstage_togg then
+		fadewhite = abs(abs(ease.linear(max(min(p.styles_tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
+	end
 
 	local rankamp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), FRACUNIT, 3*FRACUNIT/2)
 	local ranktrp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 
-	local calculationtime = ease.linear(max(min(p.styles_tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), Y_GetTimeBonus(p.realtime), 0)
-
-
-	-- Sound effects
+	local calculationtime = ease.linear(max(min(p.styles_tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), helper:Y_GetStageBonus(p), 0)
 
 	-- stop music
 	if p.styles_tallytimer == 13*TICRATE-1 then
 		S_FadeOutStopMusic(MUSICRATE, p)
 	end
-
-	-- rank sound
-	if p.styles_tallytimer == 2*TICRATE then S_StartSound(nil, sfx_rank, p) end
 
 	--
 	--	SET-UP
@@ -133,7 +134,14 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if transparency[index] ~= V_90TRANS then
 
 		local zrings = FixedDiv((z1+55)*textscaling[index], textscaling[index])
-		local tallyrings = ''..(p.rings.."/"..(helper.totalcoinnum + mapheaderinfo[gamemap].startrings or 0))
+		local tallyrings = "/"..(helper.totalcoinnum + mapheaderinfo[gamemap].startrings or 0)
+
+		if (maptol & TOL_NIGHTS) then
+			tallyrings = "???"..$
+		else
+			tallyrings = (p.rings)..$
+		end
+
 		local ringslen = (string.len(""..tallyrings))
 
 		local patch = v.cachePatch("SA2TLRNG")
@@ -152,10 +160,15 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	if transparency[index] ~= V_90TRANS then
 
 		local timebonz = FixedDiv((z2+55)*textscaling[index], textscaling[index])
-		local timebonus = ''..(Y_GetTimeBonus(p.realtime) - calculationtime)
+		local timebonus = ''..(helper:Y_GetStageBonus(p) - calculationtime)
 		local timelen = (string.len(""..timebonus))
 
 		local patch = v.cachePatch("SA2TLTB")
+
+		if (maptol & TOL_NIGHTS) then
+			patch = v.cachePatch("SA2TLSB")
+		end
+
 		v.drawScaled(FixedDiv((63+patch.leftoffset)*textscaling[index], textscaling[index]), 5*timebonz/8,
 		textscaling[index], patch, V_PERPLAYER|transparency[index])
 
@@ -186,11 +199,29 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 
 	-- Rank
 
-	local rank = rank_calculator(p)
-	if rankamp ~= 3*FRACUNIT/2 then
-		local patch = v.cachePatch("SA2RANK"..rank)
-		v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),
-		FixedDiv(158*rankamp, rankamp)+FixedDiv((patch.height/2)*rankamp, rankamp), rankamp, patch, V_PERPLAYER|ranktrp)
+	if specialstage_togg then
+		if transparency[index] ~= V_90TRANS then
+			for id = 1, 7 do
+				--v.draw(x-3, 93, v.cachePatch("CHAOSEMPTY"), 0)
+				if emeralds & emeralds_set[id] then
+					local x = 69+id*23
+					local state = states[S_CEMG1+id-1]
+					local patch = v.getSpritePatch(state.sprite, state.frame+(leveltime/state.var2 % state.var1), 0)
+
+					v.drawScaled(x*FRACUNIT, 158*FRACUNIT, FRACUNIT/2, patch, transparency[index])
+				end
+			end
+		end
+	else
+		local rank = rank_calculator(p)
+		if rankamp ~= 3*FRACUNIT/2 then
+			local patch = v.cachePatch("SA2RANK"..rank)
+			v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),
+			FixedDiv(158*rankamp, rankamp)+FixedDiv((patch.height/2)*rankamp, rankamp), rankamp, patch, V_PERPLAYER|ranktrp)
+		end
+
+		-- rank sound
+		if p.styles_tallytimer == 2*TICRATE then S_StartSound(nil, sfx_rank, p) end
 	end
 
 	return true

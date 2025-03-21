@@ -39,6 +39,10 @@ function helper.Y_GetTimeBonus(time)
 	return result
 end
 
+function helper:Y_GetStageBonus(p)
+	return (maptol & TOL_NIGHTS) and p.totalmarescore or self.Y_GetTimeBonus(p.realtime)
+end
+
 function helper.Y_GetGuardBonus(guardtime)
 	local guardscoretype = {[0] = 10000, [1] = 5000, [2] = 1000, [3] = 500, [4] = 100}
 	return (guardscoretype[guardtime] and guardscoretype[guardtime] or 0)

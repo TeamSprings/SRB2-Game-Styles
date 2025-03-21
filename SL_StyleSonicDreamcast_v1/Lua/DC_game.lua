@@ -378,16 +378,29 @@ local function G_StylesTallyBackend(p)
 					end
 
 					p.styles_tallytimer = $-1
-					local angeasemath = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
-					local distance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 100*FRACUNIT, 300*FRACUNIT)/FRACUNIT
-					local aim = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 0, -35*ANG1)
-					local zdistance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), p.mo.z+p.mo.height/2, p.mo.z+FixedMul(p.mo.height, 3*FRACUNIT))
-					P_MoveOrigin(p.mo.advposecamera, p.mo.x-distance*cos(angeasemath), p.mo.y-distance*sin(angeasemath), zdistance)
-					p.mo.advposecamera.angle = angeasemath
 					p.awayviewmobj = p.mo.advposecamera
 					p.awayviewtics = 14*TICRATE
-					p.awayviewaiming = aim
-					p.viewrollangle = -aim-15*ANG1
+
+					if not p.mo.advposecamera.setup then
+						local angeasemath = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
+						local distance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 100*FRACUNIT, 300*FRACUNIT)/FRACUNIT
+						local aim = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 0, -35*ANG1)
+						local zdistance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), p.mo.z+p.mo.height/2, p.mo.z+FixedMul(p.mo.height, 3*FRACUNIT))
+						P_MoveOrigin(p.mo.advposecamera, p.mo.x-distance*cos(angeasemath), p.mo.y-distance*sin(angeasemath), zdistance)
+						p.mo.advposecamera.angle = angeasemath
+						p.awayviewaiming = aim
+						p.viewrollangle = -aim-15*ANG1
+						p.mo.advposecamera.setup = true
+					elseif not (maptol & TOL_NIGHTS) then
+						local angeasemath = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), InvAngle(p.mo.angle-ANGLE_45), p.mo.angle-ANGLE_45)
+						local distance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 100*FRACUNIT, 300*FRACUNIT)/FRACUNIT
+						local aim = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), 0, -35*ANG1)
+						local zdistance = ease.insine(max(min(p.styles_tallytimer-10*TICRATE+TICRATE/5, 3*TICRATE-TICRATE/3), 0)*FRACUNIT/(3*TICRATE-TICRATE/3), p.mo.z+p.mo.height/2, p.mo.z+FixedMul(p.mo.height, 3*FRACUNIT))
+						P_MoveOrigin(p.mo.advposecamera, p.mo.x-distance*cos(angeasemath), p.mo.y-distance*sin(angeasemath), zdistance)
+						p.mo.advposecamera.angle = angeasemath
+						p.awayviewaiming = aim
+						p.viewrollangle = -aim-15*ANG1
+					end
 				end
 			end
 
