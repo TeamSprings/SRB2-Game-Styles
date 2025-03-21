@@ -62,7 +62,14 @@ return {
 
 	rings = function(v, p, t, e, font_type)
 		if p.mo then
-			v.draw(8, 1, v.cachePatch(list_pw[p.charability] and list_pw[p.charability] or "RINGMADV3"), hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			local skin_name = string.upper(skins[p.mo.skin or p.skin].name)
+			local patch_name = "STYLES_ADV3RINGS_"..skin_name
+
+			if v.patchExists(patch_name) then
+				v.draw(8, 1, v.cachePatch(patch_name), hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			else
+				v.draw(8, 1, v.cachePatch(list_pw[p.charability] and list_pw[p.charability] or "RINGMADV3"), hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+			end
 		end
 
 		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FRACUNIT, (hudinfo[HUD_SECONDS].y-21)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 3, '0')
