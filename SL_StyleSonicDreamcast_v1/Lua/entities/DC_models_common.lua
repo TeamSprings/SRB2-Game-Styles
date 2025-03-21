@@ -354,6 +354,38 @@ states[S_CEMG7] = {
 }
 
 --
+--	Chaos Emeralds (Nights)
+--
+
+---@diagnostic disable-next-line
+states[S_ORBITEM1].sprite = SPR_GEM1
+states[S_ORBITEM1].frame = FF_TRANS10|A
+
+---@diagnostic disable-next-line
+states[S_ORBITEM2].sprite = SPR_GEM1
+states[S_ORBITEM2].frame = FF_TRANS10|E
+
+---@diagnostic disable-next-line
+states[S_ORBITEM3].sprite = SPR_GEM1
+states[S_ORBITEM3].frame = FF_TRANS10|I
+
+---@diagnostic disable-next-line
+states[S_ORBITEM4].sprite = SPR_GEM1
+states[S_ORBITEM4].frame = FF_TRANS10|M
+
+---@diagnostic disable-next-line
+states[S_ORBITEM5].sprite = SPR_GEM2
+states[S_ORBITEM5].frame = FF_TRANS10|A
+
+---@diagnostic disable-next-line
+states[S_ORBITEM6].sprite = SPR_GEM2
+states[S_ORBITEM6].frame = FF_TRANS10|E
+
+---@diagnostic disable-next-line
+states[S_ORBITEM7].sprite = SPR_GEM2
+states[S_ORBITEM7].frame = FF_TRANS10|I
+
+--
 --	Chao Key (Key to get to Chao Garden or... used to be)
 --
 
