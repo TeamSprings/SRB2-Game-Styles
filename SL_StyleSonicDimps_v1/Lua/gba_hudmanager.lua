@@ -583,6 +583,7 @@ local gba_menu_vars = {
 	nil,
 	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SPRING ROLL", 		cv = CV_FindVar("gba_springroll")};
 	{minv = 0, maxv = 1, anim = FRACUNIT, name = "THOK EFFECT", 		cv = CV_FindVar("gba_thok")};
+	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SUPER AFTER IMG", 	cv = CV_FindVar("gba_superafterimage")};
 	"MISC",
 	nil,
 	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SIGN ANIM", 			cv = CV_FindVar("gba_sign_movement")};

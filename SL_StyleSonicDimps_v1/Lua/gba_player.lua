@@ -16,6 +16,13 @@ local springtroll_cv = CV_RegisterVar{
 	PossibleValue = {disabled=0, enabled=1}
 }
 
+local afterimage_cv = CV_RegisterVar{
+	name = "gba_superafterimage",
+	defaultvalue = "enabled",
+	flags = CV_NETVAR,
+	PossibleValue = {disabled=0, enabled=1}
+}
+
 local thok_cv = CV_RegisterVar{
 	name = "gba_thok",
 	defaultvalue = "enabled",
@@ -28,6 +35,12 @@ local angle_wholerange = angle_triggerfall*2
 
 addHook("PlayerThink", function(p)
 	if not p.mo then return end
+
+	if p.powers[pw_super] > 0
+	and afterimage_cv.value
+	and not (leveltime % 5) then
+		P_SpawnGhostMobj(p.mo)
+	end
 
 	if thok_cv.value then
 		p.thokitem = MT_RAY
@@ -77,6 +90,12 @@ addHook("PlayerThink", function(p)
 		p.mo.style_spring_type = nil
 	end
 end)
+
+addHook("MobjSpawn", function(mo)
+	if afterimage_cv.value then
+		P_RemoveMobj(mo)
+	end
+end, MT_SUPERSPARK)
 
 --
 --	HOOKS
