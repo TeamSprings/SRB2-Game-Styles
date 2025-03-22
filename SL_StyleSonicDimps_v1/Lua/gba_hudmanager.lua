@@ -439,9 +439,9 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 		for i = 1, 7 do
 			local x = 8+i*38
 
-			v.draw(x-3, 93, v.cachePatch("CHAOSEMPTY"), 0)
+			v.draw(x-3, 83, v.cachePatch("CHAOSEMPTY"), 0)
 			if emeralds & emeralds_set[i] then
-				v.draw(x, 95, v.cachePatch("CHAOS"..i), 0)
+				v.draw(x, 85, v.cachePatch("CHAOS"..i), 0)
 			end
 		end
 	else

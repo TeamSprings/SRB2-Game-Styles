@@ -285,7 +285,11 @@ local function G_StylesTallyBackend(p)
 					S_StopMusic(p)
 					p.styles_tallytrack = "_CLEAR"
 
-					if mapheaderinfo[gamemap].bonustype > 0 then
+					if specialstage then
+						p.styles_tallytrack = "_CLESP"
+					elseif mapheaderinfo[gamemap].nextlevel == 1103 then
+						p.styles_tallytrack = "_CLEGA"
+					elseif mapheaderinfo[gamemap].bonustype > 0 then
 						p.styles_tallytrack = "_CLEZO"
 					end
 

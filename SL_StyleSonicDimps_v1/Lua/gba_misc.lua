@@ -214,8 +214,6 @@ for _,egg in ipairs{
 	MT_EGGMOBILE2,
 	MT_EGGMOBILE3,
 	MT_EGGMOBILE4,
-	MT_BLACKEGGMAN,
-	MT_CYBRAKDEMON,
 } do
 	addHook("MobjDamage", function(mo)
 		if mo.health > 1 and eggman_toggle and P_RandomRange(0, 2) then
