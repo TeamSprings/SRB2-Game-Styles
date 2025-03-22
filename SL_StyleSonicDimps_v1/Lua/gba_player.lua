@@ -43,13 +43,13 @@ addHook("PlayerThink", function(p)
 	end
 
 	if thok_cv.value then
-		p.thokitem = MT_RAY
+		--p.thokitem = MT_RAY
 		p.spinitem = MT_RAY
 		p.revitem = MT_RAY
 
 		p.styles_swappedthok = true
 	elseif p.styles_swappedthok then
-		p.thokitem = skins[p.mo.skin].thokitem == -1 and MT_THOK or skins[p.mo.skin].thokitem
+		--p.thokitem = skins[p.mo.skin].thokitem == -1 and MT_THOK or skins[p.mo.skin].thokitem
 		p.spinitem = skins[p.mo.skin].spinitem == -1 and MT_THOK or skins[p.mo.skin].spinitem
 		p.revitem = skins[p.mo.skin].revitem -1 and MT_THOK or skins[p.mo.skin].revitem
 
