@@ -24,7 +24,7 @@ addHook("GameQuit", function(quit)
 		"gba_endtally",
 		"gba_sign_movement",
 
-		"gba_superafterimage",
+		"gba_supereffects",
 		"gba_springroll",
 		"gba_thok"
 	}

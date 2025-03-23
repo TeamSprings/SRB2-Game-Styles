@@ -17,7 +17,7 @@ local springtroll_cv = CV_RegisterVar{
 }
 
 local afterimage_cv = CV_RegisterVar{
-	name = "gba_superafterimage",
+	name = "gba_supereffects",
 	defaultvalue = "enabled",
 	flags = CV_NETVAR,
 	PossibleValue = {disabled=0, enabled=1}
@@ -30,6 +30,16 @@ local thok_cv = CV_RegisterVar{
 	PossibleValue = {enabled=0, disabled=1}
 }
 
+local supersparkles = freeslot("S_STYLES_SUPERSPARKLES")
+local supersparklesspr = freeslot("SPR_STYLES_SUPERSONICSPARKLES")
+
+states[supersparkles] = {
+	sprite = supersparklesspr,
+	frame = A|FF_ADD|FF_ANIMATE,
+	var1 = 11,
+	var2 = 1,
+}
+
 local angle_triggerfall = ANG1*6
 local angle_wholerange = angle_triggerfall*2
 
@@ -37,9 +47,48 @@ addHook("PlayerThink", function(p)
 	if not p.mo then return end
 
 	if p.powers[pw_super] > 0
-	and afterimage_cv.value
-	and not (leveltime % 5) then
-		P_SpawnGhostMobj(p.mo)
+	and afterimage_cv.value then
+		-- Super Sonic Effects
+
+		if p.speed > 8*p.mo.scale then
+			if not (leveltime % 5) then
+				P_SpawnGhostMobj(p.mo)
+			end
+		else
+			if not (leveltime % 8) then
+				local radius = p.mo.radius/FRACUNIT
+				local height = p.mo.height/FRACUNIT
+
+				local sparkle = P_SpawnMobjFromMobj(p.mo,
+					P_RandomRange(-radius, radius) * FRACUNIT,
+					P_RandomRange(-radius, radius) * FRACUNIT,
+					P_RandomRange(-height/4, height) * FRACUNIT,
+				MT_PARTICLE)
+
+				sparkle.fuse = TICRATE*2
+				sparkle.scale = (sparkle.scale*3)/2
+
+				if not P_IsObjectOnGround(p.mo) then
+					sparkle.momz = -9 * FRACUNIT * P_MobjFlip(p.mo)
+				end
+
+				sparkle.state = supersparkles
+			end
+		end
+	elseif p.powers[pw_invulnerability] then
+		if not (leveltime % 12) then
+			local radius = p.mo.radius/FRACUNIT
+			local height = p.mo.height/FRACUNIT
+
+			local sparkle = P_SpawnMobjFromMobj(p.mo,
+				P_RandomRange(-radius, radius) * FRACUNIT,
+				P_RandomRange(-radius, radius) * FRACUNIT,
+				P_RandomRange(-height/4, height) * FRACUNIT,
+			MT_PARTICLE)
+
+			sparkle.fuse = TICRATE/2
+			sparkle.state = supersparkles
+		end
 	end
 
 	if thok_cv.value then
