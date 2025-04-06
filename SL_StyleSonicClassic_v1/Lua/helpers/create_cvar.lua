@@ -52,6 +52,7 @@ function module:new(name, path, func, addflags)
 	self.database[name].max = maxc
 	self.database[name].tags = tags
 	self.database[name].values = values
+	self.database[name].flags = flags
 
 	return self.database[name]
 end
@@ -76,6 +77,13 @@ function module:getPureValue(name)
 	local item = self.database[name]
 
 	return item.values[item.cv.value]
+end
+
+function module:available(name)
+	if not self.database[name] then return end
+	local item = self.database[name]
+
+	return (not (item.flags & CV_NETVAR)) or isserver
 end
 
 return module

@@ -587,19 +587,27 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				end
 			end
 
+			v.draw(tally_x_row2+160, 140, v.cachePatch(tallyft..'TBICONNUM'))
 			v.draw(tally_x_row2+29, 139, v.cachePatch(tallyft..'TBICON'), 0, color)
 			v.draw(tally_x_row2, 140, v.cachePatch(tallyft..'TTSCORE'), 0, color2)
+
 			drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, p.score, 0, color2, "right", txtpadding)
 
 			if (maptol & TOL_NIGHTS) then
+				v.draw(tally_x_row3+160, 156, v.cachePatch(tallyft..'TBICONNUM'))
+
 				v.draw(tally_x_row3+86, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
 				v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TNIGHTS'), 0, color2)
 				v.draw(tally_x_row3+56, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
+
 				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_nightsbonus, 0, color2, "right", txtpadding)
 			else
+				v.draw(tally_x_row3+160, 156, v.cachePatch(tallyft..'TBICONNUM'))
+
 				v.draw(tally_x_row3+70, 155, v.cachePatch(tallyft..'TBICON'), 0, color)
 				v.draw(tally_x_row3, 156, v.cachePatch(tallyft..'TRING'), 0, color2)
 				v.draw(tally_x_row3+40, 156, v.cachePatch(tallyft..'TBONUS'), 0, color2)
+
 				drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, fake_ringbonus, 0, color2, "right", txtpadding)
 			end
 		else
@@ -625,6 +633,9 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			v.draw(tally_x_row4+40, 108, v.cachePatch(tallyft..'TBONUS'))
 			v.draw(tally_x_row3+40, 124, v.cachePatch(tallyft..'TBONUS'))
 
+			v.draw(tally_x_row4+160, 108, v.cachePatch(tallyft..'TBICONNUM'))
+			v.draw(tally_x_row3+160, 124, v.cachePatch(tallyft..'TBICONNUM'))
+
 			drawf(v, tallyft..'TNUM', (tally_x_row4+160)*FRACUNIT, 108*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			drawf(v, tallyft..'TNUM', (tally_x_row3+160)*FRACUNIT, 124*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 
@@ -633,18 +644,23 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				v.draw(tally_x_row2+82, 139, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
 				v.draw(tally_x_row2-12, 140, v.cachePatch(tallyft..'TPERFC'))
 				v.draw(tally_x_row2+52, 140, v.cachePatch(tallyft..'TBONUS'))
+				v.draw(tally_x_row2+160, 140, v.cachePatch(tallyft..'TBICONNUM'))
 
 				drawf(v, tallyft..'TNUM', (tally_x_row2+160)*FRACUNIT, 140*FRACUNIT, FRACUNIT, fake_perfect, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			end
+
+			local mania_move = hud_select == 6 and 22 or 0
 
 			-- Total vs Score nonsense
 			if hud_select > 1 and not hud_select ~= 3 then
 				v.draw(tally_x_row1+50, 155, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
 				v.draw(tally_x_row1+21, 156, v.cachePatch(tallyft..'TTOTAL'))
-				drawf(v, tallyft..'TNUM', (tally_x_row1+160)*FRACUNIT, 156*FRACUNIT, FRACUNIT, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
+				v.draw(tally_x_row1+160-mania_move, 156, v.cachePatch(tallyft..'TBICONNUM'))
+				drawf(v, tallyft..'TNUM', (tally_x_row1+160-mania_move)*FRACUNIT, 156*FRACUNIT, FRACUNIT, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			else
 				v.draw(tally_x_row5+29, 91, v.cachePatch(tallyft..'TBICON'), 0, cached_tallyskincolor)
 				v.draw(tally_x_row5, 92, v.cachePatch(tallyft..'TTSCORE'))
+				v.draw(tally_x_row5+160, 92, v.cachePatch(tallyft..'TBICONNUM'))
 				drawf(v, tallyft..'TNUM', (tally_x_row5+160)*FRACUNIT, 92*FRACUNIT, FRACUNIT, p.score, 0, v.getColormap(TC_DEFAULT, 1), "right", txtpadding)
 			end
 		end
@@ -728,6 +744,7 @@ local menu_select = 1
 local press_delay = 0
 local offset_y = 0
 local offset_x = 0
+local music_turnback = false
 
 HOOK("classic_menu", "classichud", function(v, p, t, e)
 	if menu_toggle then
@@ -739,10 +756,18 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 	else
 		if offset_x then
 			offset_x = 2*offset_x/3
+		else
+			if music_turnback then
+				S_SetInternalMusicVolume(100, p)
+				music_turnback = nil
+			end
 		end
 	end
 
 	if offset_x then
+		S_SetInternalMusicVolume(10 + 90 - (offset_x * 90 / 180), p)
+		music_turnback = true
+
 		local x_off = offset_x-105
 
 
@@ -753,13 +778,22 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 		local z = 60*menu_select+50+offset_y
 		local scale, fxscale = v.dupy()
 		local height = v.height()/scale
+		local tranpsr = ease.linear(max(offset_x-130, 0)*FRACUNIT/50, 9, 3)
 
-		v.draw(68, -24, v.cachePatch("S3KBACKGROUND"), V_SNAPTOLEFT|V_SNAPTOTOP|(ease.linear(max(offset_x-130, 0)*FRACUNIT/50, 9, 3) << V_ALPHASHIFT))
+		local selgp_1 = v.cachePatch("S3KBUTTON1")
+		local selgp_2 = v.cachePatch("S3KBUTTON2")
+		local selgp_3 = v.cachePatch("S3KBUTTON3")
+		local selgp_4 = v.cachePatch("S3KBUTTON4")
+
+		if tranpsr < 9 then
+			v.draw(68, -24, v.cachePatch("S3KBACKGROUND"), V_SNAPTOLEFT|V_SNAPTOTOP|(tranpsr << V_ALPHASHIFT))
+		end
 
 		local bg_pos = 0
+		local bg_trps = tranpsr > 3 and (tranpsr-3) << V_ALPHASHIFT or 0
 
 		while (bg_pos < height) do
-			v.draw(-133+x_off, bg_pos, v.cachePatch("MENUSRB2BACK"), V_SNAPTOLEFT|V_SNAPTOTOP)
+			v.draw(-133+x_off, bg_pos, v.cachePatch("MENUSRB2BACK"), V_SNAPTOLEFT|V_SNAPTOTOP|bg_trps)
 			bg_pos = $ + 256
 		end
 
@@ -770,10 +804,22 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 			if type(item) == "table" then
 				local y = 100+i*60-z
 
-				v.draw(x_off, y, v.cachePatch(menu_select == i and "S3KBUTTON2" or "S3KBUTTON1"), V_SNAPTOLEFT)
-				v.drawString(x_off, y+8, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT, "center")
+				local selgp = selgp_1
+
 				if item.opt then
 					local set = Options:getvalue(item.opt)
+
+					if Options:available(item.opt) then
+						if menu_select == i then
+							selgp = selgp_2
+						end
+					else
+						if menu_select == i then
+							selgp = selgp_4
+						else
+							selgp = selgp_3
+						end
+					end
 
 					if set then
 						local opt = set[1]
@@ -800,6 +846,10 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 					local font = "center"
 					local yfnt = y+28
 
+					if menu_select == i then
+						selgp = selgp_2
+					end
+
 					if string.len(item.cv.string) > 14 then
 						font = "thin-center"
 						yfnt = $ + 1
@@ -807,6 +857,9 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 
 					v.drawString(x_off, yfnt, "\x8C"..item.cv.string, V_SNAPTOLEFT, font)
 				end
+
+				v.draw(x_off, y, selgp, V_SNAPTOLEFT)
+				v.drawString(x_off, y+8, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT, "center")
 			elseif type(item) == "string" then
 				local y = 100+i*60-z
 				drawf(v, 'S3KTT', x_off*FRACUNIT, (y+16)*FRACUNIT, FRACUNIT, item, V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
@@ -885,6 +938,12 @@ addHook("PlayerCmd", function(p, cmd)
 				if classic_menu_vars[menu_select].opt then
 					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
 
+					if Options:available(opt) then
+						S_StartSound(nil, sfx_menu1, p)
+						press_delay = 8
+						return
+					end
+
 					cv = opt[1]
 					ming = opt[2]
 					maxg = opt[3]
@@ -908,6 +967,12 @@ addHook("PlayerCmd", function(p, cmd)
 
 				if classic_menu_vars[menu_select].opt then
 					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
+
+					if Options:available(opt) then
+						S_StartSound(nil, sfx_menu1, p)
+						press_delay = 8
+						return
+					end
 
 					cv = opt[1]
 					ming = opt[2]

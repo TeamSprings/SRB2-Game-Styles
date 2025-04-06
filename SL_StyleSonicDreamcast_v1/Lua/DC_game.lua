@@ -19,8 +19,6 @@ local api = tbsrequire 'styles_api'
 local setuphook = 	api:addHook("TallySetup")
 local endhook = 	api:addHook("TallyEnd")
 local skiphook = 	api:addHook("TallySkip")
-local prerankhook = api:addHook("PreRankSetup") -- Currently unused, will be used unlike in other styles
-local rankhook = 	api:addHook("RankSetup") -- Currently unused, will be used unlike in other styles
 
 --
 --	Console Variable

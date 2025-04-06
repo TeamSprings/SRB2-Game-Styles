@@ -31,8 +31,34 @@ addHook("MapChange", function()
 	end
 end)
 
-local itemboxstyle_cv = CV_FindVar("dc_itemboxstyle")
+local height_t1 = 75
+local height_t2 = 90
+local base_scale1 = FRACUNIT/24
+local base_scale2 = FRACUNIT/3
 
+local itemboxstyle_cv = CV_RegisterVar({
+	name = "dc_itemboxstyle",
+	defaultvalue = "adventure",
+	PossibleValue = {adventure = 0, nextgen = 1},
+	category = "Adventure Style - Eyecandy",
+	displayname = "Item Box Style",
+	flags = CV_CALL|CV_NETVAR,
+	func = function(cv)
+		if cv.value then
+			if cv.value < 1 then
+				height_t1 = 75
+				height_t2 = 90
+				base_scale1 = FRACUNIT/24
+				base_scale2 = FRACUNIT/3
+			else
+				height_t1 = 75
+				height_t2 = 75
+				base_scale1 = FRACUNIT/24
+				base_scale2 = FRACUNIT/24
+			end
+		end
+	end,
+})
 
 local function P_SpawnItemBox(a)
 	if Disable_ItemBox then return end
@@ -88,7 +114,7 @@ local function P_SpawnItemBox(a)
 				a.color = SKINCOLOR_RED
 			end
 
-			if not (a.type == MT_RING_BOX and a.randomring) then
+			if a.type == MT_RING_BOX and not a.randomring then
 				a.randomring = P_RandomKey(16)
 			end
 		end
@@ -327,10 +353,6 @@ local function P_MonitorThinker(a)
 					end
 				end
 
-				if itemboxstyle_cv.value == 1 then
-					a.item.frame = $ &~ FF_PAPERSPRITE
-				end
-
 				-- Type specific
 				if monitor_type == 1 then
 					slope_handler.slopeRotation(a)
@@ -342,16 +364,15 @@ local function P_MonitorThinker(a)
 					a.goldentimer = nil
 				end
 
-
 				-- Squash in tiny spaces
-				local height = (monitor_type == 2 and 90 or 75)*a.scale
+				local height = (monitor_type == 2 and height_t2 or height_t1)*a.scale
 				local funny =  P_MobjFlip(a) < 0 and FixedDiv(a.caps.ceilingz - a.caps.floorz, height) or FixedDiv(a.caps.ceilingz - a.caps.z, height)
 
 				if funny < FRACUNIT then
 					a.spriteyscale = funny
 					a.caps.spriteyscale = funny
 					if a.item and a.item.valid then
-						a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24))
+						a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and base_scale2 or base_scale1))
 					end
 				else
 					a.spritexscale = FRACUNIT
@@ -359,7 +380,7 @@ local function P_MonitorThinker(a)
 					a.caps.spritexscale = FRACUNIT
 					a.caps.spriteyscale = FRACUNIT
 					if a.item and a.item.valid then
-						a.item.scale = a.originscale + (monitor_type == 2 and FRACUNIT/3 or FRACUNIT/24)
+						a.item.scale = a.originscale + (monitor_type == 2 and base_scale2 or base_scale1)
 					end
 				end
 			else
@@ -494,7 +515,8 @@ local function P_MonitorDeath(a, d, s)
 			boxicon ~= nil and boxicon.frame or extras.frame, extras)
 		end
 
-		if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY and a.dctypemonitor and a.dctypemonitor > 1 then
+		if boxicon and boxicon.valid and a.flags & MF_NOGRAVITY
+		and a.dctypemonitor and a.dctypemonitor > 1 and itemboxstyle_cv.value == 0 then
 			boxicon.flags2 = $|MF2_DONTDRAW
 		else
 			local smuk = P_SpawnMobjFromMobj(a, 0,0,0, MT_EXTRAERADUMMY)
@@ -507,6 +529,10 @@ local function P_MonitorDeath(a, d, s)
 			a.frame = B + itemboxstyle_cv.value * 8
 			P_RemoveMobj(a.item)
 			P_RemoveMobj(a.caps)
+
+			if a.dctypemonitor > 1 then
+				a.alpha = 0
+			end
 		end
 
 		local itemrespawnvalue = CV_FindVar("respawnitemtime").value

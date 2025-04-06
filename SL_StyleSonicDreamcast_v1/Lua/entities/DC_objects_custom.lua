@@ -252,7 +252,7 @@ states[S_SARANDRING_BOX] = {
 
 mobjinfo[MT_SARANDRING_ICON] = {
 	spawnhealth = 1,
-	reactiontime = 10,
+	reactiontime = 0,
 	spawnstate = S_SARANDRING_ICON1,
 	seesound = sfx_itemup,
 	speed = 2*FRACUNIT,
@@ -260,7 +260,7 @@ mobjinfo[MT_SARANDRING_ICON] = {
 	height = 14*FRACUNIT,
 	damage = 62*FRACUNIT,
 	mass = 100,
-	flags = MF_NOGRAVITY|MF_SCENERY|MF_NOCLIP|MF_NOCLIPHEIGHT
+	flags = MF_NOGRAVITY|MF_SCENERY|MF_NOCLIP|MF_NOCLIPHEIGHT|MF_BOXICON,
 }
 
 states[S_SARANDRING_ICON1] = {

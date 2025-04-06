@@ -131,11 +131,11 @@ addHook("MobjThinker", function(a)
 
 				a.target.momx = cos(ang_h)*3
 				a.target.momy = sin(ang_h)*3
-				if a.floorz < 16*FRACUNIT then
-					a.target.momz = 3*a.scale
+				if a.floorz > a.z-96*a.scale*P_MobjFlip(a) then
+					a.target.momz = $+a.scale/4*P_MobjFlip(a)
 				else
 					---@diagnostic disable-next-line
-					a.target.momz = 3*sin(2*ANG1*leveltime)
+					a.target.momz = ease.linear(FRACUNIT/2, a.target.momz, 3*sin(2*ANG1*leveltime))
 				end
 				a.target.fuse = a.extravalue2
 			else

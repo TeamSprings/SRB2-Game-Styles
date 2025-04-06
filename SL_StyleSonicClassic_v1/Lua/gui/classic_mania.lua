@@ -45,13 +45,13 @@ local tryx, tryy = 0, 0
 
 local moveoffset = 4+8
 
---local function G_EncoreModeColors()
---	if GT_ENCORE and gametype == GT_ENCORE then
---		return
---	else
---		return
---	end
---end
+local function G_EncoreModeColors()
+	if constants["GT_ENCORE"] then -- Would use GT_ENCORE, thing just doesn't responds.
+		return {true, 124, 135, 137, 51, 213}
+	end
+
+	return {false, 65, 34, 53, 136, 123}
+end
 
 local function drawTextBG(v, x, y, width)
 	local nwidth = max(0, width)
@@ -96,6 +96,8 @@ return {
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
+		local colors = G_EncoreModeColors()
+
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		--local scale = FRACUNIT
@@ -124,13 +126,13 @@ return {
 				local check = progress - title_delay4
 
 				if check < FRACUNIT then
-					fillstretch(v, 100, progress, 136)
-					fillstretch(v, 100, progress - title_delay1, 53)
+					fillstretch(v, 100, progress, colors[5])
+					fillstretch(v, 100, progress - title_delay1, colors[4])
 					fillstretch(v, 100, progress - title_delay2, 51)
-					fillstretch(v, 100, progress - title_delay3, 123)
+					fillstretch(v, 100, progress - title_delay3, colors[6])
 				end
 
-				fillstretch(v, 100, progress - title_delay4, 65)
+				fillstretch(v, 100, progress - title_delay4, colors[2])
 
 				local line_1_x = ease.linear(clamping(0, t-9, 9), -intwidth/2, intwidth+intwidth/2)
 
@@ -139,7 +141,7 @@ return {
 					v.drawFill(intwidth-line_1_x, 137, 112, 17, 31|V_SNAPTOLEFT)
 				end
 			else
-				cuttriangle(v, 160, (t - titlebgpullaway) * titlebgpullstep, 65)
+				cuttriangle(v, 160, (t - titlebgpullaway) * titlebgpullstep, colors[2])
 			end
 
 			if t > tiltappear then
@@ -161,11 +163,11 @@ return {
 				local offy3 = ease.outsine(progress3, intheight, 0) + ease.outsine(progress7, 0, 	-intheight*2) + 121
 				local offy4 = ease.outsine(progress4, intheight, 0) + ease.outsine(progress8, 0, 	-intheight*2) + 112
 
-				tiltedlines(v, 160-64,  	offy2, 	offy2+150, 82, 53)
-				tiltedlines(v, 160-106, 	offy3, 	offy3+171, 128, 34)
-				tiltedlines(v, 160+46,      offy4, 	offy4+142, 28, 123)
+				tiltedlines(v, 160-64,  	offy2, 	offy2+150, 82,  colors[4])
+				tiltedlines(v, 160-106, 	offy3, 	offy3+171, 128, colors[3])
+				tiltedlines(v, 160+46,      offy4, 	offy4+142, 28,  colors[6])
 
-				tiltedlines(v, 160,     	offy1, 	offy1+350, 64, 136)
+				tiltedlines(v, 160,     	offy1, 	offy1+350, 64,  colors[5])
 
 				local progress9 = clamping(tiltappear+4, t-tiltdelay3, tiltappear+8)
 				local progress10 = clamping(tiltappear+20, t-tiltdelay3, tiltappear+50)
@@ -180,6 +182,8 @@ return {
 
 				local progresstext = clamping(tiltappear+11, t-tiltdelay3, tiltappear+61)-1
 
+				local encore = colors[1] and "E" or ""
+
 				if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 					v.draw(229-nw_x-zonepatch.width, 169, v.cachePatch("INTMABGZONE"))
 
@@ -192,7 +196,7 @@ return {
 				drawanim(v, 'MATTFNT', (210+nw_x-text_width)*FRACUNIT, 120*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, progresstext, drawManiaTitleTextSymbol1, 7*FRACUNIT/10)
 
 				if act ~= "0" then
-					local actcircleimg = v.cachePatch("INTMACIRC")
+					local actcircleimg = v.cachePatch("INTMACIRC"..encore)
 					local actcircle = clamping(FRACUNIT/8, progresstext + 1, 2*FRACUNIT/8) - 1
 					local centering = FixedMul(actcircleimg.width/2*FRACUNIT, FRACUNIT-actcircle)
 
@@ -252,6 +256,10 @@ return {
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
+		--TODO: Actual intermission from Mania
+		--local colors = G_EncoreModeColors()
+		--local encore = colors[1] and "E" or ""
+
 		local gotthrough = "THROUGH"
 
 		if act ~= "0" then
@@ -261,13 +269,23 @@ return {
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
 
-			--drawTextBG_A(v, 166-offsetx-text_width2, 48, text_width2)
-			--drawTextBG_A(v, 186-offsetx-text_width2, 77, text_width2)
+			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20)
+			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31)
 
-			if tonumber(act) > 9 then
-				drawf(v, 'MAN2FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+			local colors = G_EncoreModeColors()
+
+			if colors[1] then
+				if tonumber(act) > 9 then
+					drawf(v, 'MAI4FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+				else
+					drawf(v, 'MAI3FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+				end
 			else
-				drawf(v, 'MAN1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+				if tonumber(act) > 9 then
+					drawf(v, 'MAI2FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+				else
+					drawf(v, 'MAI1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+				end
 			end
 
 			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
@@ -281,8 +299,8 @@ return {
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
 
-			--drawTextBG_A(v, 166-offsetx-text_width2, 48, text_width2)
-			--drawTextBG_A(v, 186-offsetx-text_width2, 77, text_width2)
+			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20)
+			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31)
 
 			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
 			drawf(v, "MATAFNT", (200+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
@@ -324,11 +342,13 @@ return {
 	end,
 
 	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
-		v.fadeScreen(65, max(min(fading*10/15, 10), 0))
+		local colors = G_EncoreModeColors()
+
+		v.fadeScreen(colors[2], max(min(fading*10/15, 10), 0))
 		local angl = leveltime*ANG1
 
-		maniacircles(v, 160, 100, (sin(angl)*60)/FRACUNIT+100, angl+ANGLE_180, 53, 53)
-		maniacircles(v, 160, 100, (cos(angl)*60)/FRACUNIT+100, angl, 136, 65)
+		maniacircles(v, 160, 100, (sin(angl)*60)/FRACUNIT+100, angl+ANGLE_180, colors[4], colors[4])
+		maniacircles(v, 160, 100, (cos(angl)*60)/FRACUNIT+100, angl, colors[5], colors[2])
 	end,
 }
 

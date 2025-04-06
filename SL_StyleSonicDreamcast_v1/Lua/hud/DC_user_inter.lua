@@ -11,6 +11,7 @@ Contributors: Skydusk
 local drawlib = tbslibrary 'lib_emb_tbsdrawers'
 local helper = 	tbsrequire 'helpers/c_inter'
 local helper2 = tbsrequire 'helpers/lua_hud'
+local api = tbsrequire 'styles_api'
 
 local convertPlayerTime = helper2.convertPlayerTime
 
@@ -23,6 +24,8 @@ local Y_GetGuardBonus = helper.Y_GetGuardBonus
 local Y_GetPerfectBonus = helper.Y_GetPerfectBonus
 
 local HOOK = customhud.SetupItem
+
+local rankhook = api:addHook("RankSetup")
 
 --
 -- End Level Tally...
@@ -214,6 +217,9 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 		end
 	else
 		local rank = rank_calculator(p)
+
+		rankhook(p.realmo and p.realmo.skin or p.skin, p, rank)
+
 		if rankamp ~= 3*FRACUNIT/2 then
 			local patch = v.cachePatch("SA2RANK"..rank)
 			v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),

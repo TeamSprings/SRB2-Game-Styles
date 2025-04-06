@@ -27,6 +27,9 @@ local function bubbleflicky(a)
 	overlay.bubble = true
 	overlay.scale = FRACUNIT/3
 	overlay.scaleup = FRACUNIT
+	overlay.z = $ + 12*a.scale*P_MobjFlip(a)
+	overlay.angle = P_RandomKey(360)*ANG1
+	a.angle = P_RandomKey(360)*ANG1
 	a.pickupinvulneribility = TICRATE/3
 	--S_StartSound(a, sfx_advaap)
 end
@@ -111,7 +114,10 @@ local function touchflicky(a, t)
 	end
 end
 
-rawset(_G, "SA_BubbleFlickylist", Flickylist)
+rawset(_G, "Styles_SAFlickyList", 	list_flickies)
+rawset(_G, "Styles_SAFlickyData", 	Flickydata)
+rawset(_G, "Styles_SAFlickyBubble", bubbleflicky)
+rawset(_G, "Styles_SAFlickyTouch", 	touchflicky)
 
 for _,v in ipairs(list_flickies) do
 

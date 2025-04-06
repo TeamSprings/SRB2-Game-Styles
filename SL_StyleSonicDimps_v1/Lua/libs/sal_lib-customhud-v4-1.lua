@@ -13,7 +13,7 @@
 
 --]]
 
-local VERSIONNUM = {3, 5};
+local VERSIONNUM = {4, 1};
 local updating = nil;
 
 --#region library
@@ -145,7 +145,23 @@ end
 
 local huditems = customhud.hudItems
 
+if not (customhud.modPriority) then
+	customhud.modPriority = {
+		-- 0 = vanilla, don't use it
+		-- 1 = additional hud elements in vanilla style / Legacy items
+		-- 2 = simple replacements (Rings -> Coins etc.)
+		-- 3 = overhauling HUD mods/total conversions
+
+		-- DON'T USE "MOD PRIORITY" FOR CHARACTERS HUD OVERHAULS, USE CHARACTER ASSIGN SYSTEM INSTEAD!
+
+		["vanilla"] = 0,
+	}
+end
+
 customhud.hookTypes = {
+	"menu",
+	"gamemenu",
+	"overlay",
 	"game",
 	"scores",
 	"title",
@@ -224,15 +240,19 @@ end
 if updating then
 	for _,hook in pairs(hooktypes) do
 		for _,item in pairs(huditems[hook]) do
-			if item.layer and type(item.layer) == "number" then
-				local saved_num = item.layer
-				item.layer = {}
+			if (item.layer and type(item.layer) == "number") then
+				local saved_num = item.layer;
+				item.layer = {};
 
-				if item.funcs then
+				if (item.funcs) then
 					for k,_ in pairs(item.funcs) do
-						item.layer[k] = saved_num
+						item.layer[k] = saved_num;
 					end
 				end
+			end
+
+			if (not customhud.modPriority[item.type]) then
+				customhud.modPriority[item.type] = 1;
 			end
 		end
 	end
@@ -251,7 +271,6 @@ function customhud.UpdateHudItemStatus(item)
 	end
 end
 
-
 for _,v in pairs(defaultitems) do
 	local itemName = v[1];
 	local hookType = v[2];
@@ -262,7 +281,6 @@ for _,v in pairs(defaultitems) do
 	if (item == nil) then
 		item = customhud.CreateNewItem(itemName);
 		updatingItem = false;
-
 	end
 
 	item.funcs["vanilla"] = nil;
@@ -418,7 +436,9 @@ local function HudPriority(a, b)
 	return tonumber(a.layer[a.type]) < tonumber(b.layer[b.type]);
 end
 
-local function SetupItem(itemName, modName, itemFunc, hook, drawlayer)
+local CUSHUD_NOSWITCH = 1
+
+local function SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority, flags)
 	if (type(itemName) ~= "string") then
 		warn("Invalid item string \""..itemName.."\" in customhud.SetupItem");
 		return;
@@ -430,6 +450,16 @@ local function SetupItem(itemName, modName, itemFunc, hook, drawlayer)
 	end
 
 	local layernum = max(type(drawlayer) == "number" and drawlayer or 0, 0) + 100
+
+	if (type(modPriority) ~= "number") then
+		modPriority = 1
+	else
+		modPriority = min(max(1, modPriority), 3)
+	end
+
+	if not customhud.modPriority[modName] then
+		customhud.modPriority[modName] = modPriority
+	end
 
 	local item = FindItem(itemName);
 	if (item == nil) then
@@ -479,10 +509,16 @@ local function SetupItem(itemName, modName, itemFunc, hook, drawlayer)
 		item.layer[modName] = 100
 	end
 
-	item.type = modName;
+	flags = flags or 0
 
-	-- Update status
-	customhud.UpdateHudItemStatus(item);
+	if not (flags & CUSHUD_NOSWITCH) then
+		if customhud.modPriority[item.type] <= customhud.modPriority[modName] then
+			item.type = modName;
+		end
+
+		-- Update status
+		customhud.UpdateHudItemStatus(item);
+	end
 
 	return true;
 end
@@ -502,15 +538,76 @@ end
 ---@param itemFunc 		function? 	itemFunc is the function used to draw this HUD item. This can replace the need for using the base game's hud.add at all in your mod. The function format should match the HUD hook this HUD item belongs to.
 ---@param hook 			hudtype? 	hook is a string for the HUD hook (https://wiki.srb2.org/wiki/Lua/Functions#HUD_hooks) to use for newly created custom HUD items. There is also a special hook called "gameandscores", which has the function format of "scores", and will run regardless of the scoreboard being shown or not. The hook can be left out when not using custom HUD items, as all vanilla HUD items have a hook already defined. If not defined for custom HUD items, then this will get set to "game".
 ---@param drawlayer 	number?     layer is a number that determines sorting of custom HUD items. Higher numbers will be drawn on top of lower numbers. This can be left out when not using custom HUD items, as all vanilla HUD items will be put on the lowest possible layer (INT32_MIN) since there is no way to draw anything under them currently. If not defined for custom HUD items, then this will get set to 0.
+---@param modPriority	number?     When setting up HUDs, this will give priority to the mod. DO NOT USE THIS FOR COMPLETE CHARACTER HUDs. Use Character Assign system instead.
 ---@return boolean|nil
-function customhud.SetupItem(itemName, modName, itemFunc, hook, drawlayer)
-	if SetupItem(itemName, modName, itemFunc, hook, drawlayer) then
+function customhud.SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority)
+	if SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority) then
 		for _,hook in pairs(hooktypes) do
 			table.sort(huditems[hook], HudPriority);
 		end
 
 		return true;
 	end
+	return false;
+end
+
+---Only creates Item but won't switch (It is macro function, so warnings will refer to it as SetupItem)
+-- * Mostly from what mod Item comes from
+-- * Create Format: 	**customhud.AddItem(itemName, modName, itemFunc, [hook : "game", layer : 0])**
+-- *
+-- * (https://wiki.srb2.org/wiki/User:TehRealSalt/Custom_HUD_Library) **WIKI:**
+-- *
+-- * This function can change the display of a HUD item to another already defined type, replace an existing HUD item's drawing function, or create new custom HUD items entirely.
+-- *
+-- * Returns true if no errors occurred, otherwise it will return false.
+---@param itemName 		string 		itemName is the name of the HUD item. This can be anything from this list of base game HUD items (https://wiki.srb2.org/wiki/Lua/Functions#Togglable_HUD_items), or a new string to define a custom HUD item.
+---@param modName 		string  	modName is a string to use to identify the mod. The string "vanilla" is reserved for base game HUD items, and thus cannot be used for custom HUD items.
+---@param itemFunc 		function? 	itemFunc is the function used to draw this HUD item. This can replace the need for using the base game's hud.add at all in your mod. The function format should match the HUD hook this HUD item belongs to.
+---@param hook 			hudtype? 	hook is a string for the HUD hook (https://wiki.srb2.org/wiki/Lua/Functions#HUD_hooks) to use for newly created custom HUD items. There is also a special hook called "gameandscores", which has the function format of "scores", and will run regardless of the scoreboard being shown or not. The hook can be left out when not using custom HUD items, as all vanilla HUD items have a hook already defined. If not defined for custom HUD items, then this will get set to "game".
+---@param drawlayer 	number?     layer is a number that determines sorting of custom HUD items. Higher numbers will be drawn on top of lower numbers. This can be left out when not using custom HUD items, as all vanilla HUD items will be put on the lowest possible layer (INT32_MIN) since there is no way to draw anything under them currently. If not defined for custom HUD items, then this will get set to 0.
+---@param modPriority	number?     When setting up HUDs, this will give priority to the mod. DO NOT USE THIS FOR COMPLETE CHARACTER HUDs. Use Character Assign system instead.
+---@return boolean|nil
+function customhud.AddItem(itemName, modName, itemFunc, hook, drawlayer, modPriority)
+	if SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority, CUSHUD_NOSWITCH) then
+		for _,hook in pairs(hooktypes) do
+			table.sort(huditems[hook], HudPriority);
+		end
+
+		return true;
+	end
+	return false;
+end
+
+---Swaps/Switches Item to Mod's counterpart if it exists, regardless of Mod Priority
+--- - DO NOT USE THIS IN ANY FORCEFUL WAY.
+--- - Used internally
+---@param itemName 		string 		itemName is the name of the HUD item. This can be anything from this list of base game HUD items (https://wiki.srb2.org/wiki/Lua/Functions#Togglable_HUD_items), or a new string to define a custom HUD item.
+---@param modName 		string  	modName is a string to use to identify the mod. The string "vanilla" is reserved for base game HUD items, and thus cannot be used for custom HUD items.
+function customhud.SwapItem(itemName, modName)
+	if (type(itemName) ~= "string") then
+		warn("Invalid item string \""..itemName.."\" in customhud.SwapItem");
+		return;
+	end
+
+	if (type(modName) ~= "string") then
+		warn("Invalid type string \""..modName.."\" in customhud.SwapItem");
+		return;
+	end
+
+	local item = FindItem(itemName);
+	if (item) then
+
+		if (item.funcs[modName]) then
+			item.type = modName;
+
+			for _,hook in pairs(hooktypes) do
+				table.sort(huditems[hook], HudPriority);
+			end
+		end
+
+		return true;
+	end
+
 	return false;
 end
 
@@ -521,7 +618,7 @@ COM_AddCommand("customhud_force_enableitem", function(_, itemName)
 		return;
 	end
 
-	customhud.enable(itemName)
+	customhud.enable(itemName);
 end, COM_LOCAL);
 
 COM_AddCommand("customhud_force_disableitem", function(_, itemName)
@@ -531,12 +628,12 @@ COM_AddCommand("customhud_force_disableitem", function(_, itemName)
 		return;
 	end
 
-	customhud.disable(itemName)
+	customhud.disable(itemName);
 end, COM_LOCAL);
 
 COM_AddCommand("customhud_force_reset", function(_)
 	for _,v in pairs(defaultitems) do
-		customhud.enable(v[1])
+		customhud.enable(v[1]);
 	end
 end, COM_LOCAL);
 
@@ -545,9 +642,8 @@ COM_AddCommand("customhud_setmod", function(_, modName)
 		for _,item in pairs(huditems[hook]) do
 			if (item.funcs[modName])
 			or (modName == "vanilla" and item.isDefaultItem == true) then
-				item.type = modName
-
-				customhud.UpdateHudItemStatus(item)
+				customhud.SwapItem(item.name, modName);
+				customhud.UpdateHudItemStatus(item);
 			end
 		end
 	end
@@ -560,7 +656,7 @@ COM_AddCommand("customhud_setitem", function(_, itemName, modName)
 		return;
 	end
 
-	customhud.SetupItem(itemName, modName);
+	customhud.SwapItem(itemName, modName);
 end, COM_LOCAL);
 
 COM_AddCommand("customhud_getitemtype", function(_, itemName)
@@ -614,6 +710,7 @@ end
 
 --#endregion
 --#region Hooks
+
 local function RunCustomHooks(hook, v, ...)
 	if (huditems[hook] == nil) then
 		return;
@@ -639,11 +736,15 @@ local function RunCustomHooks(hook, v, ...)
 end
 
 hud.add(function(v, player, camera)
+	RunCustomHooks("menu", v, player);
+	RunCustomHooks("gamemenu", v, player);
 	RunCustomHooks("game", v, player, camera);
 	RunCustomHooks("gameandscores", v);
+	RunCustomHooks("overlay", v, player, camera);
 end, "game");
 
 hud.add(function(v)
+	RunCustomHooks("menu", v);
 	RunCustomHooks("scores", v);
 	RunCustomHooks("gameandscores", v);
 end, "scores");

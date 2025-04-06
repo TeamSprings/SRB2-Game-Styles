@@ -46,6 +46,8 @@ addHook("MapThingSpawn", function(a, mt)
 	end
 end)
 
+local boss_target_hold = 0
+
 HOOK("bossmeter", "dchud", function(v, p, t, e)
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
@@ -80,8 +82,20 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 			end
 		end
 
-		if not Bosses[1].target then return end
+		if not Bosses[1].target and not boss_target_hold then
+			if Bosses[1] then
+				boss_target_hold = TICRATE
+			else
+				return
+			end
+		elseif boss_target_hold then
+			boss_target_hold = $ - 1
 
+			if not Bosses[1] then
+				boss_target_hold = 0
+				return
+			end
+		end
 
 		if hud.bossbardecrease < 67*FRACUNIT then
 
@@ -108,6 +122,10 @@ end, "game")
 -- MONITOR DISPLAY
 --
 
+local cv_itembox_style = CV_FindVar("dc_itemboxstyle")
+local style_last_value = -1
+local border_img
+
 HOOK("monitordisplay", "dchud", function(v, p, t, e)
 	if G_RingSlingerGametype() then return end
 
@@ -118,6 +136,17 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 		local easesubtit = ease.linear(tic, FRACUNIT/2, 9*FRACUNIT/8)
 		local easetratit = ease.linear(tictransparency, 9, 0)
 		local offset = 161
+
+		if cv_itembox_style.value ~= style_last_value or border_img == nil then
+			local brpic = "SA2ICONPWBORDER"
+
+			if cv_itembox_style.value == 1 then
+				brpic = "NXGICONPWBORDER"
+			end
+
+			border_img = v.cachePatch(brpic)
+			style_last_value = cv_itembox_style.value
+		end
 
 		for k,img in ipairs(p.boxdisplay.item) do
 			local extra = 0
@@ -145,7 +174,7 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 			end
 
 			if pic.width == 24 then
-				v.drawScaled(x, y, easesubtit, v.cachePatch("SA2ICONPWBORDER"), flags)
+				v.drawScaled(x, y, easesubtit, border_img, flags)
 			end
 
 			offset = $ + incs
@@ -165,8 +194,14 @@ HOOK("checkpointtimer", "dchud", function(v, p, t, e)
 		if (leveltime % 4)/2 then
 			local mint, sect, cent = convertPlayerTime(p.starposttime)
 
-			font_drawer(v, 'SA2TL', (290)*FRACUNIT, (240)*FRACUNIT, FRACUNIT-FRACUNIT/4, mint..':'..sect..':'..cent,
-			V_PERPLAYER|V_SNAPTORIGHT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			local strint_ = mint..':'..sect
+
+			if marathonmode then
+				strint_ = $..':'..cent
+			end
+
+			font_drawer(v, 'SA2TL', (350)*FRACUNIT, (245)*FRACUNIT, FRACUNIT-FRACUNIT/4, strint_,
+			V_PERPLAYER|V_SNAPTORIGHT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 0), "center", 1, 0)
 		end
 	end
 
@@ -214,21 +249,21 @@ COM_AddCommand("dc_addfakescore", function(p, num)
 	dc_addscoreprompt(tonumber(num))
 end)
 
-addHook("MobjSpawn", function(mo)
-	if multiplayer then return end
-	mo.flags2 = $|MF2_DONTDRAW
-end, MT_SCORE)
+--addHook("MobjSpawn", function(mo)
+--	if multiplayer then return end
+--	mo.flags2 = $|MF2_DONTDRAW
+--end, MT_SCORE)
 
-addHook("MobjRemoved", function(mo)
-	if multiplayer then return end
-
-	local cur = (mo.frame & FF_FRAMEMASK)
-
-	if cur > 0 then
-		score_add_current = score_add_current and $+1 or 1
-		score_add_timer = 2*TICRATE
-	end
-end, MT_SCORE)
+--addHook("MobjRemoved", function(mo)
+--	if multiplayer then return end
+--
+--	local cur = (mo.frame & FF_FRAMEMASK)
+--
+--	if cur > 0 then
+--		score_add_current = score_add_current and $+1 or 1
+--		score_add_timer = 2*TICRATE
+--	end
+--end, MT_SCORE)
 
 local y_offset = 0
 

@@ -13,7 +13,7 @@
 
 --]]
 
-local VERSIONNUM = {4, 0};
+local VERSIONNUM = {4, 1};
 local updating = nil;
 
 --#region library
@@ -158,14 +158,6 @@ if not (customhud.modPriority) then
 	}
 end
 
-if not (customhud.characterRuleset) then
-	customhud.characterRuleset = {}
-end
-
-if not (customhud.gametypeRuleset) then
-	customhud.gametypeRuleset = {}
-end
-
 customhud.hookTypes = {
 	"menu",
 	"gamemenu",
@@ -279,7 +271,6 @@ function customhud.UpdateHudItemStatus(item)
 	end
 end
 
-
 for _,v in pairs(defaultitems) do
 	local itemName = v[1];
 	local hookType = v[2];
@@ -290,7 +281,6 @@ for _,v in pairs(defaultitems) do
 	if (item == nil) then
 		item = customhud.CreateNewItem(itemName);
 		updatingItem = false;
-
 	end
 
 	item.funcs["vanilla"] = nil;
@@ -525,10 +515,10 @@ local function SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriori
 		if customhud.modPriority[item.type] <= customhud.modPriority[modName] then
 			item.type = modName;
 		end
-	end
 
-	-- Update status
-	customhud.UpdateHudItemStatus(item);
+		-- Update status
+		customhud.UpdateHudItemStatus(item);
+	end
 
 	return true;
 end
@@ -619,16 +609,6 @@ function customhud.SwapItem(itemName, modName)
 	end
 
 	return false;
-end
-
----Assigns to character a ruleset that it priorities over any other loaded hud
---- - Exclusive to Game HUD hook
----@param skin string character skin that hud should work with
----@param ruleSet table<table, table> Currently, nested table that contains 2 string table, disable & mod. disable = {["rings"] = true, ...}, mod = {["rings"] = "terrariamod", ...},
-function customhud.AssignToCharacter(skin, ruleSet)
-	if (customhud.characterRuleset[skin] == nil) then
-		customhud.characterRuleset[skin] = ruleSet;
-	end
 end
 
 COM_AddCommand("customhud_force_enableitem", function(_, itemName)
@@ -728,66 +708,8 @@ function customhud.GetMeta()
 	return hudMeta;
 end
 
-local changedruleset = nil
-
 --#endregion
 --#region Hooks
-local function RunCustomGameHooks(hook, v, player, ...)
-	if (huditems[hook] == nil) then
-		return;
-	end
-
-	local ruleset
-
-	if player and player.valid and player.realmo and player.realmo.valid then
-		ruleset = customhud.characterRuleset[player.realmo.skin]
-	end
-
-	for _,item in pairs(huditems[hook]) do
-		if (item.enabled == false) then
-			continue;
-		end
-
-		if (item.type == nil) then
-			continue;
-		end
-
-		local func
-
-		if (ruleset ~= nil) then
-			if (ruleset.disable ~= nil and ruleset.disable[item.name]) then
-				if (item.type == "vanilla") then
-					huddisable(item.name);
-				end
-
-				changedruleset = true;
-				continue;
-			end
-
-			if (ruleset.mod ~= nil and ruleset.mod[item.name]) then
-				func = item.funcs[ruleset.mod[item.name]];
-			end
-
-			changedruleset = true;
-		else
-			if (changedruleset) then
-				customhud.UpdateHudItemStatus(item);
-				changedruleset = nil;
-			end
-		end
-
-		if (func == nil) then
-			func = item.funcs[item.type];
-
-			if (func == nil) then
-				continue
-			end
-		end
-
-		local arg = {...};
-		func(v, player, unpack(arg));
-	end
-end
 
 local function RunCustomHooks(hook, v, ...)
 	if (huditems[hook] == nil) then
@@ -814,16 +736,15 @@ local function RunCustomHooks(hook, v, ...)
 end
 
 hud.add(function(v, player, camera)
-	RunCustomHooks("menu", v);
-	RunCustomHooks("gamemenu", v);
-	RunCustomGameHooks("overlay", v);
-	RunCustomGameHooks("game", v, player, camera);
+	RunCustomHooks("menu", v, player);
+	RunCustomHooks("gamemenu", v, player);
+	RunCustomHooks("game", v, player, camera);
 	RunCustomHooks("gameandscores", v);
+	RunCustomHooks("overlay", v, player, camera);
 end, "game");
 
 hud.add(function(v)
-	RunCustomGameHooks("menu", v);
-	RunCustomGameHooks("overlay", v);
+	RunCustomHooks("menu", v);
 	RunCustomHooks("scores", v);
 	RunCustomHooks("gameandscores", v);
 end, "scores");
@@ -833,7 +754,7 @@ hud.add(function(v)
 end, "title");
 
 hud.add(function(v, player, ticker, endtime)
-	RunCustomGameHooks("titlecard", v, player, ticker, endtime);
+	RunCustomHooks("titlecard", v, player, ticker, endtime);
 end, "titlecard");
 
 hud.add(function(v)

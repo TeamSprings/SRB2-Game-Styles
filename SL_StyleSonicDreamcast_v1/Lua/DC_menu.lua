@@ -1,15 +1,62 @@
+--[[
+
+		Sonic Adventure Style's Menu Stuff
+
+Contributors: Skydusk
+@Team Blue Spring 2022-2025
+
+]]
+
+local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
+
+local drawf = drawlib.draw
+local fontlen = drawlib.lenght
+local drawBG = tbsrequire 'helpers/draw_background'
+local HOOK = customhud.SetupItem
+
+local menu_toggle = false
+
+--
+--	COM
+--
+
+COM_AddCommand("dc_menu", function(p)
+	if menu_toggle == nil then
+		menu_toggle = true
+	else
+		menu_toggle = not (menu_toggle)
+	end
+end, COM_LOCAL)
+
+--
+--	MENU ITEMS
+--
+
+local menu_items = {
+	{minv = 0, maxv = 1, 		name = "RINGBOX RANDOMIZER", cv = CV_FindVar("dc_ringboxrandomizer")},
+	{minv = 0, maxv = 3, 		name = "SHIELD PALETTE", cv = CV_FindVar("dc_replaceshields")},
+	{minv = 0, maxv = 2, 		name = "STAGE END TALLY", cv = CV_FindVar("dc_endtally")},
+	"ITEM BOXES",
+	{minv = 0, maxv = 1, 		name = "ITEM BOXES", cv = CV_FindVar("dc_itembox")},
+	{minv = 0, maxv = 1, 		name = "ITEM BOX STYLE", cv = CV_FindVar("dc_itemboxstyle")},
+	"OTHER ASSETS",
+	{minv = 0, maxv = 1, 		name = "CHECK POINTS", 	cv = CV_FindVar("dc_checkpoints")},
+	{minv = 0, maxv = 1, 		name = "SHIELDS", 		cv = CV_FindVar("dc_shields")},
+	{minv = 0, maxv = 3, 		name = "PLAYER EFFECTS BETA", cv = CV_FindVar("dc_playereffects")},
+	{minv = 0, maxv = 1, 		name = "MISC ASSETS", 	cv = CV_FindVar("dc_miscassets")},
+
+}
+
 --
 --	MENU
 --
-
-local classic_menu_vars = tbsrequire('gui/definitions/classic_menuitems')
 
 local menu_select = 1
 local press_delay = 0
 local offset_y = 0
 local offset_x = 0
 
-HOOK("classic_menu", "classichud", function(v, p, t, e)
+HOOK("dc_menu", "dchud", function(v, p, t, e)
 	if menu_toggle then
 		if offset_x < 180 then
 			offset_x = $+10
@@ -23,60 +70,27 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 	end
 
 	if offset_x then
-		local x_off = offset_x-105
+		local x_off = 40
 
 
 		if offset_y then
 			offset_y = offset_y/2
 		end
 
+		drawBG(v, v.cachePatch("SHMENUBACKGROUND"), V_50TRANS)
+
 		local z = 60*menu_select+50+offset_y
 		local scale, fxscale = v.dupy()
 		local height = v.height()/scale
 
-		v.draw(68, -24, v.cachePatch("S3KBACKGROUND"), V_SNAPTOLEFT|V_SNAPTOTOP|(ease.linear(max(offset_x-130, 0)*FRACUNIT/50, 9, 3) << V_ALPHASHIFT))
-
-		local bg_pos = 0
-
-		while (bg_pos < height) do
-			v.draw(-133+x_off, bg_pos, v.cachePatch("MENUSRB2BACK"), V_SNAPTOLEFT|V_SNAPTOTOP)
-			bg_pos = $ + 256
-		end
-
-		drawf(v, 'S3KTT', (500-offset_x)*FRACUNIT, 12*FRACUNIT, FRACUNIT, "MENU  ", V_SNAPTOTOP|V_SNAPTORIGHT, v.getColormap(TC_DEFAULT, 1), "right")
-
-		for i = 1, #classic_menu_vars do
-			local item = classic_menu_vars[i]
+		for i = 1, #menu_items do
+			local item = menu_items[i]
 			if type(item) == "table" then
 				local y = 100+i*60-z
 
-				v.draw(x_off, y, v.cachePatch(menu_select == i and "S3KBUTTON2" or "S3KBUTTON1"), V_SNAPTOLEFT)
-				v.drawString(x_off, y+8, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT, "center")
-				if item.opt then
-					local set = Options:getvalue(item.opt)
-
-					if set then
-						local opt = set[1]
-						local num = set[3]
-
-						if num ~= nil then
-							drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.upper(string.format("%02x", num)), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
-						end
-
-						if opt ~= nil then
-							local font = "center"
-							local yfnt = y+28
-
-							if string.len(opt) > 14 then
-								font = "thin-center"
-								yfnt = $ + 1
-							end
-
-							v.drawString(x_off, yfnt, "\x8C"..opt, V_SNAPTOLEFT, font)
-						end
-					end
-				elseif item.cv then
-					drawf(v, 'S3DBM', x_off*FRACUNIT, (y+17)*FRACUNIT, FRACUNIT, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
+				v.draw(x_off, y, v.cachePatch(menu_select == i and "SHMENUBUT1" or "SHMENUBUT2"))
+				drawf(v, 'SH2ENUHEADFNT', (x_off+8)*2*FRACUNIT, (y+12)*2*FRACUNIT, FRACUNIT/2, string.upper(item.name), 0, v.getColormap(TC_DEFAULT, 1), "left")
+				if item.cv then
 					local font = "center"
 					local yfnt = y+28
 
@@ -84,21 +98,11 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 						font = "thin-center"
 						yfnt = $ + 1
 					end
-
-					v.drawString(x_off, yfnt, "\x8C"..item.cv.string, V_SNAPTOLEFT, font)
+					drawf(v, 'SHMENUHEADFNT', (x_off+230)*2*FRACUNIT, (y+12)*2*FRACUNIT, FRACUNIT/2, string.upper(item.cv.string), 0, v.getColormap(TC_DEFAULT, 1), "right")
 				end
 			elseif type(item) == "string" then
 				local y = 100+i*60-z
-				drawf(v, 'S3KTT', x_off*FRACUNIT, (y+16)*FRACUNIT, FRACUNIT, item, V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 1), "center")
-			end
-		end
-
-		local current = classic_menu_vars[menu_select]
-
-		if current and type(current) == "table" and current.preview then
-			v.draw(230, 108, v.cachePatch("S3KPREVIEW"), V_SNAPTORIGHT|V_SNAPTOBOTTOM)
-			if current.preview then
-				current.preview(v, 230, 108, V_SNAPTORIGHT|V_SNAPTOBOTTOM)
+				drawf(v, 'SHMENUHEADFNT', 160*FRACUNIT, (y+16)*FRACUNIT, FRACUNIT, item, 0, v.getColormap(TC_DEFAULT, 1), "center")
 			end
 		end
 
@@ -133,8 +137,8 @@ addHook("PlayerCmd", function(p, cmd)
 	if menu_toggle then
 		if cmd and not press_delay then
 			if cmd.forwardmove < -25 then
-				menu_select = (menu_select % #classic_menu_vars) + 1
-				if type(classic_menu_vars[menu_select]) ~= "table" then
+				menu_select = (menu_select % #menu_items) + 1
+				if type(menu_items[menu_select]) ~= "table" then
 					menu_select = $ + 1
 				end
 				press_delay = 8
@@ -145,11 +149,11 @@ addHook("PlayerCmd", function(p, cmd)
 
 			if cmd.forwardmove > 25 then
 				menu_select = menu_select - 1
-				if type(classic_menu_vars[menu_select]) ~= "table" then
+				if type(menu_items[menu_select]) ~= "table" then
 					menu_select = $ - 1
 				end
 				if menu_select < 1 then
-					menu_select = #classic_menu_vars
+					menu_select = #menu_items
 				end
 				press_delay = 8
 				offset_y = $-60
@@ -157,13 +161,13 @@ addHook("PlayerCmd", function(p, cmd)
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
-			if cmd.sidemove < -25 and (classic_menu_vars[menu_select].cv or classic_menu_vars[menu_select].opt) then
-				local cv = classic_menu_vars[menu_select].cv
-				local ming = classic_menu_vars[menu_select].minv
-				local maxg = classic_menu_vars[menu_select].maxv
+			if cmd.sidemove < -25 and (menu_items[menu_select].cv or menu_items[menu_select].opt) then
+				local cv = menu_items[menu_select].cv
+				local ming = menu_items[menu_select].minv
+				local maxg = menu_items[menu_select].maxv
 
-				if classic_menu_vars[menu_select].opt then
-					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
+				if menu_items[menu_select].opt then
+					local opt = Options:getCV(menu_items[menu_select].opt)
 
 					cv = opt[1]
 					ming = opt[2]
@@ -181,13 +185,13 @@ addHook("PlayerCmd", function(p, cmd)
 				S_StartSound(nil, sfx_menu1, p)
 			end
 
-			if cmd.sidemove > 25 and (classic_menu_vars[menu_select].cv or classic_menu_vars[menu_select].opt) then
-				local cv = classic_menu_vars[menu_select].cv
-				local ming = classic_menu_vars[menu_select].minv
-				local maxg = classic_menu_vars[menu_select].maxv
+			if cmd.sidemove > 25 and (menu_items[menu_select].cv or menu_items[menu_select].opt) then
+				local cv = menu_items[menu_select].cv
+				local ming = menu_items[menu_select].minv
+				local maxg = menu_items[menu_select].maxv
 
-				if classic_menu_vars[menu_select].opt then
-					local opt = Options:getCV(classic_menu_vars[menu_select].opt)
+				if menu_items[menu_select].opt then
+					local opt = Options:getCV(menu_items[menu_select].opt)
 
 					cv = opt[1]
 					ming = opt[2]

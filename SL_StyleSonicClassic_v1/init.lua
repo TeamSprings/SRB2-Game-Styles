@@ -1,7 +1,7 @@
 local gameString = "classic"
 
-local packVersion = '3.250 beta'
-rawset(_G, "Style_ClassicVersion", 3250)
+local packVersion = '3.300'
+rawset(_G, "Style_ClassicVersion", 3300)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Classic Style '..packVersion..'] '
@@ -51,7 +51,7 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 	local start_metric = getTimeMicros()
 	print(packType.."Loading")
 
-	dofile("libs/sal_lib-customhud-v2-1.lua")
+	dofile("libs/sal_lib-customhud-v4-1.lua")
 
 	-- Game Assets
 	dofile(gameString.."_init.lua")

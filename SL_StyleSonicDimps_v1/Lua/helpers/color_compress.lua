@@ -35,6 +35,36 @@ local advance3_colors = {
 	"Advance3_Browny",
 }
 
+local rushapproximations = {}
+local rush_colors = {
+	"Rush_Gray",
+	"Rush_Red",
+	"Rush_Orange",
+	"Rush_Gold",
+	"Rush_Yellow",
+	"Rush_Shine",
+	"Rush_Ivory",
+	"Rush_Moss",
+	"Rush_Green",
+	"Rush_Emerald",
+	"Rush_Teal",
+	"Rush_Cyan",
+	"Rush_Water",
+	"Rush_Blue",
+	"Rush_Purple",
+	"Rush_Steel",
+	"Rush_GmodError",
+	"Rush_Apple",
+	"Rush_Lavender",
+	"Rush_Pink",
+	"Rush_Meat",
+	"Rush_Beige",
+	"Rush_Brown",
+	"Rush_Mud",
+	"Rush_Browny",
+}
+
+
 local ranges = {31, 47, 63, 71, 79, 83, 87, 95, 111, 119, 127, 139, 143, 159, 169, 175, 187, 191, 199, 207, 215, 223, 231, 139, 251}
 
 return {
@@ -68,9 +98,21 @@ return {
 	rush = function(id, skincolor)
 		local pl = id > 1 and SKINCOLOR_COMPRESSORGBA2 or SKINCOLOR_COMPRESSORGBA
 		local ax = skincolors[skincolor].ramp[4]
-		local ay = skincolors[skincolor].ramp[8]
-		local az = skincolors[skincolor].ramp[12]
-		skincolors[pl].ramp = {ax, ax, ax, ax, ax, ax, ay, ay, ay, ay, ay, az, az, az, az, az}
+		local ay = skincolors[skincolor].ramp[10]
+		skincolors[pl].ramp = {ax, ax, ax, ax, ax, ax, ax, ax, ay, ay, ax, ay, ay, ay, ay, 31}
 		return pl
+	end,
+
+	rush2 = function(skincolor)
+		if not rushapproximations[skincolor] then
+			for i = 1, #ranges do
+				if skincolors[skincolor].ramp[8] < ranges[i] then
+					rushapproximations[skincolor] = rush_colors[min(i, #rush_colors)]
+					break
+				end
+			end
+		end
+
+		return rushapproximations[skincolor]
 	end,
 }

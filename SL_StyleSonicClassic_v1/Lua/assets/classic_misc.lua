@@ -7,6 +7,8 @@ Contributors: Skydusk
 
 ]]
 
+-- BUG: FIX EXPLOSIONS AT NIGHTS CAPSULE
+
 local Options = tbsrequire('helpers/create_cvar')
 
 --
@@ -43,7 +45,7 @@ local explosion = Options:new("explosions", "assets/tables/sprites/explosion", s
 
 states[S_ERAEXPL1] = {
 	sprite = states[S_SONIC3KBOSSEXPLOSION1].sprite or SPR_EXPLOSION_S1,
-	frame = FF_ANIMATE|FF_FULLBRIGHT|A,
+	frame = FF_ANIMATE|A,
 	tics = 21,
 	var1 = 6,
 	var2 = 3
@@ -128,7 +130,7 @@ addHook("MobjThinker", function(a)
 end, MT_EMBLEM)
 
 -- ... this wouldn't be necessary if for some damn reason certain part of code didn't think this was part of "Hud rendering code"
-addHook("ThinkFrame", function()
+addHook("ThinkFrame", do
 	if switch then
 		-- Checkpoint
 
@@ -171,6 +173,7 @@ addHook("ThinkFrame", function()
 			states[S_ERAEXPL1].tics = expl[2]
 			states[S_ERAEXPL1].var1 = expl[3]
 			states[S_ERAEXPL1].var2 = expl[4]
+			states[S_ERAEXPL1].frame = A|FF_ANIMATE|expl[5]
 		else
 			expl_state = S_SONIC3KBOSSEXPLOSION1
 		end
@@ -179,17 +182,19 @@ addHook("ThinkFrame", function()
 
 		local _x = Options:getvalue("dust")[2]
 		local sprite = _x[1]
-		local end_i = _x[2]
+		local len_stateexp = _x[2]
+		local dur_stateexp = _x[3]
+		local ext_stateexp = _x[4] or 0
 
 		states[S_XPLD_FLICKY].sprite = sprite
 
-		for i = 0, end_i do
-			states[S_XPLD1+i].sprite = sprite
-			states[S_XPLD1+i].frame = i
-			states[S_XPLD1+i].nextstate = S_XPLD1+i+1
-		end
+		states[S_XPLD1].sprite = sprite
+		states[S_XPLD1].frame = A|FF_ANIMATE|ext_stateexp
+		states[S_XPLD1].var1 = len_stateexp
+		states[S_XPLD1].var2 = dur_stateexp
+		states[S_XPLD1].tics = (len_stateexp + 1) * dur_stateexp
 
-		states[S_XPLD1+end_i].nextstate = S_NULL
+		states[S_XPLD1].nextstate = S_NULL
 
 		-- Pity
 
@@ -244,3 +249,22 @@ addHook("ThinkFrame", function()
 		switch = false
 	end
 end)
+
+--
+-- RING COLLECT PARTICLE
+--
+
+local ringclt = freeslot("S_STYLES_CLASSIC_RINGCLT")
+
+states[ringclt] = {
+	sprite = freeslot("SPR_STYLES_CLASSIC_RINGCLT"),
+	frame = A|FF_TRANS30|FF_ANIMATE,
+	tics = 18,
+	var1 = 8,
+	var2 = 2,
+}
+
+mobjinfo[MT_RING].deathstate = ringclt
+mobjinfo[MT_FLINGRING].deathstate = ringclt
+mobjinfo[MT_REDTEAMRING].deathstate = ringclt
+mobjinfo[MT_BLUETEAMRING].deathstate = ringclt

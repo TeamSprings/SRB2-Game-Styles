@@ -1,7 +1,7 @@
 local gameString = "DC"
 
-local packVersion = '3.250 beta'
-rawset(_G, "Style_AdventureVersion", 3250)
+local packVersion = '3.300'
+rawset(_G, "Style_AdventureVersion", 3300)
 rawset(_G, "Style_Pack_Active", true)
 
 local packType = '[Adventure Style '..packVersion..'] '
@@ -52,7 +52,7 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_C
 	print(packType.."Loading")
 
 	-- sal's library
-	dofile("libs/sal_lib-customhud-v2-1.lua")
+	dofile("libs/sal_lib-customhud-v4-1.lua")
 
 	macro_dofile(gameString, "main.lua")
 
@@ -77,7 +77,8 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_C
 
 	macro_dofile(gameString,
 		"jingles.lua",
-		"save.lua"
+		"save.lua",
+		"menu.lua"
 	)
 
 	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")

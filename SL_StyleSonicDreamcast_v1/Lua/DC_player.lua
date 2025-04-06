@@ -1,6 +1,6 @@
 --[[
 
-		Sonic Adventure Style's Game Stuff
+		Sonic Adventure Style's Player Stuff
 
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
