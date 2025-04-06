@@ -66,7 +66,7 @@ local monitor_typesa_opt = Options:new("monitordistribution", "assets/tables/mon
 local monitor_typesa_cv = monitor_typesa_opt.cv
 
 local MonitorSprites, P_MarioExistsThink, P_MarioMonitorThink = unpack(tbsrequire('assets/compact/classic_mario'))
-local picks, sets = tbsrequire 'assets/tables/monitor_sets'
+local picks, sets = unpack(tbsrequire 'assets/tables/monitor_sets')
 
 local function P_SpawnItemBox(a)
 	if not multiplayer and monitor_typesa_cv.value and picks[a.type] then

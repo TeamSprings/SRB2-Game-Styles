@@ -52,4 +52,4 @@ local sets = {
 	},
 }
 
-return picks, sets
+return {picks, sets}
