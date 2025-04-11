@@ -20,6 +20,11 @@ Series of game modifications meant to turn SRB2 game feel to something more simi
 
 ## Current Styles
 
+There are no "planned" styles, side styles here are already featured in one way or another, even if inclusion is very tiny.
+"Side style" here is that they might get some content, however they are not the sole focus of this compilation. 
+
+Some of them will borderline be priority style, some of them will be just some few additions.
+
 ### Classic Style:
 
 1) Sonic The Hedgehog 1,
