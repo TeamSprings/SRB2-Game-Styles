@@ -11,6 +11,8 @@ local drawf = drawlib.draw
 local textlen = drawlib.text_lenght
 local fontlen = drawlib.lenght
 
+local clamping = tbsrequire 'helpers/anim_clamp'
+
 local tryx, tryy = 0, 0
 
 return{
@@ -23,80 +25,85 @@ return{
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 		--local scale = FRACUNIT
 		local offset = (#lvlt)*FRACUNIT
-		if t < 2 then
-			tryx = (200*FRACUNIT)
-			tryy = -(200*FRACUNIT)
-		end
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
 		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
 		local translation = isSpecialStage and "SPECIALSTAGE_SONIC3_TITLE" or nil
 		local titlelenm = textlen(v, 'S3BTFNT', lvlt, 0)
 
-		if act ~= "0" and titlelenm then
-			v.draw(315-titlelenm-offset*3/FRACUNIT, 123+tryy/FRACUNIT, v.cachePatch('S3BTFNTACT'), 0)
-			drawf(v, 'S3BTFNT', (343-titlelenm)*FRACUNIT-offset*3, 108*FRACUNIT+tryy, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
-		end
+		if t and t <= e then
+			local easet = clamping(0, t, TICRATE/3) - clamping(e-TICRATE/3, t, e)
 
-		if t and t <= 3*TICRATE/2 then
-			v.fadeScreen(fade, 31)
-		elseif t <= TICRATE+31 and t > TICRATE then
-			v.fadeScreen(fade, 31-(t-TICRATE))
-		end
-		if t and t <= 3*TICRATE then
-			if t <= TICRATE/3 then
-				tryx = max($-17*FRACUNIT, 0)
-				tryy = min($+17*FRACUNIT, 0)
+			tryx = ease.linear(easet, 200*FRACUNIT, 0)
+			tryy = -tryx
+
+			if act ~= "0" and titlelenm then
+				v.draw(303-titlelenm-offset*3/FRACUNIT, 112+tryy/FRACUNIT, v.cachePatch('S3BTFNTACT'), 0)
+				drawf(v, 'S3BTFNT', (331-titlelenm)*FRACUNIT-offset*3, 97*FRACUNIT+tryy, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
-			if t >= (3*TICRATE - TICRATE/3) then
-				tryx = $-17*FRACUNIT
-				tryy = $-17*FRACUNIT
+
+			if p.styles_entercut_timer == nil then
+
+				if t and t <= 3*TICRATE/2 then
+					v.fadeScreen(fade, 31)
+				elseif t <= TICRATE+31 and t > TICRATE then
+					v.fadeScreen(fade, 31-(t-TICRATE))
+				end
 			end
 
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'S3BTFNT', (288-titlelenm)*FRACUNIT-tryx-offset*3, 90*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
+				drawf(v, 'S3BTFNT', (262-titlelenm)*FRACUNIT-tryx-offset*3, 90*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
 			end
 
 			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, 0|V_ALLOWLOWERCASE, "center")
-			drawf(v, 'S3BTFNT', (262-tryx)*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+			drawf(v, 'S3BTFNT', 262*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 
 			return true
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
 		if p and p.mo then
+
+			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
+			local lives_y = hudinfo[HUD_LIVES].y
+
+			if lifepos > 1 then
+				lives_f = ($|V_SNAPTORIGHT|V_SNAPTOTOP) &~ (V_SNAPTOLEFT|V_SNAPTOBOTTOM)
+				lives_x = 281-hudinfo[HUD_LIVES].x-hide_offset_x
+				lives_y = 184-hudinfo[HUD_LIVES].y
+			end
 
 			local skin_name = string.upper(skins[p.mo.skin].name)
 			local patch_name = "STYLES_B3DLIFE_"..skin_name
 			local patch_s_name = "STYLES_SB3DLIFE_"..skin_name
 
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			else
-				v.draw(lives_x, hudinfo[HUD_LIVES].y-1, v.cachePatch('3BLIVBLANK1'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_FLIP|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
-				v.draw(lives_x, hudinfo[HUD_LIVES].y-1, v.cachePatch('3BLIVBLANK2'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK1'), lives_f)
+				v.draw(lives_x+8, 	lives_y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK2'), lives_f)
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, prefix..'TNUM', (lives_x+18)*FRACUNIT, (hudinfo[HUD_LIVES].y+1)*FRACUNIT, FRACUNIT, 'X'..p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+				drawf(v, prefix..'TNUM', (lives_x+18)*FRACUNIT, (lives_y+1)*FRACUNIT, FRACUNIT, 'X'..p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
-				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
 		end
 	end,
 
-	tallytitle = function(v, p, offsetx)
+	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		if mo then
 			local skin_name = nametrim(skins[mo.skin].realname)
-			drawf(v, 'S3BTFNT', (96-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, string.upper(skin_name.." got"))
+			drawf(v, 'S3BTFNT', (96-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, string.upper((overwrite and overwrite or skin_name).." got"))
 		else
 			drawf(v, 'S3BTFNT', (72-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, "YOU GOT")
 		end

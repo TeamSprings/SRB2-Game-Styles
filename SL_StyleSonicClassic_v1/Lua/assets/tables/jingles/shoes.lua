@@ -1,5 +1,6 @@
 return {
-	{"_SHJP", "jpcd",  		"Sonic JP CD"},
-	{"_SHUS", "jpus",  		"Sonic JP US"},
+	-- [0]={nil, "speedup",  	"Speed UP Music"},
+	{"_SHJP", "jpcd",  		"Sonic CD JP"},
+	{"_SHUS", "uscd",  		"Sonic CD US"},
 	{"_SHSM", "mania", 		"Sonic Mania"},
 }

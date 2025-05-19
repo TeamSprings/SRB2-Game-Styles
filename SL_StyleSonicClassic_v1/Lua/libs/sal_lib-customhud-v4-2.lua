@@ -13,7 +13,7 @@
 
 --]]
 
-local VERSIONNUM = {4, 1};
+local VERSIONNUM = {4, 2};
 local updating = nil;
 
 --#region library
@@ -116,13 +116,19 @@ else
 end
 
 customhud.Overwritten = {}
+customhud.Overwritten["add"] = hud.add
+customhud.Overwritten["addHook"] = addHook
+
 customhud.Overwritten["enable"] = hud.enable
 customhud.Overwritten["enabled"] = hud.enabled
 customhud.Overwritten["disable"] = hud.disable
 
-local hudenable =  customhud.Overwritten["enable"] ---@type function
-local hudenabled = customhud.Overwritten["enabled"] ---@type function
-local huddisable = customhud.Overwritten["disable"] ---@type function
+local hudadd =  	customhud.Overwritten["add"] ---@type function
+local hudenable =  	customhud.Overwritten["enable"] ---@type function
+local hudenabled = 	customhud.Overwritten["enabled"] ---@type function
+local huddisable = 	customhud.Overwritten["disable"] ---@type function
+
+local hookadd = 	customhud.Overwritten["addHook"] ---@type function
 
 --#endregion
 
@@ -161,16 +167,32 @@ end
 customhud.hookTypes = {
 	"menu",
 	"gamemenu",
+	"ingameintermission",
 	"overlay",
+	"gameandscores",
+};
+
+customhud.vanillaHooks = {
 	"game",
 	"scores",
 	"title",
 	"titlecard",
 	"intermission",
-	"gameandscores",
 	"continue",
 	"playersetup"
 };
+
+for _, v in ipairs(customhud.vanillaHooks) do
+	table.insert(customhud.hookTypes, v)
+end
+
+if not (customhud.rawAdditions) then
+	customhud.rawAdditions = {}
+
+	for _,v in ipairs(customhud.vanillaHooks) do
+		customhud.rawAdditions[v] = {valid = true}
+	end
+end
 
 local hooktypes = customhud.hookTypes
 
@@ -711,6 +733,17 @@ end
 --#endregion
 --#region Hooks
 
+local function RunRawHooks(hook, v, ...)
+	if (customhud.rawAdditions[hook] == nil) then
+		return;
+	end
+
+	for _,item in ipairs(customhud.rawAdditions[hook]) do
+		local arg = {...};
+		item(v, unpack(arg));
+	end
+end
+
 local function RunCustomHooks(hook, v, ...)
 	if (huditems[hook] == nil) then
 		return;
@@ -735,35 +768,75 @@ local function RunCustomHooks(hook, v, ...)
 	end
 end
 
-hud.add(function(v, player, camera)
-	RunCustomHooks("menu", v, player);
-	RunCustomHooks("gamemenu", v, player);
+hudadd(function(v, player, camera)
+	RunRawHooks("game", v, player, camera);
+	RunCustomHooks("overlay", v, player, camera);
+
 	RunCustomHooks("game", v, player, camera);
 	RunCustomHooks("gameandscores", v);
-	RunCustomHooks("overlay", v, player, camera);
+
+	RunCustomHooks("ingameintermission", v, player, camera);
+
+	RunCustomHooks("menu", v, player);
+	RunCustomHooks("gamemenu", v, player);
 end, "game");
 
-hud.add(function(v)
-	RunCustomHooks("menu", v);
+hudadd(function(v)
+	RunRawHooks("scores", v);
+
 	RunCustomHooks("scores", v);
 	RunCustomHooks("gameandscores", v);
+	RunCustomHooks("menu", v);
 end, "scores");
 
-hud.add(function(v)
+hudadd(function(v)
+	RunRawHooks("title", v);
 	RunCustomHooks("title", v);
 end, "title");
 
-hud.add(function(v, player, ticker, endtime)
+hudadd(function(v, player, ticker, endtime)
+	RunRawHooks("titlecard", v, player, ticker, endtime);
 	RunCustomHooks("titlecard", v, player, ticker, endtime);
 end, "titlecard");
 
-hud.add(function(v)
+hudadd(function(v)
+	RunRawHooks("intermission", v);
 	RunCustomHooks("intermission", v);
 end, "intermission");
+
+hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing)
+	RunRawHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
+	RunCustomHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
+end, "continue");
+
+hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused)
+	RunRawHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
+	RunCustomHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
+end, "playersetup");
 
 rawset(hud, "enable",  customhud.enable)
 rawset(hud, "enabled", customhud.enabled)
 rawset(hud, "disable", customhud.disable)
+
+local function newhud_add(func, hook, ...)
+	local _hook = hook or "game"
+
+	if customhud.rawAdditions[_hook] then
+		table.insert(customhud.rawAdditions[_hook], func)
+	else
+		hudadd(func, hook, ...)
+	end
+end
+
+rawset(hud, "add", newhud_add)
+
+rawset(_G, "addHook", function(_type, func, specifics, ...)
+	if _type == "HUD" then
+		newhud_add(func, specifics, ...)
+	else
+		hookadd(_type, func, specifics, ...)
+	end
+end)
 
 --#endregion
 --#region Fonts -- Currently unsupported

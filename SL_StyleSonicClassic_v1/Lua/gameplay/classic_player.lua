@@ -24,7 +24,7 @@ local springtroll_opt = Options:new("springroll", "gameplay/cvars/springroll", n
 
 local thok_opt = Options:new("thok", "gameplay/cvars/thok", nil, CV_NETVAR)
 
---local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
+local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
 
 --
 --	Cvars
@@ -40,7 +40,7 @@ local springtroll_cv = springtroll_opt.cv
 
 local thok_cv = thok_opt.cv
 
---local grounding_cv = grounding_opt.cv
+local grounding_cv = grounding_opt.cv
 
 --
 --	Thinker
@@ -67,16 +67,18 @@ addHook("PlayerThink", function(p)
 		p.styles_swappedthok = nil
 	end
 
-	--if P_IsObjectOnGround(p.mo) then
-	--	if grounding_cv.value == 1 then
-	--		slope_handler.slopeRotationGenesis(p.mo)
-	--	elseif grounding_cv.value == 2 then
-	--		slope_handler.slopeRotation(p.mo)
-	--	end
-	--elseif p.mo.style_rollangle_was_enabled then
-	--	p.mo.rollangle = 0
-	--	p.mo.style_rollangle_was_enabled = nil
-	--end
+	local func = Options:getPureValue("groundrot")
+
+	if func then
+		func(p.mo, p.style_springroll or p.powers[pw_carry] == CR_NIGHTSMODE)
+	elseif p.mo.style_rollangle_was_enabled then
+		p.mo.rollangle = 0
+		p.mo.style_rollangle_was_enabled = nil
+	end
+
+	if p.followmobj then
+		p.followmobj.rollangle = p.mo.rollangle
+	end
 
 	if p.mo.style_spring_type == nil then return end
 

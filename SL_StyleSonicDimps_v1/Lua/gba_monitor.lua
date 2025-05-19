@@ -29,13 +29,13 @@ CV_RegisterVar{
 	defaultvalue = "advance1",
 	flags = CV_CALL,
 	func = function(var)
-		local monitors = {A, C, E, G, I}
+		local monitors = {A, C, E, G, I, K}
 		monitor_style = monitors[var.value]
 
-		local offset = {1, 1, 1, -1, 1}
+		local offset = {1, 1, 1, -1, 1, 1}
 		monitor_iconoffset = offset[var.value]
 	end,
-	PossibleValue = {advance1=1, advance2=2, rush=3, rushadventure=4, colords=5}
+	PossibleValue = {advance1=1, advance2=2, rush=3, rushadventure=4, colords=5, sonic4=6}
 }
 
 local function P_SpawnItemBox(a)

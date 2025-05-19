@@ -105,6 +105,14 @@ CV_RegisterVar({
 	--func = disable_assets,
 })
 
+CV_RegisterVar({
+	name = "dc_hud",
+	defaultvalue = "sa2",
+	flags = 0,
+	PossibleValue = {sa1=1, sa2=2, heroes=3, nextgen=4},
+	category = "Adventure Style - Eyecandy",
+	displayname = "HUD Style"
+})
 
 CV_RegisterVar({
 	name = "dc_hud_rankdisplay",

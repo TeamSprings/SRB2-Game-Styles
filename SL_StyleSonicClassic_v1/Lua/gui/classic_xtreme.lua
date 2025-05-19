@@ -10,34 +10,42 @@ local drawf = drawlib.draw
 local fontlen = drawlib.lenght
 
 return{
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
 		if p and p.mo then
 			local curtm = 0 --StyleCD_Timetravel.timeline
 			local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 
+			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
+			local lives_y = hudinfo[HUD_LIVES].y
+
+			if lifepos > 1 then
+				lives_f = ($|V_SNAPTORIGHT|V_SNAPTOTOP) &~ (V_SNAPTOLEFT|V_SNAPTOBOTTOM)
+				lives_x = 281-hudinfo[HUD_LIVES].x-hide_offset_x
+				lives_y = 193-hudinfo[HUD_LIVES].y
+			end
 
 			local skin_name = string.upper(skins[p.mo.skin].name)
 			local patch_name = "STYLES_XTRLIFE_"..skin_name
 			local patch_s_name = "STYLES_SXTRLIFE_"..skin_name
 
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+10, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, lives_y+10, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+10, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, lives_y+10, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			else
 				for i = 1, 3 do
-					v.draw((lives_x+9), (hudinfo[HUD_LIVES].y+10+i), v.getSprite2Patch(p.mo.skin, SPR2_XTRA, false, C, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
+					v.draw((lives_x+9), (lives_y+10+i), v.getSprite2Patch(p.mo.skin, SPR2_XTRA, false, C, 0), lives_f, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
 				end
 
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+10, v.getSprite2Patch(p.mo.skin, SPR2_XTRA, false, C, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, lives_y+10, v.getSprite2Patch(p.mo.skin, SPR2_XTRA, false, C, 0), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			end
 
 
 			if G_GametypeUsesLives() then
-				drawf(v, 'XTTNUM', (lives_x+19)*FRACUNIT, (hudinfo[HUD_LIVES].y+3)*FRACUNIT, FRACUNIT, 'X'..p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+				drawf(v, 'XTTNUM', (lives_x+19)*FRACUNIT, (lives_y+3)*FRACUNIT, FRACUNIT, 'X'..p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
-				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
 		end
 	end,

@@ -117,6 +117,16 @@ return{
 
 			v.drawFill(-500, interpolate(131, 250, FRACUNIT-fractime), 9999, 9, 31|V_SNAPTOTOP)
 			local subttl = "Sonic Robo Blast CD"
+
+			if mapheaderinfo[gamemap].subttl ~= "" then
+				v.drawString(interpolate(-v.stringWidth(mapheaderinfo[gamemap].subttl), 63, fractime), interpolate(132, 251, FRACUNIT-fractime),
+				mapheaderinfo[gamemap].subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
+			else
+				local gpatch = v.cachePatch("LTCDGAME")
+
+				v.draw(interpolate(-gpatch.width, 63, fractime), interpolate(132, 251, FRACUNIT-fractime), gpatch, V_SNAPTOTOP)
+			end
+
 			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
 			v.drawString(interpolate(-v.stringWidth(subttl), 63, fractime), interpolate(132, 251, FRACUNIT-fractime),
 			subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
@@ -154,10 +164,13 @@ return{
 			v.draw(30, interpolate(-168, 0, fractime), back, V_SNAPTOTOP)
 
 			v.drawFill(-500, interpolate(-10, 131, fractime), 9999, 9, 31|V_SNAPTOTOP)
-			local subttl = "Sonic Robo Blast CD"
-			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
-			v.drawString(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime),
-			subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
+
+			if mapheaderinfo[gamemap].subttl ~= "" then
+				v.drawString(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime),
+				mapheaderinfo[gamemap].subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
+			else
+				v.draw(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime), v.cachePatch("LTCDGAME"), V_SNAPTOTOP)
+			end
 
 			V_DrawTitle(v, interpolate(40, 400, FRACUNIT-fractime), 80, superstr, V_SNAPTOTOP)
 			V_DrawTitle(v, interpolate(-V_GetLenght(v, totalsubstr), 40, fractime), 136, substr1, V_SNAPTOTOP)
@@ -186,9 +199,13 @@ return{
 			v.draw(30, 0, back, V_SNAPTOTOP)
 
 			v.drawFill(-500, 131, 9999, 9, 31|V_SNAPTOTOP)
-			local subttl = "Sonic Robo Blast 2 CD"
-			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
-			v.drawString(63, 132, subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
+
+			if mapheaderinfo[gamemap].subttl ~= "" then
+				v.drawString(63, 132,
+				mapheaderinfo[gamemap].subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
+			else
+				v.draw(63, 132, v.cachePatch("LTCDGAME"), V_SNAPTOTOP)
+			end
 
 			V_DrawTitle(v, 40, 80, superstr, V_SNAPTOTOP)
 			V_DrawTitle(v, 40, 136, substr1, V_SNAPTOTOP)
@@ -216,33 +233,44 @@ return{
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
 		if p and p.mo then
 			local curtm = 0 --StyleCD_Timetravel.timeline
 			local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
-
-			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
 
 			local skin_name = string.upper(skins[p.mo.skin].name)
 			local patch_name = "STYLES_CDLIFE_"..skin_name
 			local patch_s_name = "STYLES_SCDLIFE_"..skin_name
 
+			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
+			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
+			local lives_y = hudinfo[HUD_LIVES].y
+
+			if lifepos > 1 then
+				lives_f = ($|V_SNAPTORIGHT|V_SNAPTOTOP) &~ (V_SNAPTOLEFT|V_SNAPTOBOTTOM)
+				lives_x = 281-hudinfo[HUD_LIVES].x-hide_offset_x
+				lives_y = 184-hudinfo[HUD_LIVES].y
+			end
+
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, lives_y+11, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, lives_y+11, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			else
 				for i = 1, 4 do
-					v.draw((lives_x+8+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_ALLWHITE))
+					v.draw((lives_x+8+pos[i][1]), (lives_y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_ALLWHITE))
 				end
-				v.draw(lives_x+8, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+8, lives_y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|(curtm == 0 and V_FLIP or 0), v.getColormap(TC_DEFAULT, p.mo.color))
 			end
 
 			if G_GametypeUsesLives() then
-				v.draw(lives_x+17, hudinfo[HUD_LIVES].y+7, v.cachePatch('CDXLIFE'), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS)
-				drawf(v, 'S1TNUM', (lives_x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+4)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+				local x_p = v.cachePatch(prefix..'XLIFE')
+				local x_py = max(x_p.height - 8, 0)/2
+
+				v.draw(lives_x+17, lives_y + 7 - x_py, x_p, lives_f, colorprofile)
+				drawf(v, prefix..'TNUM', (lives_x+25)*FU, (lives_y + 4 - x_py)*FU, FU, p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
-				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
 
 			--v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
@@ -253,4 +281,57 @@ return{
 	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
 		drawBG(v, v.cachePatch("CDTSPECBG"), 0, nil)
 	end,
+
+	-- TODO: CREATE CD TALLY TITLE - Font, graphic etc.
+	--[[
+	tallytitle = function(v, p, offsetx)
+		local mo = p.mo
+
+		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+
+		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
+
+		if mo and mo.valid then
+			local skin = skins[p.mo.skin or p.skin]
+
+			local skin_name = nametrim(string.upper(skin.realname), "%d", "")
+			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
+			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
+
+			--drawf(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+		else
+			local skin_name = "YOU"
+			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
+			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
+
+			--drawf(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+		end
+
+		if act ~= "0" then
+			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
+			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
+			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 55*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+		end
+	end,
+
+	tallyspecial = function(v, p, offsetx, color, color2)
+		local mo = p.mo
+		local act = tostring(mapheaderinfo[gamemap].actnum)
+
+		local str = "CHAOS EMERALDS"
+
+		if emeralds == All7Emeralds(emeralds) then
+			str = " GOT THEM ALL"
+
+			if mo then
+				str = string.upper(mo.skin)..str
+			else
+				str = "YOU"..str
+			end
+		end
+
+		--drawS3KTXT(v, 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+	end,
+	--]]
 }

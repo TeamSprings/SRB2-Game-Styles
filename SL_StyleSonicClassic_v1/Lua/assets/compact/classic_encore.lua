@@ -157,6 +157,8 @@ return {
 				actor.overlay.flags2 = $ &~ MF2_DONTDRAW
 			end
 
+			actor.overlay.alpha = actor.alpha
+
 			actor.overlay.color = skins[sknn].prefcolor
 			actor.overlay.skin = sknn
 		elseif players[closestplayer].extralist then

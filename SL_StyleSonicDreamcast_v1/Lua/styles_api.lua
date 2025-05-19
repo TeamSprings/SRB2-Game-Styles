@@ -12,12 +12,16 @@ local function selfipairs(t, type, ...)
 	local returns = false
 
 	for _,v in ipairs(t.global) do
-		returns = v(...) and true or false
+		local acv = v(...)
+
+		returns = acv == nil and returns or acv
 	end
 
 	if t.specifics[type] then
 		for _,v in ipairs(t.specifics[type]) do
-			returns = v(...) and true or false
+			local acv = v(...)
+
+			returns = acv == nil and returns or acv
 		end
 	end
 
@@ -65,7 +69,7 @@ function module:event(id, func, specifics)
 end
 
 function module:info()
-	return "classicstyle"
+	return "adventurestyle"
 end
 
 return module

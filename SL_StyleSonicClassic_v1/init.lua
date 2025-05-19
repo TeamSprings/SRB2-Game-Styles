@@ -1,16 +1,28 @@
-local gameString = "classic"
-
-local packVersion = '3.301'
-rawset(_G, "Style_ClassicVersion", 3301)
-rawset(_G, "Style_Pack_Active", true)
-
-local packType = '[Classic Style '..packVersion..'] '
-local version = '2.2.14' -- Currently 2.2.10. UDMF support comes with 2.2.12
+local __devMode = nil
+print(__devMode)
 
 --[[
 	Classic Stylized Pack for SRB2
 	@ Contributors: Skydusk, Clonefighter
 ]]
+
+local gameString = "classic"
+
+local packVersion = '3.680'
+rawset(_G, "Style_ClassicVersion", 3680)
+rawset(_G, "Style_ClassicVersionString", packVersion)
+rawset(_G, "Style_Pack_Active", true)
+
+local packType = '[Classic Style '..packVersion..'] '
+local version = '2.2.15'
+
+rawset(_G, "Style_GamePrefix", gameString)
+rawset(_G, "Style_PrintPrefix", packType)
+rawset(_G, "Style_IOLocation", "client/bluespring/styles/classic_")
+
+rawset(_G, "Style_DebugScriptsLoaded", 0)
+rawset(_G, "Style_DebugScriptsTotal", 0)
+rawset(_G, "Style_DebugErrorPrinter", "")
 
 assert((VERSION == 202), packType.."Mod doesn't support this version of SRB2")
 
@@ -28,6 +40,20 @@ skincolors[freeslot("SKINCOLOR_PURPLEMANIAHUD")] = {
 	accessible = false,
 }
 
+local function styles_errerror(str)
+	error(str)
+
+	Style_DebugErrorPrinter = $ .. str .. "\n"
+end
+
+local function styles_errprint(str)
+	print(str)
+
+	Style_DebugErrorPrinter = $ .. str .. "\n"
+end
+
+rawset(_G, "Style_DebugPrint", styles_errprint)
+
 if not tbsrequire then
 	local cache_lib = {}
 
@@ -36,40 +62,83 @@ if not tbsrequire then
 		if cache_lib[path] then
 			return cache_lib[path]
 		else
+			Style_DebugScriptsTotal = $ + 1
+
 			local func, err = loadfile(path)
 			if not func then
-				error("error loading module '"..path.."': "..err)
+				styles_errerror("[Game Styles] Error loading module '"..path.."': "..err)
 			else
 				cache_lib[path] = func()
+				Style_DebugScriptsLoaded = $ + 1
+
 				return cache_lib[path]
 			end
 		end
 	end)
 end
 
+local function safeDoFile(path)
+	local func, err = loadfile(path)
+
+	if func then
+		local status, result = pcall(func)
+
+		if not status then
+			styles_errprint("[Game Styles] Error loading or executing " .. path .. ": " .. result)
+		else
+			Style_DebugScriptsLoaded = $ + 1
+		end
+	else
+		styles_errprint("[Game Styles] Error loading " .. path .. ": " .. err)
+	end
+
+	Style_DebugScriptsTotal = $ + 1
+end
+
+
 if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_AdventureVersion then
 	local start_metric = getTimeMicros()
+
+	-- Print "LOADING"
 	print(packType.."Loading")
 
-	dofile("libs/sal_lib-customhud-v4-1.lua")
+	local modio = tbsrequire 'classic_io'
+
+	modio.file = Style_IOLocation.."cvars.dat"
+	modio.pointer = CV_RegisterVar
+
+	rawset(_G, "CV_RegisterVar", function(...)
+		return modio:register(0, ...)
+	end)
+
+	-- RUN
+	safeDoFile("libs/sal_lib-customhud-v4-2.lua")
 
 	-- Game Assets
-	dofile(gameString.."_init.lua")
+	safeDoFile(gameString.."_init.lua")
 
-	dofile("assets/"..gameString.."_jingles.lua")
-	dofile("gameplay/"..gameString.."_inter.lua")
+	safeDoFile("assets/"..gameString.."_jingles.lua")
+	safeDoFile("gameplay/"..gameString.."_inter.lua")
 
-	dofile("assets/"..gameString.."_monitor.lua")
-	dofile("assets/"..gameString.."_misc.lua")
-	dofile("gameplay/"..gameString.."_player.lua")
+	safeDoFile("assets/"..gameString.."_monitor.lua")
+	safeDoFile("assets/"..gameString.."_misc.lua")
+	safeDoFile("assets/"..gameString.."_capsules.lua")
 
-	dofile("gameplay/"..gameString.."_special.lua")
+	safeDoFile("gameplay/"..gameString.."_player.lua")
 
-	dofile(gameString.."_presets.lua")
-	dofile(gameString.."_gui.lua")
-	dofile(gameString.."_io.lua")
+	safeDoFile("gameplay/"..gameString.."_special.lua")
+	safeDoFile("gameplay/"..gameString.."_levels.lua")
 
-	print(packType.."Mod loaded in "..(getTimeMicros()-start_metric).." ms")
+	safeDoFile(gameString.."_gui.lua")
+	safeDoFile(gameString.."_presets.lua")
+
+	-- Finish
+
+	rawset(_G, "CV_RegisterVar", modio.pointer)
+
+	modio:load()
+
+	styles_errprint(packType .. "Mod loaded in " .. ( getTimeMicros() - start_metric ) .. " ms")
 elseif Style_DimpsVersion or Style_AdventureVersion then
 	-- Notify 'em
 	local function ErrorPack_Notification(v)

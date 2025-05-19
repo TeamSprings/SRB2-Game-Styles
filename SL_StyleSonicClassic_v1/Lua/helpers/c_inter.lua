@@ -27,7 +27,7 @@ function helper.Y_GetPerfectBonus(rings, perfectb, totrings)
 end
 
 function helper.Y_GetTimeBonus(time)
-	local secs = time/TICRATE
+	local secs = time / TICRATE
 	local result
 
 	if (secs <  30) then     --[[   :30 ]] result = 50000
@@ -68,7 +68,7 @@ function helper.Y_CalculateAllScore(p)
 		return helper.Y_GetRingsBonus(p.rings)
 	else
 		local ring_bonus = helper.Y_GetRingsBonus(p.rings)
-		local time_bonus = helper.Y_GetTimeBonus(p.realtime + (p.style_additionaltime or 0))
+		local time_bonus = helper.Y_GetTimeBonus(max(p.realtime + (p.style_additionaltime or 0) - (p.styles_cutscenetime_prize or 0), 0))
 		local perfct_bonus = max(helper.Y_GetPreCalcPerfectBonus(p.rings), 0)
 
 		return ring_bonus + time_bonus + perfct_bonus

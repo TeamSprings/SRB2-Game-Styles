@@ -5,9 +5,17 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
+	TODO: Make sure to copy paste & document Music Swap
+
 ]]
 
 local Options = tbsrequire('helpers/create_cvar')
+
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local swaphook = 	api:addHook("MusicSwap")
 
 local Music = {
 	-- Looping themes
@@ -160,6 +168,8 @@ addHook("MusicChange", function(oldname, newname, mflags, looping, position, pre
 		end
 
 		our_track = true
+
+		swaphook(oldname, newname, Music[newname], forced_looping, forced_prefadems, forced_fadeinms)
 	end
 
 	old_typetrack = current_typetrack

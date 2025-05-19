@@ -16,6 +16,14 @@ local springtroll_cv = CV_RegisterVar{
 	PossibleValue = {disabled=0, enabled=1}
 }
 
+local boostvisuals_cv = CV_RegisterVar{
+	name = "gba_advance2boostvisuals",
+	defaultvalue = "enabled",
+	flags = CV_NETVAR,
+	PossibleValue = {disabled=0, enabled=1}
+}
+
+
 local afterimage_cv = CV_RegisterVar{
 	name = "gba_supereffects",
 	defaultvalue = "enabled",
@@ -42,6 +50,7 @@ states[supersparkles] = {
 
 local angle_triggerfall = ANG1*6
 local angle_wholerange = angle_triggerfall*2
+local speed_threshold = 5*FRACUNIT
 
 addHook("PlayerThink", function(p)
 	if not p.mo then return end
@@ -75,19 +84,54 @@ addHook("PlayerThink", function(p)
 				sparkle.state = supersparkles
 			end
 		end
-	elseif p.powers[pw_invulnerability] then
-		if not (leveltime % 12) then
-			local radius = p.mo.radius/FRACUNIT
-			local height = p.mo.height/FRACUNIT
+	else
+		if boostvisuals_cv.value
+		and ((p.speed > skins[p.mo.skin].normalspeed + speed_threshold)
+		or (p.styles_advanceboost and p.speed > skins[p.mo.skin].normalspeed - speed_threshold/2)) then
+			if p.styles_advanceboosttimer and p.styles_advanceboosttimer > TICRATE then
+				if not (leveltime % 5) then
+					P_SpawnGhostMobj(p.mo)
+				end
 
-			local sparkle = P_SpawnMobjFromMobj(p.mo,
-				P_RandomRange(-radius, radius) * FRACUNIT,
-				P_RandomRange(-radius, radius) * FRACUNIT,
-				P_RandomRange(-height/4, height) * FRACUNIT,
-			MT_PARTICLE)
+				if not (leveltime % 3) then
+					p.mo.colorized = true
+				else
+					p.mo.colorized = false
+				end
 
-			sparkle.fuse = TICRATE/2
-			sparkle.state = supersparkles
+				if not p.styles_advanceboost then
+					S_StartSound(p.mo, sfx_zoom)
+					p.styles_advanceboost = true
+				end
+			else
+				if P_IsObjectOnGround(p.mo) then
+					p.styles_advanceboosttimer = p.styles_advanceboosttimer ~= nil and $ + 1 or 0
+				end
+			end
+		else
+			if p.styles_advanceboost then
+				p.mo.colorized = false
+				p.styles_advanceboost = false
+			end
+
+			p.styles_advanceboosttimer = 0
+		end
+
+
+		if p.powers[pw_invulnerability] then
+			if not (leveltime % 12) then
+				local radius = p.mo.radius/FRACUNIT
+				local height = p.mo.height/FRACUNIT
+
+				local sparkle = P_SpawnMobjFromMobj(p.mo,
+					P_RandomRange(-radius, radius) * FRACUNIT,
+					P_RandomRange(-radius, radius) * FRACUNIT,
+					P_RandomRange(-height/4, height) * FRACUNIT,
+				MT_PARTICLE)
+
+				sparkle.fuse = TICRATE/2
+				sparkle.state = supersparkles
+			end
 		end
 	end
 

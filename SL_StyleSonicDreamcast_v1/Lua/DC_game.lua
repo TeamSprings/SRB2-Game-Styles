@@ -316,10 +316,12 @@ local function G_StylesTallyBackend(p)
 					if p.styles_tallytimer == 11*TICRATE then
 						p.styles_tallytrack = "_ADVCLEAR"
 
-						P_PlayJingleMusic(p, p.styles_tallytrack, 0, false)
+						S_StopMusic(p)
+						S_ChangeMusic(p.styles_tallytrack, false, p, 0, 0, 0, 0)
+
 						p.styles_tallyposms = 0
 						p.styles_tallystoplooping = nil
-						p.styles_tallysoundlenght = S_GetMusicLength()
+						p.styles_tallysoundlenght = S_GetMusicLength() or 0
 
 						setuphook(p.realmo and p.realmo.skin or p.skin, p)
 					elseif p.styles_tallytimer < 11*TICRATE then

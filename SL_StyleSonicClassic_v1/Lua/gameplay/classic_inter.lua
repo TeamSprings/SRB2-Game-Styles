@@ -20,6 +20,7 @@ local api = tbsrequire 'styles_api'
 -- Hooks for API
 
 local setuphook = 	api:addHook("TallySetup")
+local thinkhook = 	api:addHook("TallyThink")
 local endhook = 	api:addHook("TallyEnd")
 local skiphook = 	api:addHook("TallySkip")
 local prerankhook = api:addHook("PreRankSetup") -- Unused for other styles
@@ -305,7 +306,7 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallytrack = getTrack
 					p.styles_tallyposms = 0
 					p.styles_tallystoplooping = nil
-					p.styles_tallysoundlenght = S_GetMusicLength()
+					p.styles_tallysoundlenght = S_GetMusicLength() or 0
 
 					p.mo.flags = $|MF_NOCLIPTHING
 
@@ -361,6 +362,8 @@ local function G_StylesTallyBackend(p)
 							end
 						end
 					end
+
+					thinkhook(p.realmo and p.realmo.skin or p.skin, p, p.styles_tallytimer, p.styles_tallyendtime)
 
 					p.styles_tallytimer = $+1
 

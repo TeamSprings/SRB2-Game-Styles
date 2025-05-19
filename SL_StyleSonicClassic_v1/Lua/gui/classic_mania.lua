@@ -116,32 +116,35 @@ return {
 			local scale = v.dupx()
 			local intwidth = v.width() / scale
 
-			if t <= TICRATE/8 then
-				v.fadeScreen(fade, 31)
-			end
+			if p.styles_entercut_timer == nil then
 
-			local progress = title_lenght * (t - TICRATE/9)
-
-			if t <= titlebgpullaway then
-				local check = progress - title_delay4
-
-				if check < FRACUNIT then
-					fillstretch(v, 100, progress, colors[5])
-					fillstretch(v, 100, progress - title_delay1, colors[4])
-					fillstretch(v, 100, progress - title_delay2, 51)
-					fillstretch(v, 100, progress - title_delay3, colors[6])
+				if t <= TICRATE/8 then
+					v.fadeScreen(fade, 31)
 				end
 
-				fillstretch(v, 100, progress - title_delay4, colors[2])
+				local progress = title_lenght * (t - TICRATE/9)
 
-				local line_1_x = ease.linear(clamping(0, t-9, 9), -intwidth/2, intwidth+intwidth/2)
+				if t <= titlebgpullaway then
+					local check = progress - title_delay4
 
-				if line_1_x ~= intwidth+intwidth/2 then
-					v.drawFill(line_1_x, 169, 130, 9, 1|V_SNAPTOLEFT)
-					v.drawFill(intwidth-line_1_x, 137, 112, 17, 31|V_SNAPTOLEFT)
+					if check < FRACUNIT then
+						fillstretch(v, 100, progress, colors[5])
+						fillstretch(v, 100, progress - title_delay1, colors[4])
+						fillstretch(v, 100, progress - title_delay2, 51)
+						fillstretch(v, 100, progress - title_delay3, colors[6])
+					end
+
+					fillstretch(v, 100, progress - title_delay4, colors[2])
+
+					local line_1_x = ease.linear(clamping(0, t-9, 9), -intwidth/2, intwidth+intwidth/2)
+
+					if line_1_x ~= intwidth+intwidth/2 then
+						v.drawFill(line_1_x, 169, 130, 9, 1|V_SNAPTOLEFT)
+						v.drawFill(intwidth-line_1_x, 137, 112, 17, 31|V_SNAPTOLEFT)
+					end
+				else
+					cuttriangle(v, 160, (t - titlebgpullaway) * titlebgpullstep, colors[2])
 				end
-			else
-				cuttriangle(v, 160, (t - titlebgpullaway) * titlebgpullstep, colors[2])
 			end
 
 			if t > tiltappear then
@@ -221,36 +224,44 @@ return {
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
 		if p and p.mo then
+			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
+			local lives_y = hudinfo[HUD_LIVES].y
+
+			if lifepos > 1 then
+				lives_f = ($|V_SNAPTORIGHT|V_SNAPTOTOP) &~ (V_SNAPTOLEFT|V_SNAPTOBOTTOM)
+				lives_x = 281-hudinfo[HUD_LIVES].x-hide_offset_x
+				lives_y = 184-hudinfo[HUD_LIVES].y
+			end
 
 			local skin_name = string.upper(skins[p.mo.skin].name)
 			local patch_name = "STYLES_MALIFE_"..skin_name
 			local patch_s_name = "STYLES_SMALIFE_"..skin_name
 
 			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_s_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, lives_y+11, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.cachePatch(patch_name), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, lives_y+11, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			else
-				v.draw((lives_x+9), (hudinfo[HUD_LIVES].y+13), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
+				v.draw((lives_x+9), (lives_y+13), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_BLINK, SKINCOLOR_PITCHBLACK))
 				for i = 1, 4 do
-					v.draw((lives_x+9+pos[i][1]), (hudinfo[HUD_LIVES].y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_ALLWHITE))
+					v.draw((lives_x+9+pos[i][1]), (lives_y+11+pos[i][2]), v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_ALLWHITE))
 				end
 
-				v.draw(lives_x+9, hudinfo[HUD_LIVES].y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
+				v.draw(lives_x+9, lives_y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, 'MATNUM', (lives_x+21)*FRACUNIT, (hudinfo[HUD_LIVES].y+2)*FRACUNIT, FRACUNIT, 'X'..p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "left")
+				drawf(v, prefix..'TNUM', (lives_x+21)*FU, (lives_y+2)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
-				v.draw(lives_x+22, hudinfo[HUD_LIVES].y, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
+				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
 		end
 	end,
 
-	tallytitle = function(v, p, offsetx)
+	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
 
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
@@ -309,7 +320,7 @@ return {
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
-			local skin_name = nametrim(string.upper(skin.realname))
+			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname))
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 
 			drawf(v, "MATAFNT", (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_2, "right", 1)

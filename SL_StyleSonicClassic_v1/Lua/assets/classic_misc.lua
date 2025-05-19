@@ -7,9 +7,13 @@ Contributors: Skydusk
 
 ]]
 
--- BUG: FIX EXPLOSIONS AT NIGHTS CAPSULE
-
 local Options = tbsrequire('helpers/create_cvar')
+
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local swaphook = 	api:addHook("SwapMisc")
 
 --
 -- Checkpoint Switching!
@@ -96,6 +100,7 @@ local sign_cv = sign_opt.cv
 local signmove_opt = Options:new("sign_movement", "assets/tables/sprites/sign", nil, CV_NETVAR)
 local signmove_cv = signmove_opt.cv
 
+-- TODO: Multiple behaviors
 addHook("MobjThinker", function(a)
 	if signmove_cv.value then
 		if not a.style_spin then
@@ -247,6 +252,8 @@ addHook("ThinkFrame", do
 
 
 		switch = false
+
+		swaphook("Generic")
 	end
 end)
 

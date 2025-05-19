@@ -8,10 +8,16 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
-TODO: FOF checking
-TODO: 4th level of safety check, 1st checkpoint
+TODO: Copypaste Events & Document
 
 ]]
+
+local api = tbsrequire 'styles_api'
+
+-- Hooks for API
+
+local specialstage_saveevent = 		api:addHook("SpecialEntry")
+local specialstage_returnevent = 	api:addHook("SpecialReturn")
 
 local giantring = freeslot("S_GIANTRING_CLASSIC")
 states[giantring] = {
@@ -91,7 +97,9 @@ local entrance_opt = Options:new("specialentrance", "gameplay/cvars/specialtoken
 		init = nil
 	else
 		if multiplayer then
-			CONS_Printf(displayplayer, "[Classic Styles] This console variable is disabled in multiplayer.")
+			if consoleplayer == displayplayer then
+				print("[Classic Styles] This console variable is disabled in multiplayer.")
+			end
 		else
 			-- first of many cheating measures
 			if change_var == -1 or anotherlvl then
@@ -103,6 +111,10 @@ local entrance_opt = Options:new("specialentrance", "gameplay/cvars/specialtoken
 		change_var = var.value
 	end
 end, CV_NETVAR)
+
+rawset(_G, "StylesC_SPE", function()
+	return special_entrance
+end)
 
 local entrance_cv = entrance_opt.cv
 
@@ -120,7 +132,7 @@ local function P_GiantRingCheck(a)
 		local height = a.height * P_MobjFlip(a)
 
 		-- Mappers can disable it's size changes
-		if not (a.spawnpoint and a.spawnpoint.args[3]) then
+		if not (a.styles_nochecks or (a.spawnpoint and a.spawnpoint.args[3])) then
 			if (a.ceilingz - a.z) >= height
 			and (a.z - a.floorz) < height then
 				return
@@ -190,7 +202,6 @@ local function SP_SaveState(mobj, toucher)
 			storage.p2flags2 = secondarydisplayplayer.mo.flags2
 			storage.p2eflags = secondarydisplayplayer.mo.eflags
 			storage.player2 = true
-
 		end
 
 		if not maps_data[gamemap].delete then
@@ -200,6 +211,8 @@ local function SP_SaveState(mobj, toucher)
 		if mobj.type == MT_TOKEN and mobj.spawnpoint and mobj.spawnpoint.valid then
 			table.insert(maps_data[gamemap].delete, #mapthing)
 		end
+
+		specialstage_saveevent(mobj.type, storage, last_map)
 	end
 
 	last_map = gamemap
@@ -245,11 +258,16 @@ local function SP_LoadState(map)
 				if subsector and subsector.sector then
 					local sector = subsector.sector
 
-					if sector.damagetype > 0 and displayplayer.starpostnum > 0 then
+					if (sector.damagetype > 0 
+					or (displayplayer.mo.floorrover and displayplayer.mo.floorrover.sector and displayplayer.mo.floorrover.sector.damagetype > 0)
+					or (displayplayer.mo.ceilingrover and displayplayer.mo.ceilingrover.sector and displayplayer.mo.ceilingrover.sector.damagetype > 0))
+					and displayplayer.starpostnum > 0 then
 						P_SetOrigin(displayplayer.mo, displayplayer.starpostx, displayplayer.starposty, displayplayer.starpostz)
 						displayplayer.mo.angle = data.starpostangle
 						displayplayer.mo.scale = data.starpostscale
-					elseif sector.damagetype == 0 then
+					elseif sector.damagetype == 0
+					or (displayplayer.mo.floorrover and displayplayer.mo.floorrover.sector and displayplayer.mo.floorrover.sector.damagetype > 0)
+					or (displayplayer.mo.ceilingrover and displayplayer.mo.ceilingrover.sector and displayplayer.mo.ceilingrover.sector.damagetype > 0)	then
 						P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
 						displayplayer.mo.angle = data.angle
 						displayplayer.mo.scale = data.scale
@@ -308,11 +326,16 @@ local function SP_LoadState(map)
 				if subsector and subsector.sector then
 					local sector = subsector.sector
 
-					if sector.damagetype > 0 and secondarydisplayplayer.starpostnum > 0 then
+					if ((sector.damagetype > 0)
+					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
+					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0))					
+					and secondarydisplayplayer.starpostnum > 0 then
 						P_SetOrigin(secondarydisplayplayer.mo, secondarydisplayplayer.starpostx, secondarydisplayplayer.starposty, secondarydisplayplayer.starpostz)
 						secondarydisplayplayer.mo.angle = data.starpostangle
 						secondarydisplayplayer.mo.scale = data.starpostscale
-					elseif sector.damagetype == 0 then
+					elseif sector.damagetype == 0 
+					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
+					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0) then
 						P_SetOrigin(secondarydisplayplayer.mo, data.x, data.y, data.z)
 						secondarydisplayplayer.mo.angle = data.angle
 						secondarydisplayplayer.mo.scale = data.scale
@@ -367,6 +390,8 @@ local function SP_LoadState(map)
 					mobj.state = S_STARPOST_FLASH
 				end
 			end
+
+			specialstage_returnevent("Generic", data)
 		else
 			displayplayer.style_additionaltime = 0
 			if splitscreen and secondarydisplayplayer then

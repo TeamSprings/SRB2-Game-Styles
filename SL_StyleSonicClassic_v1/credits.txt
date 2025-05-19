@@ -32,3 +32,8 @@ Special Thanks:
     "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
     "Team Blue Spring"
     "STJR"
+
+
+-- TODO: FINISH ALL ICONS
+-- TODO: ADD CD INTERMISSION FONT
+-- TODO: SPLIT SRB2 AND SONIC 2 INTERMISSION FONT FOR VANILLA SUPPORT

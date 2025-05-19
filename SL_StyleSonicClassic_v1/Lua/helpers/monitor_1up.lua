@@ -86,6 +86,8 @@ local function New_1upThinker(actor)
 	else
 		actor.overlay.flags2 = $ &~ MF2_DONTDRAW
 	end
+
+	actor.overlay.alpha = actor.alpha
 end
 
 return New_1upThinker

@@ -12,12 +12,16 @@ local function selfipairs(t, type, ...)
 	local returns = false
 
 	for _,v in ipairs(t.global) do
-		returns = v(...) and true or false
+		local acv = v(...)
+
+		returns = acv == nil and returns or acv
 	end
 
 	if t.specifics[type] then
 		for _,v in ipairs(t.specifics[type]) do
-			returns = v(...) and true or false
+			local acv = v(...)
+
+			returns = acv == nil and returns or acv
 		end
 	end
 
@@ -42,12 +46,12 @@ end
 -- adds event to hooked part
 function module:event(id, func, specifics)
 	if not hooks[id] then
-		print("[Styles API] Hook warning: Invalid \'"..tostring(id).."\' Hook")
+		Style_DebugPrint("[Styles API] Hook warning: Invalid \'"..tostring(id).."\' Hook")
 		return
 	end
 
 	if type(func) ~= "function" then
-		print("[Styles API] Hook warning: Not a function or function is simply missing")
+		Style_DebugPrint("[Styles API] Hook warning: Not a function or function is simply missing")
 		return
 	end
 

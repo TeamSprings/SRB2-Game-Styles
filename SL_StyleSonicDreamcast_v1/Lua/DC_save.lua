@@ -7,72 +7,109 @@ Contributors: Skydusk
 
 ]]
 
---
+---@class IOHandler
+local handler = {
+	file = "",
+	registry = {},
+	pointer = nil,
+}
 
-addHook("GameQuit", function(quit)
-	if not quit then return end
-	local finalpos = 0
-	local forced_variables = {
-		index = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		"dc_endtally",
-		"dc_replaceshields",
-		"dc_ringboxrandomizer",
-		"dc_itembox",
-		"dc_keystyle",
-		"dc_checkpoints",
-		"dc_shields",
-		"dc_miscassets",
-		"dc_itemboxstyle",
-		"dc_playereffects",
-		"dc_hud_rankdisplay",
-	}
+--- Registers a CVAR.
+---@param priority number The priority of the CVAR (lower values are loaded first).
+---@param ... any Parameters to pass to the original CV_RegisterVar function.
+---@return consvar_t|nil any The registered CVAR, or nil if registration failed.
+function handler:register(priority, ...)
+	local cvar = handler.pointer(...)
 
-	local check = io.openlocal("client/bluespring/styles/adv_cvars.dat", "r+")
-	if check then
-		for line in check:lines() do
-			local w = line:match("^([%w]+)")
-			for k,v in ipairs(forced_variables) do
-				if v == w then
-					forced_variables.index[k] = tonumber(check:seek("cur"))+2
-				end
-			end
-		end
-		local finalpos = tonumber(check:seek("end"))
-		check:close()
+	if cvar then
+		handler.registry[cvar.name] = {cvar = cvar, priority = priority or 0};
+
+		return cvar;
+	else
+		Style_DebugPrint("[Game Styles IO] Failed to register CVAR");
+	end
+end
+
+--- Saves the CVAR values to a file.
+---@param savefile string? The path to the save file. If nil, uses the default file.
+function handler:save(savefile)
+	savefile = savefile or self.file
+
+	local string = ""
+
+	for name, struct in pairs(handler.registry) do
+		string = $ .. name .. " " .. struct.cvar.value .. "\n"
 	end
 
-    local file = io.openlocal("client/bluespring/styles/adv_cvars.dat", "w")
-	if file then
-		for k,v in ipairs(forced_variables) do
-			file:seek("set", forced_variables.index[k] == 1 and finalpos or forced_variables.index[k]-2)
-			file:write(v+" "+CV_FindVar(v).value+"\n")
-		end
+	if string then
+		local file = io.openlocal(savefile, "w")
+
+		file:seek("set", 0)
+		file:write(string)
 		file:close()
 	end
-end)
+end
 
-local function LoadConfig()
-	local loadfile = io.openlocal("client/bluespring/styles/adv_cvars.dat", "r+")
+function handler.cvar_descpriotity(a, b)
+	return a.priority > b.priority;
+end
 
-	if loadfile then
-		loadfile:seek("set", 0)
-		for line in loadfile:lines() do
-			local tab = {}
+--- Loads the CVAR values from a file.
+---@param savefile string? The path to the load file. If nil, uses the default file.
+function handler:load(savefile)
+	savefile = savefile or self.file
 
+	local data = io.openlocal(savefile, "r+");
+
+	local cache = {};
+
+	if data then
+		data:seek("set", 0);
+
+		for line in data:lines() do
+			local tokens = {};
+
+			-- Spliting lines
 			for w in string.gmatch(line, "%S+") do
-				table.insert(tab, w)
+				table.insert(tokens, w);
 			end
 
-			if tab and tab[1] and tab[2] then
-				local cvar = CV_FindVar(tab[1])
-				if cvar and (not ((cvar.flags & CV_NETVAR) and multiplayer) or isserver) then
-					CV_Set(cvar, tab[2])
+			-- Loading values
+			if tokens and tokens[1] and tokens[2] then
+				local struct = self.registry[tokens[1]];
+
+				if struct then
+					local cvar = struct.cvar;
+
+					if cvar ~= nil and (not ((cvar.flags & CV_NETVAR) and multiplayer) or isserver) then
+						table.insert(cache, {value = tokens[2], cvar = cvar, priority = struct.priority});
+					end
 				end
 			else
 				continue
 			end
 		end
-		loadfile:close()
+
+		data:close();
+
+		if cache then
+			table.sort(cache, handler.cvar_descpriotity);
+
+			for _, struct in ipairs(cache) do
+				CV_Set(struct.cvar, struct.value);
+			end
+		else
+			Style_DebugPrint("[Game Styles IO] Invalid config file found, going with default values.");
+		end
+	else
+		Style_DebugPrint("[Game Styles IO] No config file found, going with default values.");
 	end
 end
-LoadConfig()
+
+addHook("GameQuit", function(quit)
+	if not quit then return end
+
+	handler:save();
+end)
+
+return handler;

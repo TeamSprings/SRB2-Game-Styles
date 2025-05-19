@@ -218,8 +218,6 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	else
 		local rank = rank_calculator(p)
 
-		rankhook(p.realmo and p.realmo.skin or p.skin, p, rank)
-
 		if rankamp ~= 3*FRACUNIT/2 then
 			local patch = v.cachePatch("SA2RANK"..rank)
 			v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),
@@ -227,7 +225,10 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 		end
 
 		-- rank sound
-		if p.styles_tallytimer == 2*TICRATE then S_StartSound(nil, sfx_rank, p) end
+		if p.styles_tallytimer == 2*TICRATE then
+			S_StartSound(nil, sfx_rank, p)
+			rankhook(p.realmo and p.realmo.skin or p.skin, p, rank)
+		end
 	end
 
 	return true

@@ -23,6 +23,7 @@ local trx1, trx2, try
 
 
 return{
+	-- FIX SONIC 2 TITLECARD FOR CUTSCENES -> EASING
 	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
@@ -93,11 +94,12 @@ return{
 		end
 	end,
 
-	tallytitle = function(v, p, offsetx)
+	--TODO: AUTOADJUSTING FOR NAME
+	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
 
 		if mo then
-			local skin_name = string.lower(skins[mo.skin].realname)
+			local skin_name = string.lower((overwrite and overwrite or skins[mo.skin].realname))
 
 			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", 0)
 		else

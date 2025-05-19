@@ -10,6 +10,7 @@ Contributors: Skydusk
 freeslot("SPR_MONITORS_CLASSIC",  "SPR_MONITORS_GOLDEN", "SPR_MONITORS_BLUE", "SPR_MONITORS_RED",
 "S_DUMMYMONITOR", "S_DUMMYGMONITOR", "S_DUMMYBMONITOR", "S_DUMMYRMONITOR")
 
+local PolishStyles = tbsrequire('classic_polish')
 local Options = tbsrequire('helpers/create_cvar')
 
 local life_up_thinker = tbsrequire 'helpers/monitor_1up'
@@ -107,6 +108,9 @@ local function P_SpawnItemBox(a)
 	spawnhook(a.type, a, a.item, a.caps)
 end
 
+local static_anim = {0, 0, 0, 2, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 2}
+local static_maniaanim = {0, 0, 3, 2, 2, 4, 2, 3, 2, 0, 3, 2, 4, 0, 3, 2, 3, 2, 0, 2, 3, 0, 3, 0, 0, 0}
+
 local function P_MonitorThinker(a)
 	if (a and a.valid and a.info.flags & MF_MONITOR) then
 		if not a.originscale then
@@ -127,14 +131,26 @@ local function P_MonitorThinker(a)
 				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * (icon_height + (flip and -16 or 0)))*a.item.spriteyscale)
 				a.item.rollangle = a.rollangle
 
+				local statict = static_maniaanim[(leveltime % #static_maniaanim) + 1]
+
 				-- Static Animation
-				if (leveltime % 3) then
+				if not statict then
 					a.item.flags2 = $ &~ MF2_DONTDRAW
+					a.item.alpha = FRACUNIT
 					a.frame = frame_offset
 				else
 					a.item.flags2 = $|MF2_DONTDRAW
-					a.frame = frame_offset+1
 
+					if statict > 1 then
+						a.frame = frame_offset+1
+
+						if statict > 2 then
+							a.item.flags2 = $ &~ MF2_DONTDRAW
+							a.item.alpha = FRACUNIT/(statict-1)
+						end
+					else
+						a.frame = frame_offset
+					end
 				end
 
 				-- Mario Monitors
@@ -234,7 +250,7 @@ local function P_MonitorDeath(a, d, s)
 			elseif mobjinfo[a.type].damage == MT_UNKNOWN then
 				A_MonitorPop(a, 0, 0)
 			else
-				boxicon = P_SpawnMobjFromMobj(a.item, 0,0,0, mobjinfo[a.type].damage)
+				boxicon = P_SpawnMobjFromMobj(a.item, 0,0, 3 * a.momz, mobjinfo[a.type].damage)
 				boxicon.scale = a.item.scale
 				boxicon.target = a.target
 
@@ -297,6 +313,7 @@ end
 --
 
 addHook("MobjSpawn", P_SpawnItemBox, MT_1UP_BOX)
+addHook("MobjThinker", PolishStyles.fadingMonitorStateNull, mobjinfo[MT_1UP_BOX].damage)
 addHook("MobjThinker", function(a)
 	P_MonitorThinker(a)
 	if a and a.valid and a.health > 0 and a.item then
@@ -311,6 +328,7 @@ addHook("MobjRemoved", P_MonitorRemoval, MT_1UP_BOX)
 --
 
 addHook("MobjSpawn", P_SpawnItemBox, MT_MYSTERY_BOX)
+addHook("MobjThinker", PolishStyles.fadingMonitorStateNull, mobjinfo[MT_MYSTERY_BOX].damage)
 addHook("MobjThinker", function(a)
 	if Disable_ItemBox then return end
 
@@ -322,6 +340,7 @@ addHook("MobjThinker", function(a)
 end, MT_MYSTERY_BOX)
 addHook("MobjDeath", P_MonitorDeath, MT_MYSTERY_BOX)
 addHook("MobjRemoved", P_MonitorRemoval, MT_MYSTERY_BOX)
+
 
 --
 --	Monitor Register
@@ -337,6 +356,11 @@ local function P_AddMonitor(mobjtype)
 		addHook("MobjThinker", P_MonitorThinker, mobjtype)
 		addHook("MobjDeath", P_MonitorDeath, mobjtype)
 		addHook("MobjRemoved", P_MonitorRemoval, mobjtype)
+
+		if mobjinfo[mobjtype].damage then
+			addHook("MobjThinker", PolishStyles.fadingMonitorStateNull, mobjinfo[mobjtype].damage)
+		end
+
 		monitor_database[mobjtype] = 1
 	end
 end
@@ -389,6 +413,7 @@ addHook("AddonLoaded", function()
 			P_SpawnItemBox(a)
 			a.styles_special_case = encore_thinker.pop
 		end, MT_ENC_BOX)
+		addHook("MobjThinker", PolishStyles.fadingMonitorStateNull, mobjinfo[MT_ENC_BOX].damage)
 		addHook("MobjThinker", function(a)
 			P_MonitorThinker(a)
 			if a and a.valid and a.health > 0 and a.item and a.item.valid then

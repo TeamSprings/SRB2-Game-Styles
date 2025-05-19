@@ -9,6 +9,8 @@ Contributors: Skydusk
 ]]
 
 local fontregistry = {}
+local exceptions = {}
+local monospace = {}
 
 local FRACUNIT = FRACUNIT
 local FRACBITS = FRACBITS
@@ -35,7 +37,14 @@ local function V_RegisterFont(v, font, selectchar)
 	fontregistry[font] = {}
 	local cache = fontregistry[font]
 
-	for byte, char in ipairs(ASCII) do
+	for byte = 0, 128 do
+		local char = ASCII[byte]
+
+		if exceptions[font] and exceptions[font][char] then
+			cache[char] = v.cachePatch(exceptions[font])
+			continue
+		end
+
 		local char_check = font..char
 		if not v.patchExists(char_check) then
 			local byte_check = font..byte
@@ -53,13 +62,25 @@ local function V_RegisterFont(v, font, selectchar)
 	return fontregistry[font][selectchar]
 end
 
+local function V_RegisterException(font, char, exception)
+	if not exceptions[font] then
+		exceptions[font] = {}
+	end
+
+	fontregistry[char] = exception
+end
+
+local function V_RegisterMonospace(font, len)
+	monospace[font] = len
+end
+
 local function V_CachePatches(v, patch, str, font, val, padding, i)
 	local char = strsub(str, i, i)
 
 	local symbol = fontregistry[font] and (fontregistry[font][char]
 	and fontregistry[font][char]
 	or V_RegisterFont(v, font, char)) or V_RegisterFont(v, font, char)
-	return {patch = symbol, width = symbol.width+padding}
+	return {patch = symbol, width = (monospace[font] or symbol.width)+padding}
 end
 
 local function V_FontDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol)
@@ -156,4 +177,4 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 	end
 end
 
-return {draw = V_FontDrawer, lenght = V_GetCharLenght, text_lenght = V_GetTextLenght, drawanim = V_FontAnimDrawer}
+return {draw = V_FontDrawer, exception = V_RegisterException, monospace = V_RegisterMonospace, lenght = V_GetCharLenght, text_lenght = V_GetTextLenght, drawanim = V_FontAnimDrawer}

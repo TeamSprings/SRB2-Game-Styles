@@ -37,6 +37,17 @@ function helper.slopeRotBaseReturn(mo, slope)
 	return helper.cameraSpriteRotReturn(mo, slope.xydirection, 0, slope.zangle)
 end
 
+function helper.slopeRotBaseReturnSplice(mo, slope, splice)
+	if not slope then return 0 end
+	local zangle = (AngleFixed(slope.zangle) / splice) * splice
+
+	if zangle then
+		return helper.cameraSpriteRotReturn(mo, slope.xydirection, 0, FixedAngle(zangle))
+	else
+		return 0
+	end
+end
+
 function helper.slopeRotBase(mo, slope)
 	-- Reset
 	if not slope then
