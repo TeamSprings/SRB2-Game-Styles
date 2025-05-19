@@ -15,10 +15,16 @@ Series of game modifications meant to turn SRB2 game feel to something more simi
 2) Gameplay changes,
 3) Audio changes,
 4) Visual changes,
-5) Game HUDs
-6) API
+5) Game HUDs,
+6) [API](https://github.com/TeamSprings/SRB2-Game-Styles/wiki/Add%E2%80%90on-Support)
 
 ## Current Styles
+
+There are no "planned" styles, side styles here are already featured in one way or another, even if inclusion is very tiny.
+"Side style" here is that they might get some content, however they are not the sole focus of this compilation. 
+
+Some of them will borderline be priority style, some of them will be featured as a few inclusions/changes.
+It is very flexible, some content even from game not mentioned here in this list might appear, like in case of borders of old Java classic official demakes in Dimps Style.
 
 ### Classic Style:
 
@@ -55,5 +61,7 @@ Series of game modifications meant to turn SRB2 game feel to something more simi
 
 ## Contribution
 
-As long it won't create any distress or would make sense, we are accepting any changes/additions. Be it major or minor, we do really not mind.
+As long it won't create any huge distress or it would make sense to include, we are accepting any changes/additions. 
+Be it major or minor - gameplay or anything inbetween, we do really not mind.
+
 Regardless of effect of the change, you can claim credit as a contributor.
