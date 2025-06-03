@@ -1,0 +1,69 @@
+name: Build PK3s from Folders
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Uses the latest Ubuntu runner environment.
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Checks out your repository code.
+
+    - name: Get commit message and sanitize for filename
+      id: commit_info # Assigns an ID to this step to reference its outputs later.
+      run: |
+        # Get the full commit message from the push event.
+        COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+
+        # Sanitize the commit message to create a valid and safe filename base.
+        # 1. Replace spaces with hyphens.
+        # 2. Convert to lowercase.
+        # 3. Remove any characters that are not alphanumeric, hyphens, underscores, or dots.
+        # 4. Truncate the name to a maximum of 50 characters to prevent overly long filenames.
+        SANITIZED_NAME=$(echo "$COMMIT_MESSAGE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-.' | head -c 50)
+
+        # Fallback: If the sanitized name ends up empty (e.g., commit message was just emojis),
+        # use the short commit SHA as a reliable fallback.
+        if [ -z "$SANITIZED_NAME" ]; then
+          SANITIZED_NAME="${{ github.sha_short }}"
+          echo "Sanitized name was empty, falling back to short SHA: $SANITIZED_NAME"
+        else
+          echo "Sanitized filename base: $SANITIZED_NAME"
+        fi
+
+        # Set the sanitized name as an output variable for subsequent steps.
+        echo "filename_base=$SANITIZED_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: Install zip utility
+      run: |
+        sudo apt-get update # Updates the package list.
+        sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
+
+    - name: Zip Folder 1 contents into PK3
+      # The 'working-directory' specifies that the 'zip' command should be executed from inside 'my_folder_1'.
+      # 'zip -r "../${{ steps.commit_info.outputs.filename_base }}_folder1.pk3" ./*'
+      #   - '-r': Recursively includes directories.
+      #   - '"../...pk3"': Specifies the output PK3 file path, placing it one directory up (in the repository root).
+      #   - './*': Zips all files and subdirectories directly within 'my_folder_1'.
+      run: zip -r "../L_ClassicStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+      working-directory: ./SL_StyleSonicClassic_v1 # <<-- IMPORTANT: Replace 'my_folder_1' with your actual first folder name.
+
+    - name: Zip Folder 2 contents into PK3
+      run: zip -r "../L_DimpsStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDimps_v1 # <<-- IMPORTANT: Replace 'my_folder_2' with your actual second folder name.
+
+    - name: Zip Folder 3 contents into PK3
+      run: zip -r "../L_AdventureStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDreamcast_v1 # <<-- IMPORTANT: Replace 'my_folder_3' with your actual third folder name.
+
+    - name: Upload PK3s as artifacts
+      uses: actions/upload-artifact@v4 # This action uploads the generated PK3 files as workflow artifacts.
+      with:
+        name: pk3-files # The name of the artifact bundle.
+        path: |
+          L_ClassicStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
+          L_DimpsStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
+          L_AdventureStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
+        # These paths specify which files to upload. They should match the names generated in the zip steps.
