@@ -4,11 +4,14 @@
     This might allow some light level changes to adjust some mod objects in certain levels
 
     TODO : (Will only do Vanilla and maybe MRCE, however anyone is free to add here anything)
+    TODO : Fix interactions between level editing and special entrances
+    TODO : Level end cutscenes
 
 --]]
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 local lvllib = tbsrequire 'libs/lib_emb_levelverification'
+local cutlib = tbsrequire 'libs/lib_emb_cutscene'
 
 local TRAPF_ENDLVL 	= 1
 local TRAPF_LIFT 	= 2
@@ -24,9 +27,9 @@ local function move_mapthing(id, x, y, z)
     if mapthings[id] and mapthings[id].mobj and mapthings[id].mobj.valid then
         local mobj = mapthings[id].mobj
         P_SetOrigin(mobj,
-        x == nil and mobj.x or (x * FRACUNIT),
-        y == nil and mobj.y or (y * FRACUNIT),
-        z == nil and mobj.z or (z * FRACUNIT))
+        x == nil and mobj.x or (x * FU),
+        y == nil and mobj.y or (y * FU),
+        z == nil and mobj.z or (z * FU))
     end
 end
 
@@ -53,83 +56,8 @@ local function player_lock(p)
 end
 
 local __data = {
-    [1] = { -- GFZ1
-
-        {
-            name = "Greenflower",
-            hash = -1131512167,
-
-            _func = function()
-				if not multiplayer and StylesC_SPE() == 3 then
-					local special_ring1 = get_mapthing(567)
-					special_ring1.styles_nochecks = true
-
-					delete_mapthing(233)
-					delete_mapthing(234)
-					delete_mapthing(235)
-					delete_mapthing(236)
-					delete_mapthing(237)
-					delete_mapthing(238)
-				end
-
-                --print("SUCCESS!")
-            end,
-
-            -- Cutscenes
-            _in = {
-                {   tics = 0, func = function(p, mo)
-						mo.styles_cutscenethink = {
-							P_SpawnMobj(448 * FRACUNIT,
-                            224 * FRACUNIT,
-                            192 * FRACUNIT,
-                            MT_EGGMOBILE)
-						}
-
-                        mo.styles_cutscenethink[1].state = S_INVISIBLE
-						mo.styles_cutscenethink[1].sprite = states[S_EGGMOBILE_STND].sprite
-						mo.styles_cutscenethink[1].frame = states[S_EGGMOBILE_STND].frame
-                        mo.styles_cutscenethink[1].angle = ANGLE_225
-
-						mo.styles_cutscenethink[1].flag = MF_SPECIAL|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY
-
-                        player_lock(p)
-					end
-                },
-                {   tics = 5 * TICRATE / 2, func = function(p, mo)
-                        local tic = FRACUNIT - ((p.styles_cutscene_tics * FRACUNIT) / (5 * TICRATE / 2))
-                        local x = ease.outsine(tic, 448 * FRACUNIT, 1024 * FRACUNIT)
-                        local y = ease.outsine(tic, 224 * FRACUNIT, 736 * FRACUNIT)
-                        local z = ease.outsine(tic, 192 * FRACUNIT, 224 * FRACUNIT)
-
-						mo.styles_cutscenethink[1].state = S_INVISIBLE
-						mo.styles_cutscenethink[1].sprite = states[S_EGGMOBILE_STND].sprite
-						mo.styles_cutscenethink[1].frame = states[S_EGGMOBILE_STND].frame
-                        mo.styles_cutscenethink[1].angle = ANGLE_45
-
-                        P_MoveOrigin(mo.styles_cutscenethink[1], x, y, z)
-
-                        player_lock(p)
-                    end
-                },
-                {   tics = TICRATE, func = function(p, mo)
-                        local tic = FRACUNIT - ((p.styles_cutscene_tics * FRACUNIT) / TICRATE)
-                        local x = ease.outsine(tic, 1024 * FRACUNIT, 1824 * FRACUNIT)
-
-						mo.styles_cutscenethink[1].state = S_INVISIBLE
-						mo.styles_cutscenethink[1].sprite = states[S_EGGMOBILE_STND].sprite
-						mo.styles_cutscenethink[1].frame = states[S_EGGMOBILE_STND].frame
-                        mo.styles_cutscenethink[1].angle = 0
-
-                        P_MoveOrigin(mo.styles_cutscenethink[1], x, 736 * FRACUNIT, 224 * FRACUNIT)
-                    end
-                },
-                {   tics = 0, func = function(p, mo)
-                        P_RemoveMobj(mo.styles_cutscenethink[1])
-                        mo.styles_cutscenethink = nil
-                    end
-                },
-            },
-        },
+    [1] = {
+        tbsrequire("gameplay/levels/gfz1"),
     },
 
 	[3] = { -- GFZ3
@@ -138,7 +66,7 @@ local __data = {
 			hash = -838659965,
 
 			_func = function()
-				local center = P_SpawnMobj(4470*FRACUNIT, 3688*FRACUNIT, 3552*FRACUNIT, MT_STYLES_EGGTR)
+				local center = P_SpawnMobj(4470*FU, 3688*FU, 3552*FU, MT_STYLES_EGGTR)
 				center.styles_flags = TRAPF_ENDLVL|TRAPF_LIFT
 				center.styles_tagged = 382
 				center.styles_list = {mapthings[112].mobj}
@@ -155,30 +83,6 @@ local __data = {
 			end,
 		}
 	},
-
-    [8] = { -- DSZ1
-		{
-			name = "Deep Sea",
-			hash = -888824694,
-
-            -- Cutscenes
-            _in = {
-                {   tics = 0, func = function(p, mo)
-                        P_SetOrigin(mo, mo.x, mo.y, mo.z + 256 * FRACUNIT)
-                        P_InstaThrust(mo, mo.angle, 35 * FRACUNIT)
-
-                        if p.mo then
-                            p.mo.state = S_PLAY_PAIN
-                        end
-                    end
-                },
-                {  tics = 3 * TICRATE / 2,
-                },
-            },
-		}
-
-
-    },
 
 	[22] = { -- EGZ1
 		{
@@ -232,6 +136,11 @@ addHook("MapLoad", function()
                     if not (multiplayer or modeattacking or leveltime)
                     and (sheet._in or sheet._out) then
 
+                        if type(sheet._out) == "function" then
+                            displayplayer.styles_exitcut = sheet._out(displayplayer)
+                        elseif type(sheet._out) == "table" then
+                            displayplayer.styles_exitcut = sheet._out
+                        end
 
 						if __playedmaps[gamemap] then
 							break
@@ -239,8 +148,11 @@ addHook("MapLoad", function()
 							__playedmaps[gamemap] = true
 						end
 
-						displayplayer.styles_entercut = sheet._in
-                        displayplayer.styles_exitcut = sheet._out
+                        if type(sheet._in) == "function" then
+                            displayplayer.styles_entercut = sheet._in(displayplayer)
+                        elseif type(sheet._in) == "table" then
+                            displayplayer.styles_entercut = sheet._in
+                        end
                     end
 
                     break
@@ -262,8 +174,8 @@ addHook("MapChange", function()
     displayplayer.styles_entercut = nil
     displayplayer.styles_exitcut = nil
 
-    displayplayer.styles_cutscene_tics = nil
-    displayplayer.styles_cutscene_seq = nil
+    displayplayer.styles_entercut_timer = nil
+    displayplayer.styles_entercut_etimer = nil
 end)
 
 ---@param p player_t
@@ -273,41 +185,23 @@ addHook("PlayerThink", function(p)
 	-- ENTER LEVEL CUTSCENES
 	--
 
-	if p.styles_entercut then
-        if not p.styles_cutscene_tics then
-            if p.styles_cutscene_seq == nil then
-                p.styles_cutscene_seq = 0
-            end
-
-            p.styles_cutscene_seq = $ + 1
-
-            if p.styles_entercut[p.styles_cutscene_seq] then
-                p.styles_cutscene_tics = p.styles_entercut[p.styles_cutscene_seq].tics
-
-                if p.styles_entercut[p.styles_cutscene_seq].func and p.realmo and p.realmo.valid then
-                    p.styles_entercut[p.styles_cutscene_seq].func(p, p.realmo)
-                end
-            else
-                p.styles_entercut = nil
-                p.styles_cutscene_tics = nil
-                p.styles_cutscene_seq = nil
-                p.styles_entercut_timer = 0
-                p.styles_entercut_etimer = 3*TICRATE
-
-                -- Well, it is kinda prize, though mostly cut cost of the cutscene time
-                p.styles_cutscenetime_prize = leveltime + p.styles_entercut_etimer
-            end
-
-
-        else
-            p.styles_cutscene_tics = $ - 1
-
-            if p.styles_entercut[p.styles_cutscene_seq].func and p.realmo and p.realmo.valid then
-                p.styles_entercut[p.styles_cutscene_seq].func(p, p.realmo)
-            end
+	if p.styles_entercut ~= nil then
+        if leveltime > TICRATE and p.cmd and p.cmd.buttons & BT_SPIN 
+        and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
+            local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
+            thrd:interupt()
         end
 
-        Styles_HideHud()
+        if p.teamsprings_scenethread and not p.teamsprings_scenethread.valid then
+            p.styles_entercut = nil
+            p.teamsprings_scenethread = nil
+
+            p.styles_entercut_timer = 0
+            p.styles_entercut_etimer = 3*TICRATE
+            p.styles_cutscenetime_prize = 3*TICRATE + leveltime
+        end
+
+        cutlib:newCutscene(p, p.styles_entercut)
     end
 
     if p.styles_entercut_timer ~= nil and p.styles_entercut_timer < p.styles_entercut_etimer then
@@ -317,5 +211,21 @@ addHook("PlayerThink", function(p)
             p.styles_entercut_timer = nil
             p.styles_entercut_etimer = nil
         end
+    end
+    
+    if p.styles_tallyendtime 
+    and p.styles_exitcut ~= nil and p.styles_tallytimer > p.styles_tallyendtime-1 then
+        if p.cmd and p.cmd.buttons & BT_SPIN 
+        and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
+            local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
+            thrd:interupt()
+        end        
+        
+        if p.teamsprings_scenethread and not p.teamsprings_scenethread.valid then
+            p.styles_exitcut = nil
+            p.teamsprings_scenethread = nil
+        end
+
+        cutlib:newCutscene(p, p.styles_exitcut)
     end
 end)

@@ -25,11 +25,11 @@ end)
 addHook("MobjSpawn", function(a)
 	if Disable_Capsules then return end
 
-	a.radius = 46*FRACUNIT
-	a.height = 88*FRACUNIT
+	a.radius = 46*FU
+	a.height = 88*FU
 	a.spaz = a.z
-	a.scale = $+FRACUNIT/6
-	P_SetOrigin(a, a.x*FRACUNIT, a.y*FRACUNIT, a.z*FRACUNIT-a.scale*200)
+	a.scale = $+FU/6
+	P_SetOrigin(a, a.x*FU, a.y*FU, a.z*FU-a.scale*200)
 	a.disty = -a.scale*200
 
 	for sector in sectors.iterate do
@@ -168,7 +168,7 @@ addHook("MobjThinker", function(a)
 
 
 
-		local z = a.subsector.sector.floorheight + FRACUNIT + (P_RandomKey((FixedMul(2*a.height/3, a.scale))/FRACUNIT) << FRACBITS)
+		local z = a.subsector.sector.floorheight + FU + (P_RandomKey((FixedMul(2*a.height/3, a.scale))/FU) << FRACBITS)
 		local fa = P_RandomRange(1,360) *ANG1
 		local ns = a.radius
 		local x = a.x + FixedMul(sin(fa), ns)
@@ -176,7 +176,7 @@ addHook("MobjThinker", function(a)
 		if (leveltime % 3)/2 then
 			local mo2 = P_SpawnMobj(x, y, z, MT_EXPLODE)
 			mo2.state = S_XPLD_EGGTRAP -- so the flickies don't lose their target if they spawn
-			ns = 2*FRACUNIT
+			ns = 2*FU
 			mo2.momx = FixedMul(sin(fa), ns)
 			mo2.momy = FixedMul(cos(fa), ns)
 			mo2.angle = fa
@@ -198,7 +198,7 @@ addHook("MobjCollide", function(a,mt)
 	if Disable_Capsules then return end
 	if mt.player and a.activatable == true then
 		local discenter = P_AproxDistance(a.x - mt.x, a.y - mt.y)
-		if discenter < 26*a.scale and a.z+a.height+10*FRACUNIT > mt.z then
+		if discenter < 26*a.scale and a.z+a.height+10*FU > mt.z then
 			a.activated = true
 			a.flags = $ &~ MF_NOCLIPTHING
 		end

@@ -28,8 +28,8 @@ return{
 
 		local lvlt = string.lower(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
-		local scale = FRACUNIT
-		local offset = 0 --(#lvlt)*FRACUNIT
+		local scale = FU
+		local offset = 0 --(#lvlt)*FU
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
 		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
@@ -47,26 +47,26 @@ return{
 
 		if t and t <= e then
 
-			local out = ease.outquad(clamping(e - titledur, t, e), 0, 400*FRACUNIT)
+			local out = ease.outquad(clamping(e - titledur, t, e), 0, 400*FU)
 
-			trx = ease.outquad(clamping(0, t, titledur), 400*FRACUNIT, 0) + out
-			trx2 = ease.outquad(clamping(titledel, t, titledur+titledel), 400*FRACUNIT, 0) + out
+			trx = ease.outquad(clamping(0, t, titledur), 400*FU, 0) + out
+			trx2 = ease.outquad(clamping(titledel, t, titledur+titledel), 400*FU, 0) + out
 
 			local mo = p.mo
 			if mo then
-				v.drawScaled(FixedMul(179*FRACUNIT, scale) + trx - offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(mo.skin, color_choice or mo.color))
+				v.drawScaled(FixedMul(179*FU, scale) + trx - offset/2, FixedMul(78*FU, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(mo.skin, color_choice or mo.color))
 			else
-				v.drawScaled(FixedMul(179*FRACUNIT, scale) + trx - offset/2, FixedMul(78*FRACUNIT, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(TC_DEFAULT, color_choice or p.skincolor))
+				v.drawScaled(FixedMul(179*FU, scale) + trx - offset/2, FixedMul(78*FU, scale), scale, v.cachePatch('SO1SPI'), 0, v.getColormap(TC_DEFAULT, color_choice or p.skincolor))
 			end
 
-			drawf(v, 'SO1FNT', FixedMul(231*FRACUNIT, scale) - trx - offset, FixedMul(76*FRACUNIT, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+			drawf(v, 'SO1FNT', FixedMul(231*FU, scale) - trx - offset, FixedMul(76*FU, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'SO1FNT', FixedMul(215*FRACUNIT, scale) - trx2 - offset, FixedMul(96*FRACUNIT, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+				drawf(v, 'SO1FNT', FixedMul(215*FU, scale) - trx2 - offset, FixedMul(96*FU, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
 
 			if act ~= "0" then
-				v.drawScaled(FixedMul(188*FRACUNIT, scale)+ trx2 - offset, FixedMul(118*FRACUNIT, scale), scale, v.cachePatch('SO1ACT'))
-				drawf(v, 'S1ANUM', FixedMul(215*FRACUNIT, scale) + trx2 - offset, FixedMul(97*FRACUNIT, scale), scale, string.upper(act), 0, v.getColormap(TC_DEFAULT, 1))
+				v.drawScaled(FixedMul(188*FU, scale)+ trx2 - offset, FixedMul(118*FU, scale), scale, v.cachePatch('SO1ACT'))
+				drawf(v, 'S1ANUM', FixedMul(215*FU, scale) + trx2 - offset, FixedMul(97*FU, scale), scale, string.upper(act), 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
 			v.drawString(160 - trx, 135, mapheaderinfo[gamemap].subttl, V_ALLOWLOWERCASE, "center")
@@ -134,16 +134,16 @@ return{
 		if mo then
 			local skin_name = skins[mo.skin].realname
 
-			drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 43*FRACUNIT, FRACUNIT, string.lower((overwrite and overwrite or skin_name).." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
+			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, string.lower((overwrite and overwrite or skin_name).." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
 		else
-			drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 43*FRACUNIT, FRACUNIT, "you have", 0, v.getColormap(TC_DEFAULT, 1), "center")
+			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, "you have", 0, v.getColormap(TC_DEFAULT, 1), "center")
 		end
 
-		drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 64*FRACUNIT, FRACUNIT, "passed", 0, v.getColormap(TC_DEFAULT, 1), "center")
+		drawf(v, 'SO1FNT', (160-offsetx)*FU, 64*FU, FU, "passed", 0, v.getColormap(TC_DEFAULT, 1), "center")
 
 		if act ~= "0" then
 			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
-			drawf(v, 'S1ANUM', (213-offsetx)*FRACUNIT, 67*FRACUNIT+FRACUNIT/2, FRACUNIT, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S1ANUM', (213-offsetx)*FU, 67*FU+FU/2, FU, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
@@ -164,7 +164,7 @@ return{
 			end
 		end
 
-		drawf(v, 'SO1FNT', (160-offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, str, 0, color2, "center")
+		drawf(v, 'SO1FNT', (160-offsetx)*FU, 57*FU, FU, str, 0, color2, "center")
 	end,
 
 	tallybg = function(v, p, offsetx, color, color2, fading)

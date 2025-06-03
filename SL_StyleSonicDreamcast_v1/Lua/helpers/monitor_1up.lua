@@ -75,7 +75,7 @@ local function New_1upThinker(actor)
 
 		actor.overlay.skin = players[closestplayer].mo.skin
 		actor.overlay.state = S_PLAY_NBX1
-		actor.overlay.spriteyoffset = 4*FRACUNIT
+		actor.overlay.spriteyoffset = 4*FU
 		actor.overlay.frame = $|FF_PAPERSPRITE
 	end
 

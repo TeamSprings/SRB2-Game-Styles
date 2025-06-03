@@ -352,11 +352,11 @@ local MID_LINES = LINES/2
 local END_LINE_Y = 56+8*(LINES+1)
 
 local function fixedMulInt(int, fixedmultiplier)
-	return FixedInt(FixedMul(int * FRACUNIT, fixedmultiplier))
+	return FixedInt(FixedMul(int * FU, fixedmultiplier))
 end
 
 local function fixedDivInt(int, fixedmultiplier)
-	return FixedInt(FixedDiv(int * FRACUNIT, fixedmultiplier))
+	return FixedInt(FixedDiv(int * FU, fixedmultiplier))
 end
 
 

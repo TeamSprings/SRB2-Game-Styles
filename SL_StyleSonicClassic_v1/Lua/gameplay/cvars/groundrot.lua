@@ -1,8 +1,8 @@
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
-local GENESIS_ROT_DECS = 45*FRACUNIT
+local GENESIS_ROT_DECS = 45*FU
 local GENESIS_ROT_THR = tofixed('15.7')
-local MAXANGLE = 360*FRACUNIT
+local MAXANGLE = 360*FU
 
 local function GENESIS_ROT(a, stop)
 	if P_IsObjectOnGround(a) then
@@ -31,12 +31,12 @@ local function MANIA_ROT(a, stop)
 
 			if roll < GENESIS_ROT_THR
 			or roll > MAXANGLE-GENESIS_ROT_THR then
-				a.rollangle = ease.linear(FRACUNIT/3, a.rollangle, 0)
+				a.rollangle = ease.linear(FU/3, a.rollangle, 0)
 			else
-				a.rollangle = ease.linear(FRACUNIT/3, a.rollangle, aim)
+				a.rollangle = ease.linear(FU/3, a.rollangle, aim)
 			end
 		elseif not stop then
-			a.rollangle = ease.linear(FRACUNIT/8, a.rollangle, 0)
+			a.rollangle = ease.linear(FU/8, a.rollangle, 0)
 		end
 	elseif not stop then
 		a.rollangle = 0

@@ -43,7 +43,7 @@ return{
 
 
 			if G_GametypeUsesLives() then
-				drawf(v, 'XTTNUM', (lives_x+19)*FRACUNIT, (lives_y+3)*FRACUNIT, FRACUNIT, 'X'..p.lives, lives_f, colorprofile, "left")
+				drawf(v, 'XTTNUM', (lives_x+19)*FU, (lives_y+3)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

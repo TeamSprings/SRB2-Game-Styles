@@ -1,5 +1,5 @@
 return function(v, x, opening, color)
-	if opening > FRACUNIT then return end
+	if opening > FU then return end
 
 	local procentage = max(opening, 0)
 

@@ -13,7 +13,7 @@ end
 local function SpringBounce(line,mobj,sector)
 	mobj.momx = 0
 	mobj.momy = 0
-    mobj.momz = line.args[0]*FRACUNIT
+    mobj.momz = line.args[0]*FU
 	S_StartSound(mobj, sfx_advspr)
 	
 	if not mobj.player then return end

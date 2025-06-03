@@ -52,7 +52,7 @@ local function P_SpawnItemBox(a)
 	local icsprite = states[icstate].sprite
 	local icframe = states[icstate].frame
 
-	a.item = P_SpawnMobjFromMobj(a, 0,0, P_MobjFlip(a)*14*FRACUNIT, MT_FRONTTIERADUMMY)
+	a.item = P_SpawnMobjFromMobj(a, 0,0, P_MobjFlip(a)*14*FU, MT_FRONTTIERADUMMY)
 	a.item.state = S_INVISIBLE
 	a.item.sprite = icsprite
 	a.item.frame = icframe
@@ -95,7 +95,7 @@ local MonitorSprites = {
 local function P_MarioExistsThink(a, typepw)
 	if not mariocoins then return false end
 	-- Optimalization, INT32 feels too much tbh.
-	local marioconfirmed, maxdistance = false, 1000*FRACUNIT
+	local marioconfirmed, maxdistance = false, 1000*FU
 
 	if (mariocoins.value and typepw == 0) or (consoleplayer and consoleplayer.valid and IsMario(consoleplayer)) then
 		marioconfirmed = true
@@ -133,7 +133,7 @@ local function P_MarioMonitorThink(a, sprite, oldframe)
 	if marioconfirmed then
 		a.sprite = SPR_MMON
 		a.frame = typepw
-		a.spriteyoffset = -FRACUNIT*16
+		a.spriteyoffset = -FU*16
 	else
 		a.sprite = sprite
 		a.frame = oldframe
@@ -182,12 +182,12 @@ local function P_MonitorThinker(a)
 				local height = 64*a.scale
 				local funny =  P_MobjFlip(a) < 0 and FixedDiv(a.ceilingz - a.floorz, height) or FixedDiv(a.ceilingz - a.z, height)
 
-				if funny < FRACUNIT then
+				if funny < FU then
 					a.spriteyscale = funny
 					a.item.spriteyscale = funny
 				else
-					a.spriteyscale = FRACUNIT
-					a.item.spriteyscale = FRACUNIT
+					a.spriteyscale = FU
+					a.item.spriteyscale = FU
 				end
 			else
 				-- Spawns all necessary components
@@ -249,7 +249,7 @@ local function P_MonitorDeath(a, d, s)
 		if s or d then
 			a.target = (s or d)
 		else
-			a.target = P_LookForPlayers(a, FixedMul(64*FRACUNIT, a.scale), yes)
+			a.target = P_LookForPlayers(a, FixedMul(64*FU, a.scale), yes)
 		end
 	end
 

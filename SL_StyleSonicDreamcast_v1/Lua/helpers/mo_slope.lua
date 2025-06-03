@@ -41,7 +41,7 @@ function helper.slopeRotBase(mo, slope)
 	-- Reset
 	if not slope then
 		if mo.rollangle then
-			mo.rollangle = ease.linear(FRACUNIT/4, mo.rollangle, FixedAngle(0))
+			mo.rollangle = ease.linear(FU/4, mo.rollangle, FixedAngle(0))
 		end
 		return
 	end

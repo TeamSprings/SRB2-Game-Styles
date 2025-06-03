@@ -113,7 +113,7 @@ local function P_SpawnCheckPoint(a)
 			end
 
 			if not a.stick[i] then
-				stick = P_SpawnMobjFromMobj(base, 0, 0, 44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_BACKTIERADUMMY)
+				stick = P_SpawnMobjFromMobj(base, 0, 0, 44*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_BACKTIERADUMMY)
 				stick.state = S_INVISIBLE
 				stick.sprite = a.sprite
 				stick.angle = ang
@@ -130,7 +130,7 @@ local function P_SpawnCheckPoint(a)
 			end
 
 			if not a.bulb[i] then
-				bulb = P_SpawnMobjFromMobj(base, -49*cos(ang), -49*sin(ang),36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_FRONTERADUMMY)
+				bulb = P_SpawnMobjFromMobj(base, -49*cos(ang), -49*sin(ang),36*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1), MT_FRONTERADUMMY)
 				bulb.state = S_INVISIBLE
 				bulb.sprite = a.sprite
 				bulb.angle = ang
@@ -158,11 +158,11 @@ addHook("MobjThinker", function(a)
 	if a.checksurrondings == nil and #thglist > 1 then
 		for k,rvmt in ipairs(MapthingCheckpoints.thg) do
 			if rvmt and rvmt.valid then
-				local dist = P_AproxDistance(a.x - rvmt.x, a.y - rvmt.y)/FRACUNIT
+				local dist = P_AproxDistance(a.x - rvmt.x, a.y - rvmt.y)/FU
 				local distz = abs(a.z - rvmt.z)
 				--print(distz)
 
-				if distz < 50*FRACUNIT and dist < MapthingCheckpoints.dis[a.idmt].dis and a.health == rvmt.health and k ~= a.idmt then
+				if distz < 50*FU and dist < MapthingCheckpoints.dis[a.idmt].dis and a.health == rvmt.health and k ~= a.idmt then
 					MapthingCheckpoints.dis[a.idmt].x = rvmt.x
 					MapthingCheckpoints.dis[a.idmt].y = rvmt.y
 					MapthingCheckpoints.dis[a.idmt].dis = dist
@@ -211,17 +211,17 @@ addHook("MobjThinker", function(a)
 
 	if a.state == S_STARPOST_SPIN and not a.sprong then
 
-		local decreasespd = ease.linear((a.tics*FRACUNIT)/states[S_STARPOST_SPIN].tics, 47*ANG1, 36*ANG1)
+		local decreasespd = ease.linear((a.tics*FU)/states[S_STARPOST_SPIN].tics, 47*ANG1, 36*ANG1)
 
 		for id,stick in ipairs(a.stick) do
 			stick.angle =  $ + (id == 1 and decreasespd or -decreasespd)
-			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 		for id,bulb in ipairs(a.bulb) do
 			bulb.frame = F
 			bulb.angle =  $ + (id == 1 and decreasespd or -decreasespd)
-			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 	elseif a.state == S_STARPOST_FLASH then
 		a.sprong = true
@@ -234,9 +234,9 @@ addHook("MobjThinker", function(a)
 			a.angv = $+5
 		end
 
-		local calcangle = ease.outquad((a.angv*FRACUNIT)/110, 0, -90*ANG1-10)
-		local decreasespd = ease.outquint((a.angv*FRACUNIT)/110, 27*ANG1, 0)
-		local height = ease.outquad((a.angv*FRACUNIT)/110, 0, 58)
+		local calcangle = ease.outquad((a.angv*FU)/110, 0, -90*ANG1-10)
+		local decreasespd = ease.outquint((a.angv*FU)/110, 27*ANG1, 0)
+		local height = ease.outquad((a.angv*FU)/110, 0, 58)
 
 		if a.angv < 110 then
 
@@ -247,7 +247,7 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+45*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+45*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 			for id,bulb in ipairs(a.bulb) do
@@ -256,7 +256,7 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(bulb,
 				a.base[id].x-57*cos(bulb.angle)+height*cos(bulb.angle),
 				a.base[id].y-57*sin(bulb.angle)+height*sin(bulb.angle),
-				a.z+(36+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+(36+height)*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 		end
 
@@ -273,14 +273,14 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(bulb,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+(35+height)*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+(35+height)*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 			for id,stick in ipairs(a.stick) do
 				P_SetOrigin(stick,
 				a.base[id].x,
 				a.base[id].y,
-				a.z+35*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+				a.z+35*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 			end
 
 		end
@@ -289,12 +289,12 @@ addHook("MobjThinker", function(a)
 
 		for id,stick in ipairs(a.stick) do
 			stick.angle = ang
-			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(stick, a.base[id].x, a.base[id].y, a.z+44*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 		for id,bulb in ipairs(a.bulb) do
 			bulb.angle = ang+ANGLE_180*id
-			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FRACUNIT*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
+			P_SetOrigin(bulb, a.base[id].x-49*cos(bulb.angle), a.base[id].y-49*sin(bulb.angle), a.z+36*FU*(a.flags2 & MF2_OBJECTFLIP and -1 or 1))
 		end
 
 	end
@@ -339,7 +339,7 @@ local rewards = {
 
 		if consoleplayer == p and not p.powers[pw_super] then
 			if S_SpeedMusic(0) and mapheaderinfo[gamemap].levelflags & LF_SPEEDMUSIC then
-				S_SpeedMusic(FRACUNIT + 4*FRACUNIT/10)
+				S_SpeedMusic(FU + 4*FU/10)
 			else
 				P_PlayJingle(p, JT_SHOES)
 			end

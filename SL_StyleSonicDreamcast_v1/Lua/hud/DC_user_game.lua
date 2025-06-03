@@ -65,7 +65,7 @@ end, "game")
 
 addHook("PlayerThink", function(p)
 	if p.styles_keytouch and p.styles_keytouch.dur > 920 then
-		p.styles_keytouch.dur = p.styles_keytouch.dur-FRACUNIT/18
+		p.styles_keytouch.dur = p.styles_keytouch.dur-FU/18
 		p.styles_keytouch.frame = ((p.styles_keytouch.frame & FF_FRAMEMASK)+2) % p.styles_keytouch.loop
 	else
 		p.styles_keytouch = nil
@@ -97,8 +97,8 @@ end, "game")
 	--for i = 1, 8 do
 	--	local anlg = (i * angmax) + (leveltime * ANG1) / 8
 
-	--	local x = (cos(anlg) * 40) / FRACUNIT
-	--	local y = (sin(anlg) * 10) / FRACUNIT
+	--	local x = (cos(anlg) * 40) / FU
+	--	local y = (sin(anlg) * 10) / FU
 
 	--	v.drawString(160 + x, 100 + y, "LMAO")
 	--end

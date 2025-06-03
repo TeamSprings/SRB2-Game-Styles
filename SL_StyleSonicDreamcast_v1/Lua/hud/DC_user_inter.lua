@@ -37,7 +37,7 @@ sfxinfo[freeslot("sfx_advtal")].caption = "tally"
 
 local emeralds_set = {EMERALD1, EMERALD2, EMERALD3, EMERALD4, EMERALD5, EMERALD6, EMERALD7}
 
-local interm_size = FRACUNIT-3*FRACUNIT/8
+local interm_size = FU-3*FU/8
 
 local music = "_ADVLCEAR"
 
@@ -52,21 +52,21 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	local xcnt = {}
 
 	for i = 1,5 do
-		textscaling[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), interm_size, 3*FRACUNIT/2)
-		transparency[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
+		textscaling[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FU/(TICRATE/5), interm_size, 3*FU/2)
+		transparency[i] = ease.linear(max(min(p.styles_tallytimer-7*TICRATE-8*i, TICRATE/5), 0)*FU/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 	end
 
-	local fade = ease.linear(max(min(p.styles_tallytimer-8*TICRATE-5, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 16, 0)
+	local fade = ease.linear(max(min(p.styles_tallytimer-8*TICRATE-5, TICRATE/3), 0)*FU/(TICRATE/3), 16, 0)
 	local fadewhite = 0
 
 	if not specialstage_togg then
-		fadewhite = abs(abs(ease.linear(max(min(p.styles_tallytimer-11*TICRATE, 3*TICRATE), 0)*FRACUNIT/(3*TICRATE), 10, -10))-10)
+		fadewhite = abs(abs(ease.linear(max(min(p.styles_tallytimer-11*TICRATE, 3*TICRATE), 0)*FU/(3*TICRATE), 10, -10))-10)
 	end
 
-	local rankamp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), FRACUNIT, 3*FRACUNIT/2)
-	local ranktrp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FRACUNIT/(TICRATE/5), 1, 9) << V_ALPHASHIFT
+	local rankamp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FU/(TICRATE/5), FU, 3*FU/2)
+	local ranktrp = ease.linear(max(min(p.styles_tallytimer-2*TICRATE, TICRATE/5), 0)*FU/(TICRATE/5), 1, 9) << V_ALPHASHIFT
 
-	local calculationtime = ease.linear(max(min(p.styles_tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FRACUNIT/(3*TICRATE-TICRATE/2), helper:Y_GetStageBonus(p), 0)
+	local calculationtime = ease.linear(max(min(p.styles_tallytimer-5*TICRATE, 3*TICRATE-TICRATE/2), 0)*FU/(3*TICRATE-TICRATE/2), helper:Y_GetStageBonus(p), 0)
 
 	-- stop music
 	if p.styles_tallytimer == 13*TICRATE-1 then
@@ -82,7 +82,7 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 	v.fadeScreen(0xFF00, fade)
 
 	local z1, z2 = 56, 125
-	local scale = ease.linear(max(min(p.styles_tallytimer-8*TICRATE, TICRATE/4), 0)*FRACUNIT/(TICRATE/4), FRACUNIT-FRACUNIT/4, 1)
+	local scale = ease.linear(max(min(p.styles_tallytimer-8*TICRATE, TICRATE/4), 0)*FU/(TICRATE/4), FU-FU/4, 1)
 	local x1 = FixedDiv(162*scale, scale)
 	local index = 5
 
@@ -211,14 +211,14 @@ HOOK("ingameintermission", "dchud", function(v, p, t, e)
 					local state = states[S_CEMG1+id-1]
 					local patch = v.getSpritePatch(state.sprite, state.frame+(leveltime/state.var2 % state.var1), 0)
 
-					v.drawScaled(x*FRACUNIT, 158*FRACUNIT, FRACUNIT/2, patch, transparency[index])
+					v.drawScaled(x*FU, 158*FU, FU/2, patch, transparency[index])
 				end
 			end
 		end
 	else
 		local rank = rank_calculator(p)
 
-		if rankamp ~= 3*FRACUNIT/2 then
+		if rankamp ~= 3*FU/2 then
 			local patch = v.cachePatch("SA2RANK"..rank)
 			v.drawScaled(FixedDiv(144*rankamp, rankamp)+FixedDiv((patch.width/2)*rankamp, rankamp),
 			FixedDiv(158*rankamp, rankamp)+FixedDiv((patch.height/2)*rankamp, rankamp), rankamp, patch, V_PERPLAYER|ranktrp)
@@ -345,27 +345,27 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 	end
 
 	-- Timer and easing functions
-	local tic = min(t, TICRATE)*FRACUNIT/TICRATE
-	local ticq = min(t, TICRATE-17)*FRACUNIT/(TICRATE-17)
+	local tic = min(t, TICRATE)*FU/TICRATE
+	local ticq = min(t, TICRATE-17)*FU/(TICRATE-17)
 
-	local easespin = ease.inquint(min(2*tic, FRACUNIT), 500, 0)
-	local easespinspin = ease.inquint(min(2*tic, FRACUNIT), 500, 0)
-	local easegoout = ease.linear(max(min(t-2*TICRATE-9, TICRATE/2), 0)*FRACUNIT/(TICRATE/2), 0, 93)
-	local easescaleout = ease.outsine((max(min(t-2*TICRATE/3-5, 2*TICRATE), 0)*FRACUNIT)/(2*TICRATE), FRACUNIT, 3*FRACUNIT/2)
+	local easespin = ease.inquint(min(2*tic, FU), 500, 0)
+	local easespinspin = ease.inquint(min(2*tic, FU), 500, 0)
+	local easegoout = ease.linear(max(min(t-2*TICRATE-9, TICRATE/2), 0)*FU/(TICRATE/2), 0, 93)
+	local easescaleout = ease.outsine((max(min(t-2*TICRATE/3-5, 2*TICRATE), 0)*FU)/(2*TICRATE), FU, 3*FU/2)
 
-	local easetransparency1 = ease.linear(max(min(t-2*TICRATE+TICRATE/3, TICRATE/3), 0)*FRACUNIT/(TICRATE/3), 5, 9)
+	local easetransparency1 = ease.linear(max(min(t-2*TICRATE+TICRATE/3, TICRATE/3), 0)*FU/(TICRATE/3), 5, 9)
 
-	local easetransparency2 = ease.linear((max(min(t-2*TICRATE/3, TICRATE/3), 0)*FRACUNIT)/(TICRATE/3), 0, 9)
+	local easetransparency2 = ease.linear((max(min(t-2*TICRATE/3, TICRATE/3), 0)*FU)/(TICRATE/3), 0, 9)
 
-	local easetransparency3 = ease.linear((max(min(t-2*TICRATE-TICRATE/2, TICRATE/3), 0)*FRACUNIT)/(TICRATE/3), 0, 9)
-	local easetransparency4 = ease.linear((max(min(t-2*TICRATE-TICRATE/2, TICRATE/3), 0)*FRACUNIT)/(TICRATE/3), 5, 9)
+	local easetransparency3 = ease.linear((max(min(t-2*TICRATE-TICRATE/2, TICRATE/3), 0)*FU)/(TICRATE/3), 0, 9)
+	local easetransparency4 = ease.linear((max(min(t-2*TICRATE-TICRATE/2, TICRATE/3), 0)*FU)/(TICRATE/3), 5, 9)
 
-	local easespout = ease.inquint((max(min(t-5*TICRATE/2-9, TICRATE/2), 0)*FRACUNIT)/(TICRATE/2), 0, 500)
+	local easespout = ease.inquint((max(min(t-5*TICRATE/2-9, TICRATE/2), 0)*FU)/(TICRATE/2), 0, 500)
 
-	local easesubtit = ease.linear(ticq, 1, FRACUNIT)
+	local easesubtit = ease.linear(ticq, 1, FU)
 	local easespeen = ease.incubic(ticq, 90, 0)*ANG1
 	local easetranp = ease.incubic(tic, 4, 9)
-	local easescale = (ease.incubic(ticq, 700, 150)*FRACUNIT)/100
+	local easescale = (ease.incubic(ticq, 700, 150)*FU)/100
 
 	-- Actual Title Card Drawer
 	if t < et then
@@ -418,35 +418,35 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 		local spinGraphic = v.cachePatch("SA2TTSPIN")
 
 		if easetranp ~= 9 then
-			v.drawScaled((75+#lenght*10+spinGraphic.width/2)*FRACUNIT, (75+spinGraphic.height/2)*FRACUNIT, easescale, spinGhost, V_ADD|V_PERPLAYER|(easetranp << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
+			v.drawScaled((75+#lenght*10+spinGraphic.width/2)*FU, (75+spinGraphic.height/2)*FU, easescale, spinGhost, V_ADD|V_PERPLAYER|(easetranp << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, color))
 		end
 
 		v.draw((75+#lenght*10)-easespinspin+easespout, 75, spinGraphic, V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 
 		if mapheaderinfo[gamemap].styles_dc_stagenum then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, textColor, 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FU, 82*FU, FU-FU/4, mapheaderinfo[gamemap].styles_dc_stagenum.."", V_PERPLAYER, textColor, 0, -1, 0)
 		elseif SubToTagLUT[string.upper(subtitle)] then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, SubToTagLUT[string.upper(subtitle)], V_PERPLAYER, textColor, 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FU, 82*FU, FU-FU/4, SubToTagLUT[string.upper(subtitle)], V_PERPLAYER, textColor, 0, -1, 0)
 			subtitle = nil
 		elseif not (G_RingSlingerGametype() or G_GametypeHasSpectators()) then
-			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FRACUNIT, 82*FRACUNIT, FRACUNIT-FRACUNIT/4, "Stage: "..stagenum, V_PERPLAYER, textColor, 0, -1, 0)
+			font_drawer(v, 'SA2TTFONT', (80+#lenght*4+easespin-easespout)*FU, 82*FU, FU-FU/4, "Stage: "..stagenum, V_PERPLAYER, textColor, 0, -1, 0)
 		end
 
 		-- SUBTITLE
 
 		if subtitle and string.len(subtitle) > 0 then
 			for i = 1, 2 do
-				v.drawScaled(FixedDiv(84*FRACUNIT, easesubtit), FixedDiv(140*FRACUNIT, easesubtit), easesubtit, v.cachePatch("SA2TTSUB"..i), ((i == 2 and easetransparency4 or easetransparency3) << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
+				v.drawScaled(FixedDiv(84*FU, easesubtit), FixedDiv(140*FU, easesubtit), easesubtit, v.cachePatch("SA2TTSUB"..i), ((i == 2 and easetransparency4 or easetransparency3) << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, color))
 			end
 
 			if t > TICRATE then
 				if mapheaderinfo[gamemap].styles_mission then
 					local tag = mapheaderinfo[gamemap].styles_missiontag or "Mission:"
 
-					font_drawer(v, 'SA2TTFONT', 187*FRACUNIT, 298*FRACUNIT, 3*FRACUNIT/5-FRACUNIT/9, THTHTHfunc(tonumber(mapheaderinfo[gamemap].styles_mission) or 0)..tag, (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
-					font_drawer(v, 'COMSANSFT', 182*FRACUNIT, 312*FRACUNIT, FRACUNIT/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1, 0)
+					font_drawer(v, 'SA2TTFONT', 187*FU, 298*FU, 3*FU/5-FU/9, THTHTHfunc(tonumber(mapheaderinfo[gamemap].styles_mission) or 0)..tag, (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_SLATE), 0, -1, 0)
+					font_drawer(v, 'COMSANSFT', 182*FU, 312*FU, FU/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "left", 1, 0)
 				else
-					font_drawer(v, 'COMSANSFT', 358*FRACUNIT, 300*FRACUNIT, FRACUNIT/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "center", 1, 0)
+					font_drawer(v, 'COMSANSFT', 358*FU, 300*FU, FU/2, tostring(subtitle), (easetransparency3 << V_ALPHASHIFT)|V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREY), "center", 1, 0)
 				end
 			end
 
@@ -455,8 +455,8 @@ HOOK("stagetitle", "dchud", function(v, p, t, et)
 		-- TITLE
 
 		for i = 1, #split do
-			local spliteaseout = ease.inquint((max(min(t-5*TICRATE/2-(i-1), TICRATE/2+(i-1)), 0)*FRACUNIT)/(TICRATE/2+(i-1)), 0, 500)
-			font_drawer(v, 'SA2LTTFONT', (115-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FRACUNIT, (88+(i-1)*20)*FRACUNIT, FRACUNIT, split[i], V_PERPLAYER, textColor, 0, -1, 0)
+			local spliteaseout = ease.inquint((max(min(t-5*TICRATE/2-(i-1), TICRATE/2+(i-1)), 0)*FU)/(TICRATE/2+(i-1)), 0, 500)
+			font_drawer(v, 'SA2LTTFONT', (115-(#split[i] > 8 and #split[i]*2 or 0)+easespin-spliteaseout)*FU, (88+(i-1)*20)*FU, FU, split[i], V_PERPLAYER, textColor, 0, -1, 0)
 		end
 
 	end

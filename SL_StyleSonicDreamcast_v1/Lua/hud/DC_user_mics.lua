@@ -58,8 +58,8 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 
 		local curhealth = boss and (boss.health and boss.health or 0) or 0
 		local maxhealth = boss.info.spawnhealth or 1
-		local onehealth = FixedDiv(67*FRACUNIT, maxhealth*FRACUNIT)
-		local prchealth = (curhealth == 0 and 0 or (FixedMul(FixedDiv(curhealth*FRACUNIT, maxhealth*FRACUNIT), 67*FRACUNIT)))
+		local onehealth = FixedDiv(67*FU, maxhealth*FU)
+		local prchealth = (curhealth == 0 and 0 or (FixedMul(FixedDiv(curhealth*FU, maxhealth*FU), 67*FU)))
 
 		if (not boss.valid or curhealth < 1) and Bosses[2] then
 			hud.bosshealthcountersmooth = 0
@@ -77,8 +77,8 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 				hud.bosshealthcountersmooth = $-1
 			end
 
-			if hud.bosshealthcountersmooth < 2 and curhealth == 0 and hud.bossbardecrease < 67*FRACUNIT then
-				hud.bossbardecrease = $+3*FRACUNIT
+			if hud.bosshealthcountersmooth < 2 and curhealth == 0 and hud.bossbardecrease < 67*FU then
+				hud.bossbardecrease = $+3*FU
 			end
 		end
 
@@ -97,15 +97,15 @@ HOOK("bossmeter", "dchud", function(v, p, t, e)
 			end
 		end
 
-		if hud.bossbardecrease < 67*FRACUNIT then
+		if hud.bossbardecrease < 67*FU then
 
 			v.draw(216, hudinfo[HUD_RINGS].y-28, v.cachePatch("SA2BOSSH1"), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
-			v.draw(216+(hud.bossbardecrease or 0)/FRACUNIT, hudinfo[HUD_RINGS].y-28, v.cachePatch("SA2BOSSHL"), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
+			v.draw(216+(hud.bossbardecrease or 0)/FU, hudinfo[HUD_RINGS].y-28, v.cachePatch("SA2BOSSHL"), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
 			v.draw(289, hudinfo[HUD_RINGS].y-28, v.cachePatch("SA2BOSSHR"), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
 
-			v.drawStretched(222*FRACUNIT+(hud.bossbardecrease or 0), (hudinfo[HUD_RINGS].y-28)*FRACUNIT, 67*FRACUNIT-(hud.bossbardecrease or 0), FRACUNIT,
+			v.drawStretched(222*FU+(hud.bossbardecrease or 0), (hudinfo[HUD_RINGS].y-28)*FU, 67*FU-(hud.bossbardecrease or 0), FU,
 			v.cachePatch("SA2BOSSH2"), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
-			v.drawStretched(222*FRACUNIT, (hudinfo[HUD_RINGS].y-20)*FRACUNIT, prchealth+(hud.bosshealthcountersmooth*onehealth)/35, FRACUNIT,
+			v.drawStretched(222*FU, (hudinfo[HUD_RINGS].y-20)*FU, prchealth+(hud.bosshealthcountersmooth*onehealth)/35, FU,
 			v.cachePatch((curhealth > maxhealth/5 and "SA2BOBAR2" or "SA2BOBAR1" )), V_HUDTRANS|V_SNAPTORIGHT|V_SNAPTOTOP|V_PERPLAYER)
 
 		end
@@ -131,9 +131,9 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 
 	if p.boxdisplay and p.boxdisplay.timer and p.boxdisplay.item then
 		local lenght = p.boxdisplay.item
-		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FRACUNIT/(TICRATE/5)
-		local tictransparency = max(min(p.boxdisplay.timer, TICRATE/4),0)*FRACUNIT/(TICRATE/4)
-		local easesubtit = ease.linear(tic, FRACUNIT/2, 9*FRACUNIT/8)
+		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FU/(TICRATE/5)
+		local tictransparency = max(min(p.boxdisplay.timer, TICRATE/4),0)*FU/(TICRATE/4)
+		local easesubtit = ease.linear(tic, FU/2, 9*FU/8)
 		local easetratit = ease.linear(tictransparency, 9, 0)
 		local offset = 161
 
@@ -151,7 +151,7 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 		for k,img in ipairs(p.boxdisplay.item) do
 			local extra = 0
 			if SPR_MMON then
-				extra = (img[1] == SPR_MMON and -FRACUNIT*16 or 0)
+				extra = (img[1] == SPR_MMON and -FU*16 or 0)
 			end
 			local pic = v.getSpritePatch(img[1], img[2], 0)
 			local incs = pic.width+6
@@ -165,11 +165,11 @@ HOOK("monitordisplay", "dchud", function(v, p, t, e)
 				local enc = img[3]
 
 				if enc.skin and enc.color then
-					v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
+					v.drawScaled(x, y-5*FU, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
 				end
 			else
 				if img[1] == SPR_TV1P and p.mo then
-					v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+					v.drawScaled(x, y-5*FU, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
 				end
 			end
 
@@ -200,7 +200,7 @@ HOOK("checkpointtimer", "dchud", function(v, p, t, e)
 				strint_ = $..':'..cent
 			end
 
-			font_drawer(v, 'SA2TL', (350)*FRACUNIT, (245)*FRACUNIT, FRACUNIT-FRACUNIT/4, strint_,
+			font_drawer(v, 'SA2TL', (350)*FU, (245)*FU, FU-FU/4, strint_,
 			V_PERPLAYER|V_SNAPTORIGHT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 0), "center", 1, 0)
 		end
 	end
@@ -299,7 +299,7 @@ HOOK("scoreadditives", "dchud", function(v, p, t, e)
 		local y = hudinfo[HUD_RINGS].y + 14 + y_offset
 
 		for k, prompt in ipairs(score_add) do
-			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FRACUNIT, y*FRACUNIT, FRACUNIT/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP|V_PERPLAYER)
+			v.drawScaled((hudinfo[HUD_RINGS].x+12+prompt.x)*FU, y*FU, FU/2, v.cachePatch(prompt.graphic), V_SNAPTOLEFT|V_SNAPTOTOP|V_PERPLAYER)
 
 
 			if prompt.x then
@@ -328,7 +328,7 @@ end, "game")
 
 local flickies_y = 200 - 25
 local flicky_flags = V_SNAPTORIGHT|V_SNAPTOBOTTOM|V_PERPLAYER
-local flicky_scale = FRACUNIT/2
+local flicky_scale = FU/2
 
 local color_flickies = {
 	["flight"] = SKINCOLOR_BLUE,
@@ -340,11 +340,11 @@ sfxinfo[freeslot("sfx_advaac")].caption = "Flicky Collected!"
 
 HOOK("flickies", "dchud", function(v, p, t, e)
 	if p.flickies and p.flickies.tics then
-		local scale_in = max(p.flickies.tics - (TICRATE*3 - 25), 0)*FRACUNIT/25
-		local move_in = max(p.flickies.tics - (TICRATE*3 - 15), 0)*FRACUNIT/15
-		local move_out = min(p.flickies.tics - 10, 0)*FRACUNIT/10
+		local scale_in = max(p.flickies.tics - (TICRATE*3 - 25), 0)*FU/25
+		local move_in = max(p.flickies.tics - (TICRATE*3 - 15), 0)*FU/15
+		local move_out = min(p.flickies.tics - 10, 0)*FU/10
 
-		local incoming_move = min(move_in*2, FRACUNIT)
+		local incoming_move = min(move_in*2, FU)
 
 		local invx = ease.linear(incoming_move, 20, 0)
 		local x = ease.linear(incoming_move - move_out, 320, 500)-35
@@ -371,10 +371,10 @@ HOOK("flickies", "dchud", function(v, p, t, e)
 			local state = states[mobjinfo[fl.mobjtype].spawnstate]
 			local sprite = v.getSpritePatch(state.sprite, state.frame, 0, 0)
 
-			v.drawScaled(x * FRACUNIT - movscale*base.width/2, flickies_y * FRACUNIT - movscale*base.height/2, flicky_scale+movscale, base, flicky_flags, v.getColormap(TC_DEFAULT, colorindx))
+			v.drawScaled(x * FU - movscale*base.width/2, flickies_y * FU - movscale*base.height/2, flicky_scale+movscale, base, flicky_flags, v.getColormap(TC_DEFAULT, colorindx))
 
-			v.drawScaled((x + sprite.width/3) * FRACUNIT - movscale,
-			(flickies_y + sprite.height/3 + sprite.height/4) * FRACUNIT - movscale,
+			v.drawScaled((x + sprite.width/3) * FU - movscale,
+			(flickies_y + sprite.height/3 + sprite.height/4) * FU - movscale,
 			flicky_scale + movscale / sprite.height,
 			sprite,
 			flicky_flags)
@@ -438,7 +438,7 @@ HOOK("coopemeralds", "dchud", function(v)
 				-- Cache that damn sprite
 				local state = states[S_CEMG1+id-1]
 				local patch = v.getSpritePatch(state.sprite, state.frame+(leveltime/state.var2 % state.var1), 0)
-				v.draw((32*cos(posang)/FRACUNIT)+160, (32*sin(posang)/FRACUNIT)+100, patch, V_20TRANS|V_PERPLAYER)
+				v.draw((32*cos(posang)/FU)+160, (32*sin(posang)/FU)+100, patch, V_20TRANS|V_PERPLAYER)
 			end
 		end
 	end

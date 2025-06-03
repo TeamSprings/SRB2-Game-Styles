@@ -33,8 +33,8 @@ states[token_sonic_3dblast] = {
 
 
 return {
-	[0] = {{S_TOKEN, 		FRACUNIT}, 		"vanilla", 	"Vanilla"},
-	{{token_sonic_3dblast, 	FRACUNIT/4},	"b3d",		"Sonic 3D Blast"},
-	{{token_sonic_r, 		FRACUNIT/3},	"sonicr", 	"Sonic R"},
-	{{token_sonic_origins, 	FRACUNIT/3},	"origins", 	"Sonic Origins"},
+	[0] = {{S_TOKEN, 		FU}, 		"vanilla", 	"Vanilla"},
+	{{token_sonic_3dblast, 	FU/4},	"b3d",		"Sonic 3D Blast"},
+	{{token_sonic_r, 		FU/3},	"sonicr", 	"Sonic R"},
+	{{token_sonic_origins, 	FU/3},	"origins", 	"Sonic Origins"},
 }

@@ -20,14 +20,14 @@ local fontlen = drawlib.lenght
 
 local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 
-local title_lenght = FRACUNIT/6
+local title_lenght = FU/6
 local title_delay1 = 2 * title_lenght
 local title_delay2 = title_delay1*2
 local title_delay3 = title_delay1*3
 local title_delay4 = title_delay1*4
 
 local titlebgpullaway = 2*TICRATE-TICRATE/2
-local titlebgpullstep = FRACUNIT/10
+local titlebgpullstep = FU/10
 
 local tiltappear = TICRATE/9+16
 local tiltdelay1 = 2
@@ -69,21 +69,21 @@ end
 
 
 local function exprs(t, s, e, p)
-	return ease.linear(t, s, e) + ease.outsine(clamping(0, t-FRACUNIT/2, FRACUNIT/4), 0, p) - ease.outsine(clamping(0, t-3*FRACUNIT/4, FRACUNIT/4), 0, p)
+	return ease.linear(t, s, e) + ease.outsine(clamping(0, t-FU/2, FU/4), 0, p) - ease.outsine(clamping(0, t-3*FU/4, FU/4), 0, p)
 end
 
 local function drawManiaTitleTextSymbol1(v, x, y, scale, patch, flags, color, i, progress)
 	local jump = exprs(progress, y+patch.height*scale, y, -patch.height*scale)
 	local cuts = patch.height*scale-min(max(jump-y, 0), patch.height*scale)
 
-	v.drawCropped(x, jump, scale, scale, patch, flags, color, 0, 0, 128*FRACUNIT, cuts or 1)
+	v.drawCropped(x, jump, scale, scale, patch, flags, color, 0, 0, 128*FU, cuts or 1)
 end
 
 local function drawManiaTitleTextSymbol2(v, x, y, scale, patch, flags, color, i, progress)
 	local jump = exprs(progress, y-15*scale, y, patch.height*scale)
 	local cuts = abs(min(jump-y, 0))
 
-	v.drawCropped(x, jump, scale, scale, patch, flags, color, 0, cuts, 128*FRACUNIT, 128*FRACUNIT)
+	v.drawCropped(x, jump, scale, scale, patch, flags, color, 0, cuts, 128*FU, 128*FU)
 end
 
 local function drawManiaTitleTextSymbol3(v, x, y, scale, patch, flags, color, i, progress)
@@ -100,11 +100,11 @@ return {
 
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
-		--local scale = FRACUNIT
-		local offset = (#lvlt)*FRACUNIT
+		--local scale = FU
+		local offset = (#lvlt)*FU
 		if t < 2 then
-			tryx = (200*FRACUNIT)
-			tryy = -(200*FRACUNIT)
+			tryx = (200*FU)
+			tryy = -(200*FU)
 		end
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
@@ -127,7 +127,7 @@ return {
 				if t <= titlebgpullaway then
 					local check = progress - title_delay4
 
-					if check < FRACUNIT then
+					if check < FU then
 						fillstretch(v, 100, progress, colors[5])
 						fillstretch(v, 100, progress - title_delay1, colors[4])
 						fillstretch(v, 100, progress - title_delay2, 51)
@@ -191,28 +191,28 @@ return {
 					v.draw(229-nw_x-zonepatch.width, 169, v.cachePatch("INTMABGZONE"))
 
 					if progresstext > 0 then
-						drawanim(v, 'MAZNFNT', (242-nw_x-zonepatch.width)*FRACUNIT, 159*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, progresstext, drawManiaTitleTextSymbol2, 7*FRACUNIT/10)
+						drawanim(v, 'MAZNFNT', (242-nw_x-zonepatch.width)*FU, 159*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, progresstext, drawManiaTitleTextSymbol2, 7*FU/10)
 					end
 				end
 
 				drawTextBG(v, 210+nw_x-text_width, 137, text_width)
-				drawanim(v, 'MATTFNT', (210+nw_x-text_width)*FRACUNIT, 120*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, progresstext, drawManiaTitleTextSymbol1, 7*FRACUNIT/10)
+				drawanim(v, 'MATTFNT', (210+nw_x-text_width)*FU, 120*FU, FU, lvlt, 0, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, progresstext, drawManiaTitleTextSymbol1, 7*FU/10)
 
 				if act ~= "0" then
 					local actcircleimg = v.cachePatch("INTMACIRC"..encore)
-					local actcircle = clamping(FRACUNIT/8, progresstext + 1, 2*FRACUNIT/8) - 1
-					local centering = FixedMul(actcircleimg.width/2*FRACUNIT, FRACUNIT-actcircle)
+					local actcircle = clamping(FU/8, progresstext + 1, 2*FU/8) - 1
+					local centering = FixedMul(actcircleimg.width/2*FU, FU-actcircle)
 
-					local act_x = (238+nw_x/4)*FRACUNIT+centering
-					local act_y = (119+nw_x/4)*FRACUNIT
+					local act_x = (238+nw_x/4)*FU+centering
+					local act_y = (119+nw_x/4)*FU
 
 					if actcircle > 0 then
-						v.drawStretched(act_x, act_y, actcircle, FRACUNIT, actcircleimg, 0, nil)
+						v.drawStretched(act_x, act_y, actcircle, FU, actcircleimg, 0, nil)
 
 						if tonumber(act) > 9 then
-							drawanim(v, 'MAN2FNT', act_x+31*FRACUNIT-centering, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 0, 0, 0, actcircle, drawManiaTitleTextSymbol3, FRACUNIT)
+							drawanim(v, 'MAN2FNT', act_x+31*FU-centering, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 0, 0, 0, actcircle, drawManiaTitleTextSymbol3, FU)
 						else
-							drawanim(v, 'MAN1FNT', act_x+31*FRACUNIT-centering, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 0, 0, 0, actcircle, drawManiaTitleTextSymbol3, FRACUNIT)
+							drawanim(v, 'MAN1FNT', act_x+31*FU-centering, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 0, 0, 0, actcircle, drawManiaTitleTextSymbol3, FU)
 						end
 					end
 				end
@@ -274,8 +274,8 @@ return {
 		local gotthrough = "THROUGH"
 
 		if act ~= "0" then
-			local act_x = (210+offsetx)*FRACUNIT
-			local act_y = 43*FRACUNIT
+			local act_x = (210+offsetx)*FU
+			local act_y = 43*FU
 
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
@@ -287,20 +287,20 @@ return {
 
 			if colors[1] then
 				if tonumber(act) > 9 then
-					drawf(v, 'MAI4FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+					drawf(v, 'MAI4FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
 				else
-					drawf(v, 'MAI3FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+					drawf(v, 'MAI3FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
 				end
 			else
 				if tonumber(act) > 9 then
-					drawf(v, 'MAI2FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+					drawf(v, 'MAI2FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
 				else
-					drawf(v, 'MAI1FNT', act_x+31*FRACUNIT, act_y+8*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+					drawf(v, 'MAI1FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
 				end
 			end
 
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
-			drawf(v, "MATAFNT", (166+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
+			drawf(v, "MATAFNT", (166+text_width-offsetx)*FU, 77*FU, FU, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		else
 			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				gotthrough = $..' ZONE'
@@ -313,8 +313,8 @@ return {
 			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20)
 			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31)
 
-			drawf(v, "MATAFNT", (166-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
-			drawf(v, "MATAFNT", (200+text_width-offsetx)*FRACUNIT, 77*FRACUNIT, FRACUNIT, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
+			drawf(v, "MATAFNT", (200+text_width-offsetx)*FU, 77*FU, FU, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		end
 
 		if mo and mo.valid then
@@ -323,12 +323,12 @@ return {
 			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname))
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 
-			drawf(v, "MATAFNT", (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_2, "right", 1)
+			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_2, "right", 1)
 		else
 			local skin_name = "YOU"
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			drawf(v, "MATAFNT", (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color1, "right", 1)
+			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color1, "right", 1)
 		end
 	end,
 
@@ -349,7 +349,7 @@ return {
 		local len = textlen(v, 'MATAFNT', str, 1)
 
 		drawTextBG_A(v, 160-offsetx-len/2, 40, len)
-		drawf(v, "MATAFNT", (160-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "center", 1)
+		drawf(v, "MATAFNT", (160-offsetx)*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "center", 1)
 	end,
 
 	tallyspecialbg = function(v, p, offsetx, color, color2, fading)
@@ -358,8 +358,8 @@ return {
 		v.fadeScreen(colors[2], max(min(fading*10/15, 10), 0))
 		local angl = leveltime*ANG1
 
-		maniacircles(v, 160, 100, (sin(angl)*60)/FRACUNIT+100, angl+ANGLE_180, colors[4], colors[4])
-		maniacircles(v, 160, 100, (cos(angl)*60)/FRACUNIT+100, angl, colors[5], colors[2])
+		maniacircles(v, 160, 100, (sin(angl)*60)/FU+100, angl+ANGLE_180, colors[4], colors[4])
+		maniacircles(v, 160, 100, (cos(angl)*60)/FU+100, angl, colors[5], colors[2])
 	end,
 }
 

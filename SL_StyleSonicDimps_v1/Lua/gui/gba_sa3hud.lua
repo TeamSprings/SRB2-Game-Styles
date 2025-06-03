@@ -57,7 +57,7 @@ return {
 			y_off = 4
 		end
 
-		drawf(v, font_type, 160*FRACUNIT, (hudinfo[HUD_SECONDS].y + y_off)*FRACUNIT, FRACUNIT, "T"..timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "center", 0, 0)
+		drawf(v, font_type, 160*FU, (hudinfo[HUD_SECONDS].y + y_off)*FU, FU, "T"..timestr, hudinfo[HUD_RINGS].f|V_PERPLAYER &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "center", 0, 0)
 	end,
 
 	rings = function(v, p, t, e, font_type)
@@ -72,9 +72,9 @@ return {
 			end
 		end
 
-		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FRACUNIT, (hudinfo[HUD_SECONDS].y-21)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 3, '0')
+		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FU, (hudinfo[HUD_SECONDS].y-21)*FU, FU, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 3, '0')
 		if p.rings < 1 and (leveltime % 10) / 5 then
-			drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FRACUNIT, (hudinfo[HUD_SECONDS].y-21)*FRACUNIT, FRACUNIT, "RRR", hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 0)
+			drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-61)*FU, (hudinfo[HUD_SECONDS].y-21)*FU, FU, "RRR", hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 0, 0)
 		end
 	end,
 
@@ -91,7 +91,7 @@ return {
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p.mo.color, p)
 
 				if G_GametypeUsesLives() then
-					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FU, (hudinfo[HUD_LIVES].y+7)*FU, FU, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 					v.draw(hudinfo[HUD_LIVES].x+25, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
@@ -101,7 +101,7 @@ return {
 				bot_existance = nil
 
 				if G_GametypeUsesLives() then
-					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+					drawf(v, font_type, (hudinfo[HUD_LIVES].x+25)*FU, (hudinfo[HUD_LIVES].y+7)*FU, FU, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 					v.draw(hudinfo[HUD_LIVES].x+25, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
@@ -110,7 +110,7 @@ return {
 			draw_lifeicon(v, hudinfo[HUD_LIVES].x, hudinfo[HUD_LIVES].y+16, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style ~= nil and V_FLIP or 0), p.mo.color, p)
 
 			if G_GametypeUsesLives() then
-				drawf(v, font_type, (hudinfo[HUD_LIVES].x+17)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+				drawf(v, font_type, (hudinfo[HUD_LIVES].x+17)*FU, (hudinfo[HUD_LIVES].y+7)*FU, FU, p.lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(hudinfo[HUD_LIVES].x+17, hudinfo[HUD_LIVES].y+4, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end
@@ -120,7 +120,7 @@ return {
 	key = function(v, p, t, e, font_type)
 		if token then
 			v.draw(10, 25, v.cachePatch("KEYADV3"), hudinfo[HUD_RINGS].f|V_PERPLAYER)
-			drawf(v, font_type, 35*FRACUNIT, 27*FRACUNIT, FRACUNIT, token, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
+			drawf(v, font_type, 35*FU, 27*FU, FU, token, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 0, 0)
 		end
 	end,
 }

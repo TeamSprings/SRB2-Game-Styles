@@ -12,7 +12,7 @@ local fontregistry = {}
 local exceptions = {}
 local monospace = {}
 
-local FRACUNIT = FRACUNIT
+local FU = FU
 local FRACBITS = FRACBITS
 
 local FixedSqrt = FixedSqrt
@@ -157,8 +157,8 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 		lenght = $+cur.width
 	end
 
-	local nprogress = (progress % FRACUNIT) + 1
-	local animseq = FRACUNIT / maxv
+	local nprogress = (progress % FU) + 1
+	local animseq = FU / maxv
 	local animoff = offset / maxv
 
 	local nx = FixedMul(x, scale)
@@ -171,7 +171,7 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 	end
 
 	for i = 1,maxv do
-		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FRACUNIT)
+		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FU)
 		anim(v, nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color, i, invprg, nprogress, {...})
 		fontoffset = $+cache[i].width
 	end

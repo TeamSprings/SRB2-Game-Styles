@@ -12,6 +12,7 @@ TODO: Copypaste Events & Document
 
 ]]
 
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 local api = tbsrequire 'styles_api'
 
 -- Hooks for API
@@ -77,8 +78,6 @@ states[giantring_endstage] = {
 	var1 = 23,
 	var2 = 1,
 }
-
-local Options = tbsrequire('helpers/create_cvar')
 
 local original_radius = mobjinfo[MT_TOKEN].radius
 local original_height = mobjinfo[MT_TOKEN].height
@@ -245,7 +244,7 @@ local function SP_LoadState(map)
 				checkpoint_trigger = data.starpostnum
 
 				displayplayer.style_additionaltime = max(data.starposttime, data.leveltime)
-				displayplayer.mo.alpha = FRACUNIT
+				displayplayer.mo.alpha = FU
 
 				displayplayer.mo.flags = data.flags &~ MF_NOTHINK
 				displayplayer.mo.flags2 = data.flags2
@@ -313,7 +312,7 @@ local function SP_LoadState(map)
 				checkpoint_trigger = max(checkpoint_trigger, data.p2starpostnum)
 
 				secondarydisplayplayer.style_additionaltime = max(data.p2starposttime, data.leveltime)
-				secondarydisplayplayer.mo.alpha = FRACUNIT
+				secondarydisplayplayer.mo.alpha = FU
 
 				secondarydisplayplayer.mo.flags = data.p2flags &~ MF_NOTHINK
 				secondarydisplayplayer.mo.flags2 = data.p2flags2
@@ -472,7 +471,7 @@ addHook("MapThingSpawn", function(a)
 	if specialpackdetected then return end
 
 	if not All7Emeralds(emeralds) then
-		a.ring = P_SpawnMobjFromMobj(a, -200*cos(a.angle+ANGLE_90), -200*sin(a.angle+ANGLE_90), 128*FRACUNIT, MT_TOKEN)
+		a.ring = P_SpawnMobjFromMobj(a, -200*cos(a.angle+ANGLE_90), -200*sin(a.angle+ANGLE_90), 128*FU, MT_TOKEN)
 		a.ring.endleveltoken = true
 	end
 end, MT_SIGN)
@@ -497,8 +496,8 @@ addHook("MobjSpawn", function(a)
 	if specialpackdetected then return end
 
 	if special_entrance == 3 or special_entrance == 1 then
-		a.radius = 89*FRACUNIT
-		a.height = 128*FRACUNIT
+		a.radius = 89*FU
+		a.height = 128*FU
 	else
 		a.radius = original_radius
 		a.height = original_height
@@ -508,7 +507,7 @@ addHook("MobjSpawn", function(a)
 	or (special_entrance == 1 and giantring_endstage or giantring)
 
 	a.flags = $|MF_SPECIAL
-	a.shadowscale = FRACUNIT/4
+	a.shadowscale = FU/4
 end, MT_TOKEN)
 
 addHook("TouchSpecial", function(a, k)
@@ -585,8 +584,8 @@ addHook("MobjThinker", function(a)
 			a.spriteyscale = sprite[2]
 			a.extravalue1 = 1991
 		elseif a.health < 1 and a.extravalue1 then
-			a.spritexscale = FRACUNIT
-			a.spriteyscale = FRACUNIT
+			a.spritexscale = FU
+			a.spriteyscale = FU
 			a.extravalue1 = 0
 		end
 
@@ -621,7 +620,7 @@ addHook("MobjThinker", function(a)
 			local star = P_SpawnMobjFromMobj(a,
 			FixedMul(a.radius, cos(ANG1*P_RandomRange(0,360))),
 			FixedMul(a.radius, sin(ANG1*P_RandomRange(0,360))),
-			P_RandomRange(0, a.height/FRACUNIT)*FRACUNIT, MT_SUPERSPARK)
+			P_RandomRange(0, a.height/FU)*FU, MT_SUPERSPARK)
 			star.color = SKINCOLOR_GOLD
 			star.colorized = true
 		end
@@ -645,7 +644,7 @@ addHook("TouchSpecial", function(a, mt)
 		a.countdownst = 50
 
 		for i = 1,16 do
-			local ang = a.angle + i*ANG1*((360*FRACUNIT/16)/FRACUNIT)
+			local ang = a.angle + i*ANG1*((360*FU/16)/FU)
 			local stars = P_SpawnMobjFromMobj(a, 4*cos(ang), 4*sin(ang), a.height, MT_BUSH)
 			stars.state = S_INVISIBLE
 			stars.sprite = SPR_SSS0
@@ -663,7 +662,7 @@ addHook("MobjCollide", function(a, mt)
 	if not special_entrance or special_entrance ~= 2 then return end
 	if specialpackdetected then return end
 
-	if mt.player and (mt.z < a.z+a.height+12*FRACUNIT) and (mt.z > a.z+a.height-32*FRACUNIT) and a.stars ~= nil and a.stars[1].valid and not a.countdownst then
+	if mt.player and (mt.z < a.z+a.height+12*FU) and (mt.z > a.z+a.height-32*FU) and a.stars ~= nil and a.stars[1].valid and not a.countdownst then
 		SP_SaveState(a)
 	end
 end,  MT_STARPOST)
@@ -693,7 +692,7 @@ addHook("MobjThinker", function(a, mt)
 		for i,star in ipairs(a.stars) do
 			star.angle = $+4*ANG1
 			star.frame = (((i % 2)*3+a.stfuse/4) % 6)|FF_TRANS10|FF_FULLBRIGHT
-			star.alpha = FRACUNIT-a.countdownst*FRACUNIT/100
+			star.alpha = FU-a.countdownst*FU/100
 
 			P_SetOrigin(star, a.x+(55-a.countdownst)*cos(star.angle), a.y+(55-a.countdownst)*sin(star.angle), a.z+a.height+(12-a.countdownst/4)*sin(a.vangle+star.angle))
 			if a.stfuse == 0 then

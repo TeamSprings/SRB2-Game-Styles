@@ -85,7 +85,7 @@ return{
 			end
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(382-trx2-offset_x+zonelenght)*FRACUNIT, 80*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'TTL0',(382-trx2-offset_x+zonelenght)*FU, 80*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
 			v.drawString(160-trx1, 105, mapheaderinfo[gamemap].subttl, V_ALLOWLOWERCASE, "center")
@@ -116,7 +116,7 @@ return{
 			local act = ''..mapheaderinfo[gamemap].actnum
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FRACUNIT, 57*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FU, 57*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 		end
 

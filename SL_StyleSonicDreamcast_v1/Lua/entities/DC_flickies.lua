@@ -25,8 +25,8 @@ local function bubbleflicky(a)
 	overlay.target = a
 	overlay.fuse = TICRATE*6
 	overlay.bubble = true
-	overlay.scale = FRACUNIT/3
-	overlay.scaleup = FRACUNIT
+	overlay.scale = FU/3
+	overlay.scaleup = FU
 	overlay.z = $ + 12*a.scale*P_MobjFlip(a)
 	overlay.angle = P_RandomKey(360)*ANG1
 	a.angle = P_RandomKey(360)*ANG1

@@ -330,13 +330,13 @@ HOOK("stagetitle", "gbahud", function(v, p, t, e)
 	local textbox_x = -txtbg_x*scale
 
 	v.drawFill(textbox_x, 166, width/scale*2, 20, 1|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
-	drawScroll(v, 'ADV1TTF', textbox_x*FRACUNIT, 169*FRACUNIT, FRACUNIT, long_name, V_SNAPTOLEFT|V_SNAPTOBOTTOM, v.getColormap(0, 0), "left", 0, 0, 0, 3*t, width/scale*2)
+	drawScroll(v, 'ADV1TTF', textbox_x*FU, 169*FU, FU, long_name, V_SNAPTOLEFT|V_SNAPTOBOTTOM, v.getColormap(0, 0), "left", 0, 0, 0, 3*t, width/scale*2)
 
 	if act ~= "0" then
 		local act_y = 187 - min(t*8-2*bg.width/3-bgtxt.height, 0) + awaytime/8
 
 		v.draw(260, act_y, v.cachePatch("ADV1ACT"), V_SNAPTORIGHT|V_SNAPTOBOTTOM)
-		drawf(v, 'ADV1ACTNUM', 292*FRACUNIT, act_y*FRACUNIT, FRACUNIT, act, V_SNAPTORIGHT|V_SNAPTOBOTTOM, v.getColormap(0, 0), "left")
+		drawf(v, 'ADV1ACTNUM', 292*FU, act_y*FU, FU, act, V_SNAPTORIGHT|V_SNAPTOBOTTOM, v.getColormap(0, 0), "left")
 	end
 
 	return true
@@ -472,17 +472,17 @@ HOOK("styles_levelendtally", "gbahud", function(v, p, t, e)
 	local fourt_up = max(clampTimer(-45, p.styles_tallytimer, -10)-1, 0)
 
 	v.drawFill(offset_x, 166-offset_ytxtb, width/scale*2, 20, 1|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
-	drawScroll(v, 'ADV1MENFNT', offset_x*FRACUNIT, (171-offset_ytxtb)*FRACUNIT, FRACUNIT, name, V_SNAPTOLEFT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, name_lenght+((3*leveltime) % (name_lenght+1)), width/scale*2)
+	drawScroll(v, 'ADV1MENFNT', offset_x*FU, (171-offset_ytxtb)*FU, FU, name, V_SNAPTOLEFT|V_SNAPTOBOTTOM, v.getColormap(TC_DEFAULT, 1), "left", 0, 0, 0, name_lenght+((3*leveltime) % (name_lenght+1)), width/scale*2)
 
-	drawan(v, spfont_type, 92*FRACUNIT, (100+special_offy)*FRACUNIT, FRACUNIT, "TIME BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', first_up, scale_updraw, 8*FRACUNIT/10)
-	drawan(v, 'ADVNUM', 175*FRACUNIT, (97+special_offy)*FRACUNIT, FRACUNIT, fake_timebonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', secon_up, scale_updraw, 8*FRACUNIT/10)
+	drawan(v, spfont_type, 92*FU, (100+special_offy)*FU, FU, "TIME BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', first_up, scale_updraw, 8*FU/10)
+	drawan(v, 'ADVNUM', 175*FU, (97+special_offy)*FU, FU, fake_timebonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', secon_up, scale_updraw, 8*FU/10)
 
 	if (maptol & TOL_NIGHTS) then
-		drawan(v, spfont_type, 92*FRACUNIT, (122+special_offy)*FRACUNIT, FRACUNIT, "SP   BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FRACUNIT/10)
-		drawan(v, 'ADVNUM', 175*FRACUNIT, (119+special_offy)*FRACUNIT, FRACUNIT, fake_nightsbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FRACUNIT/10)
+		drawan(v, spfont_type, 92*FU, (122+special_offy)*FU, FU, "SP   BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FU/10)
+		drawan(v, 'ADVNUM', 175*FU, (119+special_offy)*FU, FU, fake_nightsbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FU/10)
 	else
-		drawan(v, spfont_type, 92*FRACUNIT, (122+special_offy)*FRACUNIT, FRACUNIT, "RING BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FRACUNIT/10)
-		drawan(v, 'ADVNUM', 175*FRACUNIT, (119+special_offy)*FRACUNIT, FRACUNIT, fake_ringbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FRACUNIT/10)
+		drawan(v, spfont_type, 92*FU, (122+special_offy)*FU, FU, "RING BONUS", 0, v.getColormap(0, 0), "left", 0, 5, ' ', third_up, scale_updraw, 8*FU/10)
+		drawan(v, 'ADVNUM', 175*FU, (119+special_offy)*FU, FU, fake_ringbonus, 0, v.getColormap(0, 0), "left", 0, 5, ' ', fourt_up, scale_updraw, 8*FU/10)
 	end
 
 	return true
@@ -498,9 +498,9 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 
 	if p.boxdisplay and p.boxdisplay.timer and p.boxdisplay.item then
 		local lenght = p.boxdisplay.item
-		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FRACUNIT/(TICRATE/5)
-		local tictransparency = max(min(p.boxdisplay.timer, TICRATE/4),0)*FRACUNIT/(TICRATE/4)
-		local easesubtit = ease.linear(tic, FRACUNIT/2, 9*FRACUNIT/8)
+		local tic = min(3*TICRATE-p.boxdisplay.timer, TICRATE/5)*FU/(TICRATE/5)
+		local tictransparency = max(min(p.boxdisplay.timer, TICRATE/4),0)*FU/(TICRATE/4)
+		local easesubtit = ease.linear(tic, FU/2, 9*FU/8)
 		local easetratit = ease.linear(tictransparency, 9, 0)
 		local offset = 161
 
@@ -509,7 +509,7 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 		for k,img in ipairs(p.boxdisplay.item) do
 			local extra = 0
 			if SPR_MMON then
-				extra = (img[1] == SPR_MMON and -FRACUNIT*16 or 0)
+				extra = (img[1] == SPR_MMON and -FU*16 or 0)
 			end
 			local pic = v.getSpritePatch(img[1], img[2], 0)
 			local incs = pic.width+6
@@ -521,7 +521,7 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 				local y = FixedDiv(180*easesubtit-extra, easesubtit)
 				local flags = V_PERPLAYER|(easetratit << V_ALPHASHIFT)|V_SNAPTOBOTTOM
 
-				v.drawCropped(x, y, easesubtit, easesubtit, pic, flags, nil, 3*FRACUNIT+1, 3*FRACUNIT+1, (incs-9)*FRACUNIT, (incs-9)*FRACUNIT)
+				v.drawCropped(x, y, easesubtit, easesubtit, pic, flags, nil, 3*FU+1, 3*FU+1, (incs-9)*FU, (incs-9)*FU)
 				v.drawScaled(x, y, easesubtit, item_border, flags)
 				if img[3] and img[3].type and img[3].type == "ENC" then
 					local enc = img[3]
@@ -544,11 +544,11 @@ HOOK("monitordisplay", "gbahud", function(v, p, t, e)
 					local enc = img[3]
 
 					if enc.skin and enc.color then
-						v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
+						v.drawScaled(x, y-5*FU, easesubtit, v.getSprite2Patch(enc.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(enc.skin, enc.color))
 					end
 				else
 					if img[1] == SPR_TV1P and p.mo then
-						v.drawScaled(x, y-5*FRACUNIT, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
+						v.drawScaled(x, y-5*FU, easesubtit, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), flags, v.getColormap(p.mo.skin, p.mo.color))
 					end
 				end
 			end
@@ -575,22 +575,22 @@ end)
 --
 
 local gba_menu_vars = {
-	{minv = 1, maxv = 6, anim = FRACUNIT, name = "HUD PRESET", 			cv = gba_hud};
-	{minv = 1, maxv = 5, anim = FRACUNIT, name = "HUD FONT", 			cv = font_cv};
-	{minv = 1, maxv = 3, anim = FRACUNIT, name = "HUD LIFE STYLE", 		cv = icon_cv};
-	{minv = 0, maxv = 3, anim = FRACUNIT, name = "HUD BORDERS", 		cv = borders_cv};
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "ITEM DISPLAY", 		cv = itemdisplay_cv};
+	{minv = 1, maxv = 6, anim = FU, name = "HUD PRESET", 			cv = gba_hud};
+	{minv = 1, maxv = 5, anim = FU, name = "HUD FONT", 			cv = font_cv};
+	{minv = 1, maxv = 3, anim = FU, name = "HUD LIFE STYLE", 		cv = icon_cv};
+	{minv = 0, maxv = 3, anim = FU, name = "HUD BORDERS", 		cv = borders_cv};
+	{minv = 0, maxv = 1, anim = FU, name = "ITEM DISPLAY", 		cv = itemdisplay_cv};
 	"PLAYER",
 	nil,
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SPRING ROLL", 		cv = CV_FindVar("gba_springroll")};
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "THOK EFFECT", 		cv = CV_FindVar("gba_thok")};
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SUPER EFFECTS", 		cv = CV_FindVar("gba_supereffects")};
+	{minv = 0, maxv = 1, anim = FU, name = "SPRING ROLL", 		cv = CV_FindVar("gba_springroll")};
+	{minv = 0, maxv = 1, anim = FU, name = "THOK EFFECT", 		cv = CV_FindVar("gba_thok")};
+	{minv = 0, maxv = 1, anim = FU, name = "SUPER EFFECTS", 		cv = CV_FindVar("gba_supereffects")};
 	"MISC",
 	nil,
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SIGN ANIM", 			cv = CV_FindVar("gba_sign_movement")};
-	{minv = 1, maxv = 6, anim = FRACUNIT, name = "MONITOR STYLE", 		cv = CV_FindVar("gba_monitorstyle")};
-	{minv = 0, maxv = 2, anim = FRACUNIT, name = "EGGMAN VOICE", 		cv = CV_FindVar("gba_eggmanvoice")};
-	{minv = 0, maxv = 1, anim = FRACUNIT, name = "SCORE TALLY", 		cv = CV_FindVar("gba_endtally")};
+	{minv = 0, maxv = 1, anim = FU, name = "SIGN ANIM", 			cv = CV_FindVar("gba_sign_movement")};
+	{minv = 1, maxv = 6, anim = FU, name = "MONITOR STYLE", 		cv = CV_FindVar("gba_monitorstyle")};
+	{minv = 0, maxv = 2, anim = FU, name = "EGGMAN VOICE", 		cv = CV_FindVar("gba_eggmanvoice")};
+	{minv = 0, maxv = 1, anim = FU, name = "SCORE TALLY", 		cv = CV_FindVar("gba_endtally")};
 }
 
 local menu_max_val = #gba_menu_vars
@@ -602,7 +602,7 @@ local menu_transition = 0
 HOOK("gba_menu", "gbahud", function(v, p, t, e)
 	if menu_toggle or menu_transition > 0 then
 
-		local menu_offset = ease.outsine(clampTimer(FRACUNIT/2, menu_transition, FRACUNIT-1), 1280, 0)
+		local menu_offset = ease.outsine(clampTimer(FU/2, menu_transition, FU-1), 1280, 0)
 
 		v.fadeScreen(136, ease.outsine(menu_transition, 1, 8))
 		v.draw(menu_offset-23, -32, v.cachePatch("GBA_MENU_BG1"))
@@ -631,10 +631,10 @@ HOOK("gba_menu", "gbahud", function(v, p, t, e)
 				local type_item = type(item)
 
 				if type_item == "table" then
-					if FRACUNIT > item.anim then
-						item.anim = $+FRACUNIT/16
+					if FU > item.anim then
+						item.anim = $+FU/16
 					else
-						item.anim = FRACUNIT
+						item.anim = FU
 					end
 
 					local cvarname = string.upper(item.cv.string)
@@ -658,10 +658,10 @@ HOOK("gba_menu", "gbahud", function(v, p, t, e)
 					end
 
 
-					drawf(v, menu_select == i and 'RUSBFNT' or 'RUSHFNT', (menu_offset+63)*FRACUNIT, (47+offI)*FRACUNIT, FRACUNIT, string.upper(item.name), 0, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
-					drawan(v, menu_select == i and 'RUSSFNT' or 'RUSHFNT', (menu_offset+259)*FRACUNIT, (47+offI)*FRACUNIT, FRACUNIT, cvarname, 0, v.getColormap(TC_DEFAULT, 0), "right", 1, 0, ' ', min(abs(item.anim), FRACUNIT-1), scale_updraw, 8*FRACUNIT/10)
+					drawf(v, menu_select == i and 'RUSBFNT' or 'RUSHFNT', (menu_offset+63)*FU, (47+offI)*FU, FU, string.upper(item.name), 0, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
+					drawan(v, menu_select == i and 'RUSSFNT' or 'RUSHFNT', (menu_offset+259)*FU, (47+offI)*FU, FU, cvarname, 0, v.getColormap(TC_DEFAULT, 0), "right", 1, 0, ' ', min(abs(item.anim), FU-1), scale_updraw, 8*FU/10)
 				elseif type_item == "string" then
-					drawf(v, 'RUSSFNT', (menu_offset+161)*FRACUNIT, (54+offI)*FRACUNIT, FRACUNIT, string.upper(item), 0, v.getColormap(TC_DEFAULT, 0), "center", 1, 0)
+					drawf(v, 'RUSSFNT', (menu_offset+161)*FU, (54+offI)*FU, FU, string.upper(item), 0, v.getColormap(TC_DEFAULT, 0), "center", 1, 0)
 				end
 			end
 
@@ -678,14 +678,14 @@ HOOK("gba_menu", "gbahud", function(v, p, t, e)
 	end
 
 	if menu_toggle then
-		if menu_transition < FRACUNIT then
-			menu_transition = $ + FRACUNIT/24
-		elseif menu_transition > FRACUNIT then
-			menu_transition = FRACUNIT
+		if menu_transition < FU then
+			menu_transition = $ + FU/24
+		elseif menu_transition > FU then
+			menu_transition = FU
 		end
 	else
 		if menu_transition > 0 then
-			menu_transition = $ - FRACUNIT/24
+			menu_transition = $ - FU/24
 		elseif menu_transition < 0 then
 			menu_transition = 0
 		end

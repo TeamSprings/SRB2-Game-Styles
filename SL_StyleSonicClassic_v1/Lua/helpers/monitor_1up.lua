@@ -75,7 +75,7 @@ local function New_1upThinker(actor)
 
 		actor.overlay.skin = players[closestplayer].mo.skin
 		actor.overlay.state = S_PLAY_NBX1
-		actor.overlay.spriteyoffset = 4*FRACUNIT
+		actor.overlay.spriteyoffset = 4*FU
 	end
 
 	actor.overlay.color = players[closestplayer].mo.color

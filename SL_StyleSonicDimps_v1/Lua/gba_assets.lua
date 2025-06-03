@@ -25,8 +25,8 @@ mobjinfo[MT_REDTEAMRING].deathstate = ringclt
 mobjinfo[MT_BLUETEAMRING].deathstate = ringclt
 
 states[S_SPLISH1].action = function(mo)
-	mo.spritexscale = FRACUNIT*3/2
-	mo.spriteyscale = FRACUNIT*3/2
+	mo.spritexscale = FU*3/2
+	mo.spriteyscale = FU*3/2
 end
 
 --

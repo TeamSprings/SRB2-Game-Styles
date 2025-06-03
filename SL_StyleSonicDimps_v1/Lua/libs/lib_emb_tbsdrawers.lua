@@ -10,7 +10,7 @@ Contributors: Skydusk
 
 local fontregistry = {}
 
-local FRACUNIT = FRACUNIT
+local FU = FU
 local FRACBITS = FRACBITS
 
 local FixedSqrt = FixedSqrt
@@ -100,8 +100,8 @@ local function V_FontScrollDrawer(v, font, x, y, scale, value, flags, color, all
 	local drawer = v.drawScaled
 	local endp = 0
 
-	--v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, 0, 0, cut*FRACUNIT, 360*FRACUNIT) -- Reverse, as if inserting anim
-	v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, (cache[start].width-cut)*FRACUNIT, 0, 360*FRACUNIT, 360*FRACUNIT)
+	--v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, 0, 0, cut*FU, 360*FU) -- Reverse, as if inserting anim
+	v.drawCropped(nx, ny, scale, scale, cache[start].patch, flags, color, (cache[start].width-cut)*FU, 0, 360*FU, 360*FU)
 	fontoffset = $+cut
 
 	for i = start+1, maxv do
@@ -120,7 +120,7 @@ local function V_FontScrollDrawer(v, font, x, y, scale, value, flags, color, all
 	end
 
 	if endp then
-		v.drawCropped(nx+fontoffset*scale, ny, scale, scale, cache[endp].patch, flags, color, 0, 0, max(cache[endp].width+(width-fontoffset), 0)*FRACUNIT, 360*FRACUNIT)
+		v.drawCropped(nx+fontoffset*scale, ny, scale, scale, cache[endp].patch, flags, color, 0, 0, max(cache[endp].width+(width-fontoffset), 0)*FU, 360*FU)
 	end
 end
 
@@ -143,8 +143,8 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 		lenght = $+cur.width
 	end
 
-	local nprogress = (progress % FRACUNIT) + 1
-	local animseq = FRACUNIT / maxv
+	local nprogress = (progress % FU) + 1
+	local animseq = FU / maxv
 	local animoff = offset / maxv
 
 	local nx = FixedMul(x, scale)
@@ -157,7 +157,7 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 	end
 
 	for i = 1,maxv do
-		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FRACUNIT)
+		local invprg = min(max(nprogress - (animseq*i - animoff*i), 0)*maxv, FU)
 		anim(v, nx+fontoffset*scale, ny, scale, cache[i].patch, flags, color, i, invprg, nprogress, {...})
 		fontoffset = $+cache[i].width
 	end

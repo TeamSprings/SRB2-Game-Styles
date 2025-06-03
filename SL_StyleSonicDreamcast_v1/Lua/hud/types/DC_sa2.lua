@@ -9,7 +9,7 @@ local translate = worldlib.translate
 local font_drawer = drawlib.draw
 local font_string = 'SA2NUM'
 local font_redstring = 'SA2NUMR'
-local font_scale = FRACUNIT/4*3
+local font_scale = FU/4*3
 
 
 local tokenstyle_cv = CV_FindVar("dc_keystyle")
@@ -51,7 +51,7 @@ end
 
 return {
 	score = function(v, p, t, e)
-		V_ScoreDrawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y-8)*FRACUNIT, font_scale, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
+		V_ScoreDrawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FU, (hudinfo[HUD_SECONDS].y-8)*FU, font_scale, p.score, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 8)
 	end,
 
 	time = function(v, p, t, e)
@@ -65,25 +65,25 @@ return {
 			time_string = gettime(p)
 		end
 	
-		font_drawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FRACUNIT, (hudinfo[HUD_SECONDS].y+4)*FRACUNIT, font_scale, time_string, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
+		font_drawer(v, font_string, (hudinfo[HUD_SCORENUM].x-80)*FU, (hudinfo[HUD_SECONDS].y+4)*FU, font_scale, time_string, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "left", 1, 0)
 	end,
 
 	rings = function(v, p, t, e)
 		local numrings = (p.rings > 99  and p.rings or (p.rings < 10 and '00'..p.rings or '0'..p.rings))
 
 		-- main drawer
-		v.drawScaled((hudinfo[HUD_RINGS].x+12)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
-		font_drawer(v, font_string, (hudinfo[HUD_RINGSNUM].x-32)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, font_scale, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+		v.drawScaled((hudinfo[HUD_RINGS].x+12)*FU, (hudinfo[HUD_RINGS].y-10)*FU, font_scale, (not mariomode and v.cachePatch('SA2RINGS') or v.cachePatch('SA2COINS')), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+		font_drawer(v, font_string, (hudinfo[HUD_RINGSNUM].x-32)*FU, (hudinfo[HUD_RINGSNUM].y+14)*FU, font_scale, numrings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 
 		-- flashing
 		if not p.rings then
-			local transparency = ease.outsine(abs(((leveltime*FRACUNIT/22) % (2*FRACUNIT))+1-FRACUNIT), 0, 9) << V_ALPHASHIFT
-			font_drawer(v, font_redstring, (hudinfo[HUD_RINGSNUM].x-32)*FRACUNIT, (hudinfo[HUD_RINGSNUM].y+14)*FRACUNIT, font_scale, "000", hudinfo[HUD_RINGS].f|transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			local transparency = ease.outsine(abs(((leveltime*FU/22) % (2*FU))+1-FU), 0, 9) << V_ALPHASHIFT
+			font_drawer(v, font_redstring, (hudinfo[HUD_RINGSNUM].x-32)*FU, (hudinfo[HUD_RINGSNUM].y+14)*FU, font_scale, "000", hudinfo[HUD_RINGS].f|transparency|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 		end
 
 		if token then
 			if token > 1 or not p.styles_keytouch then
-				v.drawScaled((hudinfo[HUD_RINGS].x+72)*FRACUNIT, (hudinfo[HUD_RINGS].y-10)*FRACUNIT, font_scale, v.cachePatch(tokenstyle_cv.value and 'SA2CHAO' or 'SA2HEROESKEY'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
+				v.drawScaled((hudinfo[HUD_RINGS].x+72)*FU, (hudinfo[HUD_RINGS].y-10)*FU, font_scale, v.cachePatch(tokenstyle_cv.value and 'SA2CHAO' or 'SA2HEROESKEY'), hudinfo[HUD_RINGS].f|V_PERPLAYER)
 			end
 
 			if p.styles_keytouch and p.styles_keytouch.dur > 0 then
@@ -112,10 +112,10 @@ return {
 				local key_sprite = v.getSpritePatch(p.styles_keytouch.sprite, p.styles_keytouch.frame)
 
 				local scale = 	ease.linear	(dur, font_scale/5, oscale)
-				local x = 		ease.outsine(dur, hudinfo[HUD_RINGS].x-widthgreenextra+78+FixedInt(FixedMul(key_sprite.leftoffset, scale)), ox/FRACUNIT)
-				local y = 		ease.outsine(dur, hudinfo[HUD_RINGS].y-heightgreenextra+9+FixedInt(FixedMul(key_sprite.topoffset, scale)), oy/FRACUNIT+FixedInt(FixedMul(key_sprite.topoffset, scale)))
+				local x = 		ease.outsine(dur, hudinfo[HUD_RINGS].x-widthgreenextra+78+FixedInt(FixedMul(key_sprite.leftoffset, scale)), ox/FU)
+				local y = 		ease.outsine(dur, hudinfo[HUD_RINGS].y-heightgreenextra+9+FixedInt(FixedMul(key_sprite.topoffset, scale)), oy/FU+FixedInt(FixedMul(key_sprite.topoffset, scale)))
 
-				v.drawScaled(x*FRACUNIT, y*FRACUNIT, scale, key_sprite, V_PERPLAYER)
+				v.drawScaled(x*FU, y*FU, scale, key_sprite, V_PERPLAYER)
 			end
 		end
 	end,
@@ -147,7 +147,7 @@ return {
 		if G_GametypeUsesLives() then
 			-- number
 			local numlives = (p.lives < 10 and '0'..p.lives or p.lives)
-			font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+55)*FRACUNIT, (hudinfo[HUD_LIVES].y+64)*FRACUNIT, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
+			font_drawer(v, font_string, (hudinfo[HUD_LIVES].x+55)*FU, (hudinfo[HUD_LIVES].y+64)*FU, font_scale, numlives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, 1, 0)
 		elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 			v.draw(hudinfo[HUD_LIVES].x+38, hudinfo[HUD_LIVES].y-3, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 		end

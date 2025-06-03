@@ -10,7 +10,7 @@ Contributors: Skydusk
 
 local fontregistry = {}
 
-local FRACUNIT = FRACUNIT
+local FU = FU
 local FRACBITS = FRACBITS
 
 local FixedSqrt = FixedSqrt

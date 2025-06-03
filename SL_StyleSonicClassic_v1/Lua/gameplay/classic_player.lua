@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
 --
@@ -25,6 +25,14 @@ local springtroll_opt = Options:new("springroll", "gameplay/cvars/springroll", n
 local thok_opt = Options:new("thok", "gameplay/cvars/thok", nil, CV_NETVAR)
 
 local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
+
+local runonwater_opt = Options:new("runonwater", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
+
+local jumpsounds_opt = Options:new("jumpsfx", "gameplay/sfx/jumpsfx", nil, 0)
+
+local spinsounds_opt = Options:new("spinsfx", "gameplay/sfx/spinsfx", nil, 0)
+
+local dashsounds_opt = Options:new("dashsfx", "gameplay/sfx/dashsfx", nil, 0)
 
 --
 --	Cvars
@@ -52,6 +60,45 @@ addHook("PlayerThink", function(p)
 	if spindash_cv.value and p.mo.state == S_PLAY_SPINDASH then
 		p.mo.state = S_PLAY_ROLL
 	end
+
+	-- SFX
+
+	local jumpsfx = jumpsounds_opt()
+	local spinsfx = spinsounds_opt()
+	local dashsfx = dashsounds_opt()
+
+
+	if jumpsfx and S_SoundPlaying(p.realmo, sfx_jump) then
+		S_StopSoundByID(p.realmo, sfx_jump)
+		S_StartSound(p.realmo, jumpsfx)
+	end
+
+	if spinsfx and S_SoundPlaying(p.realmo, sfx_spin) then
+		S_StopSoundByID(p.realmo, sfx_spin)
+		S_StartSound(p.realmo, spinsfx)
+	end
+	
+	if dashsfx and S_SoundPlaying(p.realmo, sfx_zoom) then
+		S_StopSoundByID(p.realmo, sfx_zoom)
+		S_StartSound(p.realmo, dashsfx)
+	end
+
+	-- ABILITIES
+
+	local runwater = runonwater_opt()
+
+	if runwater then
+		p.charflags = $|SF_RUNONWATER
+		p.styles_runonwater = true
+	elseif p.styles_runonwater then
+		if not skins[p.mo.skin].flags & SF_RUNONWATER then
+			p.charflags = $ &~ SF_RUNONWATER
+		end
+
+		p.styles_runonwater = nil
+	end
+
+	-- EYE CANDY
 
 	if thok_cv.value then
 		p.thokitem = MT_RAY
@@ -120,7 +167,7 @@ addHook("PlayerThink", function(p)
 			if p.mo.state ~= S_PLAY_WALK then
 				p.mo.state = S_PLAY_WALK
 			end
-			p.mo.springyscale = 16*FRACUNIT
+			p.mo.springyscale = 16*FU
 		else
 			p.style_falling = nil
 			if p.styles_spronk then

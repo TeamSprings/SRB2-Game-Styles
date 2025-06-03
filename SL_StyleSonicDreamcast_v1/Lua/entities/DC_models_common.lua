@@ -106,7 +106,7 @@ addHook("MobjThinker", function(a)
 
 		if a.bubble then
 			if a.scaleup and a.scale ~= FixedMul(a.scaleup, a.target.scale) then
-				a.scale = ease.linear(FRACUNIT/24, a.scale, FixedMul(a.scaleup, a.target.scale))
+				a.scale = ease.linear(FU/24, a.scale, FixedMul(a.scaleup, a.target.scale))
 			end
 
 			if a.target.valid and a.fuse > 4 then
@@ -135,7 +135,7 @@ addHook("MobjThinker", function(a)
 					a.target.momz = $+a.scale/4*P_MobjFlip(a)
 				else
 					---@diagnostic disable-next-line
-					a.target.momz = ease.linear(FRACUNIT/2, a.target.momz, 3*sin(2*ANG1*leveltime))
+					a.target.momz = ease.linear(FU/2, a.target.momz, 3*sin(2*ANG1*leveltime))
 				end
 				a.target.fuse = a.extravalue2
 			else
@@ -147,13 +147,13 @@ addHook("MobjThinker", function(a)
 			end
 
 			if a.alpha and a.fuse < 9 then
-				a.alpha = $-FRACUNIT/10
+				a.alpha = $-FU/10
 			end
 		end
 	else
 		if a.bubble then
 			if a.alpha then
-				a.alpha = $-FRACUNIT/10
+				a.alpha = $-FU/10
 			else
 				P_RemoveMobj(a)
 			end
@@ -205,7 +205,7 @@ states[S_XPLDADVENTURE_1] = {
 	tics = 2,
 	action = function(a)
 	a.blendmode = AST_ADD
-	a.scale = $+FRACUNIT
+	a.scale = $+FU
 	S_StartSound(a, sfx_advexp)
 end,
 	nextstate = S_XPLDADVENTURE_2
@@ -423,12 +423,12 @@ addHook("MobjThinker", function(mo)
 
 		if mo.state ~= curstate then
 			mo.state = curstate
-			mo.spritexscale = FRACUNIT/2
-			mo.spriteyscale = FRACUNIT/2
+			mo.spritexscale = FU/2
+			mo.spriteyscale = FU/2
 		end
 	else
-		mo.spritexscale = FRACUNIT
-		mo.spriteyscale = FRACUNIT
+		mo.spritexscale = FU
+		mo.spriteyscale = FU
 	end
 end, MT_TOKEN)
 
@@ -450,7 +450,7 @@ addHook("TouchSpecial", function(mo, pmo)
 
 		sprite = mo.sprite,
 		frame = mo.frame,
-		dur = FRACUNIT,
+		dur = FU,
 
 		loop = states[tokenstyle_cv.value and chao_key or heroes_key].var1 + 1,
 	}
@@ -471,7 +471,7 @@ sfxinfo[freeslot("sfx_advite")].caption = "Pop"
 addHook("MapThingSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
-	a.scale = $+FRACUNIT/3
+	a.scale = $+FU/3
 	a.state = S_YELLOWBOOSTERROLLER
 
 	if mt.args[0] > 0 then
@@ -488,7 +488,7 @@ end, MT_YELLOWBOOSTER)
 addHook("MapThingSpawn", function(a, mt)
 	if Disable_Miscs then return end
 	a.renderflags = $|RF_OBJECTSLOPESPLAT|RF_FLOORSPRITE|RF_NOSPLATBILLBOARD
-	a.scale = $+FRACUNIT/3
+	a.scale = $+FU/3
 	a.state = S_REDBOOSTERROLLER
 
 	if mt.args[0] > 0 then
@@ -614,7 +614,7 @@ addHook("MobjSpawn", function(mo)
 	if GoalRing then return end
 
 	local gr = P_SpawnMobjFromMobj(mo, 0, 0, 8, goalring)
-	gr.scale = $+FRACUNIT/4
+	gr.scale = $+FU/4
 	P_RemoveMobj(mo)
 end, MT_SIGN)
 
@@ -650,7 +650,7 @@ addHook("MobjThinker", function(a)
 			a.alpha = 9*a.alpha/10
 		end
 
-		if a.scale < FRACUNIT/8 then
+		if a.scale < FU/8 then
 			P_RemoveMobj(a)
 			return
 		end
@@ -660,7 +660,7 @@ addHook("MobjThinker", function(a)
 		a.angle = $ + ANG2
 	end
 
-	a.spriteyoffset = 32*FRACUNIT
+	a.spriteyoffset = 32*FU
 end, MT_EMBLEM)
 
 addHook("MobjDeath", function(a)

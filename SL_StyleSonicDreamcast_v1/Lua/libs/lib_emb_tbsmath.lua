@@ -10,7 +10,7 @@ Contributors: Skydusk
 
 local fontregistry = {}
 
-local FRACUNIT = FRACUNIT
+local FU = FU
 local FRACBITS = FRACBITS
 
 local FixedSqrt = FixedSqrt
@@ -31,7 +31,7 @@ end
 -- sTBS's Fixedpoint interpretation of Roblox's lua doc interpretation's of Bezier's curves.
 
 local function Math_QuadBezier(t, p0, p1, p2)
-	return FixedMul(FixedMul(FRACUNIT - t, FRACUNIT - t), p0) + 2 * FixedMul(FixedMul(FRACUNIT - t, t), p1) + FixedMul(FixedMul(t, t), p2)
+	return FixedMul(FixedMul(FU - t, FU - t), p0) + 2 * FixedMul(FixedMul(FU - t, t), p1) + FixedMul(FixedMul(t, t), p2)
 end
 
 return {atan = atan, power = FixedPower, quadBezier = Math_QuadBezier}

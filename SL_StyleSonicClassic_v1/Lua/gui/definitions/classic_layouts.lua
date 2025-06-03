@@ -30,6 +30,10 @@ return {
 		xoffset_timenum = 0,
 		xoffset_ringsnum = 0,
 
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,
+
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
 		yoffset_ringsnum = 0,
@@ -69,6 +73,10 @@ return {
 		xoffset_scorenum = 0,
 		xoffset_timenum = 0,
 		xoffset_ringsnum = 0,
+
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
 
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
@@ -110,6 +118,10 @@ return {
 		xoffset_timenum = 0,
 		xoffset_ringsnum = -17,
 
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
+
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
 		yoffset_ringsnum = 0,
@@ -149,6 +161,10 @@ return {
 		xoffset_scorenum = 186,
 		xoffset_timenum = -104,
 		xoffset_ringsnum = -17,
+
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
 
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
@@ -190,6 +206,10 @@ return {
 		xoffset_timenum = 0,
 		xoffset_ringsnum = 24,
 
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
+
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
 		yoffset_ringsnum = 0,
@@ -229,6 +249,10 @@ return {
 		xoffset_scorenum = -80,
 		xoffset_timenum = -104,
 		xoffset_ringsnum = -65,
+
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
 
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
@@ -270,6 +294,10 @@ return {
 		xoffset_timenum =  -104,
 		xoffset_ringsnum = -80,
 
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
+
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,
 		yoffset_ringsnum = 0,
@@ -309,6 +337,10 @@ return {
 		xoffset_scorenum = -80,
 		xoffset_timenum = -104,
 		xoffset_ringsnum = -80,
+
+		leftlimit_scorenum = 0,
+		leftlimit_timenum = 0,
+		leftlimit_ringsnum = 0,		
 
 		yoffset_scorenum = 0,
 		yoffset_timenum = 0,

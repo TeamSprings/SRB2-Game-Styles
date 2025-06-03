@@ -66,7 +66,7 @@ addHook("PlayerThink", function(p)
 				p.styles_jumpball.color = p.mo.color
 				p.styles_jumpball.frame = states[S_THOK].frame
 				p.styles_jumpball.target = p.mo
-				p.styles_jumpball.spriteyoffset = -10*FRACUNIT
+				p.styles_jumpball.spriteyoffset = -10*FU
 				p.styles_jumpball.dispoffset = -20
 				p.styles_jumpball.fuse = 8
 
@@ -74,8 +74,8 @@ addHook("PlayerThink", function(p)
 					p.styles_jumpball.flags2 = MF2_DONTDRAW
 				end
 
-				p.styles_jumpball.spritexscale = 5*FRACUNIT/4
-				p.styles_jumpball.spriteyscale = 5*FRACUNIT/4
+				p.styles_jumpball.spritexscale = 5*FU/4
+				p.styles_jumpball.spriteyscale = 5*FU/4
 
 				if cvar.value == 2 then
 					-- lel

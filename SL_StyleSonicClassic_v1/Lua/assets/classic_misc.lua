@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 
 local api = tbsrequire 'styles_api'
 

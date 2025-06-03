@@ -11,7 +11,7 @@ freeslot("SPR_MONITORS_CLASSIC",  "SPR_MONITORS_GOLDEN", "SPR_MONITORS_BLUE", "S
 "S_DUMMYMONITOR", "S_DUMMYGMONITOR", "S_DUMMYBMONITOR", "S_DUMMYRMONITOR")
 
 local PolishStyles = tbsrequire('classic_polish')
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 
 local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 local slope_handler = tbsrequire 'helpers/mo_slope'
@@ -49,10 +49,10 @@ local frame_offset = 0
 local icon_height = 0
 
 local style = Options:new("monitor", "assets/tables/sprites/monitor", function(var)
-	local sets = {13, 0, 3, 10, 6}
+	local sets = {13, 0, 3, 10, 6, 16}
 	frame_offset = sets[var.value]
 
-	local heights = {14, 14, 20, 15, 14}
+	local heights = {14, 14, 20, 15, 14, 14}
 	icon_height = heights[var.value]
 end)
 
@@ -90,7 +90,7 @@ local function P_SpawnItemBox(a)
 	local icsprite = states[icstate].sprite
 	local icframe = states[icstate].frame
 
-	a.item = P_SpawnMobjFromMobj(a, 0,0, P_MobjFlip(a)*14*FRACUNIT, MT_FRONTTIERADUMMY)
+	a.item = P_SpawnMobjFromMobj(a, 0,0, P_MobjFlip(a)*14*FU, MT_FRONTTIERADUMMY)
 	a.item.state = S_INVISIBLE
 	a.item.sprite = icsprite
 	a.item.frame = icframe
@@ -136,7 +136,7 @@ local function P_MonitorThinker(a)
 				-- Static Animation
 				if not statict then
 					a.item.flags2 = $ &~ MF2_DONTDRAW
-					a.item.alpha = FRACUNIT
+					a.item.alpha = FU
 					a.frame = frame_offset
 				else
 					a.item.flags2 = $|MF2_DONTDRAW
@@ -146,7 +146,7 @@ local function P_MonitorThinker(a)
 
 						if statict > 2 then
 							a.item.flags2 = $ &~ MF2_DONTDRAW
-							a.item.alpha = FRACUNIT/(statict-1)
+							a.item.alpha = FU/(statict-1)
 						end
 					else
 						a.frame = frame_offset
@@ -168,12 +168,12 @@ local function P_MonitorThinker(a)
 				local height = 64*a.scale
 				local funny = flip and FixedDiv(a.ceilingz - a.floorz, height) or FixedDiv(a.ceilingz - a.z, height)
 
-				if funny < FRACUNIT then
+				if funny < FU then
 					a.spriteyscale = funny
 					a.item.spriteyscale = funny
 				else
-					a.spriteyscale = FRACUNIT
-					a.item.spriteyscale = FRACUNIT
+					a.spriteyscale = FU
+					a.item.spriteyscale = FU
 				end
 			else
 				-- Spawns all necessary components
@@ -193,7 +193,7 @@ local function P_MonitorThinker(a)
 				if a.goldentimer == 5*TICRATE then
 					--local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
 					--newitembox.scale = a.originscale
-					--newitembox.alpha = FRACUNIT
+					--newitembox.alpha = FU
 					--newitembox.flags = a.info.flags
 					--P_RemoveMobj(a)
 					P_SpawnItemBox(a)
@@ -230,12 +230,15 @@ local function P_MonitorDeath(a, d, s)
 		if s or d then
 			a.target = (s or d)
 		else
-			a.target = P_LookForPlayers(a, FixedMul(64*FRACUNIT, a.scale), yes)
+			a.target = P_LookForPlayers(a, FixedMul(64*FU, a.scale), yes)
 		end
 	end
 
+	local prioritysmoke = 0
+
 	if (monitor_jump_cv.value > 0) then
 		a.momz = $+4*P_MobjFlip(a)*a.scale
+		prioritysmoke = 2
 	end
 
 	S_StartSound(a, a.info.deathsound)
@@ -281,6 +284,7 @@ local function P_MonitorDeath(a, d, s)
 		smuk.state = S_XPLD1
 		smuk.fuse = 32
 		smuk.scale = a.scale
+		smuk.dispoffset = prioritysmoke
 		a.frame = frame_offset + 2
 		P_RemoveMobj(a.item)
 	end

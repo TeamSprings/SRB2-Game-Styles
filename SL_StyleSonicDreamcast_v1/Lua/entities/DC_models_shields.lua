@@ -133,7 +133,7 @@ addHook("MobjThinker", function(mo)
 	end
 
 	if not (leveltime % 3) then
-		local shock = P_SpawnMobjFromMobj(mo, -4069*FRACUNIT, -4069*FRACUNIT, -4069*FRACUNIT, MT_METALJETFUME)
+		local shock = P_SpawnMobjFromMobj(mo, -4069*FU, -4069*FU, -4069*FU, MT_METALJETFUME)
 		shock.state = S_MAGN14
 		shock.scale = mo.scale/2
 		shock.angle = P_RandomRange(1, 360) * ANG1
@@ -149,7 +149,7 @@ addHook("PlayerThink", function(p)
 	if not (p.mo and p.mo.valid) then return end
 
 	if 	p.shieldscale == skins[p.mo.skin].shieldscale
-	and p.shieldscale == FRACUNIT then
+	and p.shieldscale == FU then
 		-- This needs increase!
 		p.shieldscale = tofixed('1.15')
 	end
@@ -203,7 +203,7 @@ states[n_1] = {
 
 local amount_rays = 1
 local mid_index = amount_rays + 1
-local angle_div = 360*FRACUNIT/amount_rays
+local angle_div = 360*FU/amount_rays
 
 local function invincibilityModel(a, p)
 	if Disable_Shields then return end
@@ -211,8 +211,8 @@ local function invincibilityModel(a, p)
 	if not a.raylist and p.powers[pw_invulnerability] then
 		local ray = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_OVERLAY)
 		ray.state = n_1
-		ray.spritexscale = 2*FRACUNIT/9
-		ray.spriteyscale = 2*FRACUNIT/9
+		ray.spritexscale = 2*FU/9
+		ray.spriteyscale = 2*FU/9
 		ray.target = p.mo
 		ray.fuse = 8
 		ray.dispoffset = 20
@@ -222,7 +222,7 @@ local function invincibilityModel(a, p)
 	if a.raylist and not a.raylist[mid_index] then
 		local mid = P_SpawnMobjFromMobj(a, 0, 0, 0, MT_ROTATEOVERLAY)
 		mid.target = a
-		mid.scale = 5*FRACUNIT/4
+		mid.scale = 5*FU/4
 		mid.state = S_INVISIBLE
 		mid.sprite = SPR_INV1
 		mid.frame = A|FF_ADD|FF_TRANS40|FF_SEMIBRIGHT

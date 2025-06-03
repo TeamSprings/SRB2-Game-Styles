@@ -1,4 +1,4 @@
-local inbdistance = FRACUNIT/64
+local inbdistance = FU/64
 local S3KSS_Map = {
 	[1] = {
 	{   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,},	

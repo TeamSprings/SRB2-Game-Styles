@@ -33,8 +33,8 @@ end)
 
 local height_t1 = 75
 local height_t2 = 90
-local base_scale1 = FRACUNIT/24
-local base_scale2 = FRACUNIT/3
+local base_scale1 = FU/24
+local base_scale2 = FU/3
 
 local itemboxstyle_cv = CV_RegisterVar({
 	name = "dc_itemboxstyle",
@@ -48,13 +48,13 @@ local itemboxstyle_cv = CV_RegisterVar({
 			if cv.value < 1 then
 				height_t1 = 75
 				height_t2 = 90
-				base_scale1 = FRACUNIT/24
-				base_scale2 = FRACUNIT/3
+				base_scale1 = FU/24
+				base_scale2 = FU/3
 			else
 				height_t1 = 75
 				height_t2 = 75
-				base_scale1 = FRACUNIT/24
-				base_scale2 = FRACUNIT/24
+				base_scale1 = FU/24
+				base_scale2 = FU/24
 			end
 		end
 	end,
@@ -70,7 +70,7 @@ local function P_SpawnItemBox(a)
 
 	if a.health > 0 then
 		if not a.item then
-			a.item = P_SpawnMobjFromMobj(a, 0,0,25*FRACUNIT, MT_BACKTIERADUMMY)
+			a.item = P_SpawnMobjFromMobj(a, 0,0,25*FU, MT_BACKTIERADUMMY)
 			a.item.state = S_INVISIBLE
 			a.item.target = a
 			a.item.icsprite = icsprite
@@ -97,7 +97,7 @@ local function P_SpawnItemBox(a)
 	a.state = S_INVISIBLE
 	a.sprite = SPR_DC_MONITOR
 
-	--a.item.dispoffset = -32*FRACUNIT
+	--a.item.dispoffset = -32*FU
 
 	if a.info.flags & MF_GRENADEBOUNCE then
 		a.color = SKINCOLOR_GOLD
@@ -184,7 +184,7 @@ local MonitorSprites = {
 local function P_MarioExistsThink(a, typepw)
 	if not mariocoins then return false end
 	-- Optimalization, INT32 feels too much tbh.
-	local marioconfirmed, maxdistance = false, 1000*FRACUNIT
+	local marioconfirmed, maxdistance = false, 1000*FU
 
 	if (mariocoins.value and typepw == 0) or (consoleplayer and consoleplayer.valid and IsMario(consoleplayer)) then
 		marioconfirmed = true
@@ -233,7 +233,7 @@ local function P_MarioMonitorThink(a, sprite, oldframe)
 	if marioconfirmed then
 		a.sprite = SPR_MMON
 		a.frame = typepw|FF_PAPERSPRITE
-		a.spriteyoffset = -FRACUNIT*16
+		a.spriteyoffset = -FU*16
 	else
 		a.sprite = sprite
 		a.frame = oldframe|FF_PAPERSPRITE
@@ -288,8 +288,8 @@ local function P_MonitorThinker(a)
 					a.dctypemonitor = 2
 
 					if P_IsObjectOnGround(a)
-					or (a.floorz + 30*FRACUNIT >= a.z + 4*FRACUNIT
-					or (P_MobjFlip(a) < 0 and a.ceilingz - 30*FRACUNIT >= a.z + 4*FRACUNIT)) then
+					or (a.floorz + 30*FU >= a.z + 4*FU
+					or (P_MobjFlip(a) < 0 and a.ceilingz - 30*FU >= a.z + 4*FU)) then
 						a.dctypemonitor = 1
 					end
 
@@ -300,9 +300,9 @@ local function P_MonitorThinker(a)
 			end
 
 			if a.item and a.item.valid and a.caps and a.caps.valid then
-				a.alpha = FRACUNIT
-				a.item.alpha = FRACUNIT
-				a.caps.alpha = FRACUNIT
+				a.alpha = FU
+				a.item.alpha = FU
+				a.caps.alpha = FU
 
 				-- Static Behavior
 				a.item.angle = $+ANG1*4
@@ -368,17 +368,17 @@ local function P_MonitorThinker(a)
 				local height = (monitor_type == 2 and height_t2 or height_t1)*a.scale
 				local funny =  P_MobjFlip(a) < 0 and FixedDiv(a.caps.ceilingz - a.caps.floorz, height) or FixedDiv(a.caps.ceilingz - a.caps.z, height)
 
-				if funny < FRACUNIT then
+				if funny < FU then
 					a.spriteyscale = funny
 					a.caps.spriteyscale = funny
 					if a.item and a.item.valid then
 						a.item.scale = FixedMul(funny, a.scale + (monitor_type == 2 and base_scale2 or base_scale1))
 					end
 				else
-					a.spritexscale = FRACUNIT
-					a.spriteyscale = FRACUNIT
-					a.caps.spritexscale = FRACUNIT
-					a.caps.spriteyscale = FRACUNIT
+					a.spritexscale = FU
+					a.spriteyscale = FU
+					a.caps.spritexscale = FU
+					a.caps.spriteyscale = FU
 					if a.item and a.item.valid then
 						a.item.scale = a.originscale + (monitor_type == 2 and base_scale2 or base_scale1)
 					end
@@ -401,7 +401,7 @@ local function P_MonitorThinker(a)
 				if a.goldentimer == 89 then
 					local newitembox = P_SpawnMobjFromMobj(a, 0, 0, 0, a.type)
 					newitembox.scale = a.originscale
-					newitembox.alpha = FRACUNIT
+					newitembox.alpha = FU
 					P_RemoveMobj(a)
 
 					return
@@ -419,13 +419,13 @@ local function P_MonitorThinker(a)
 					end
 				else
 					if a.alpha then
-						a.alpha = $ - FRACUNIT/14
+						a.alpha = $ - FU/14
 						a.item.alpha = a.alpha
 						a.caps.alpha = a.alpha
 
-						a.scale = $ + FRACUNIT/14
-						a.item.scale = $ + FRACUNIT/14
-						a.caps.scale = $ + FRACUNIT/14
+						a.scale = $ + FU/14
+						a.item.scale = $ + FU/14
+						a.caps.scale = $ + FU/14
 					else
 						if a.item and a.item.valid then
 							P_RemoveMobj(a.item)
@@ -467,7 +467,7 @@ local function P_MonitorDeath(a, d, s)
 			if s or d then
 				a.target = (s or d)
 			else
-				a.target = P_LookForPlayers(a, FixedMul(64*FRACUNIT, a.scale), yes)
+				a.target = P_LookForPlayers(a, FixedMul(64*FU, a.scale), yes)
 			end
 		end
 

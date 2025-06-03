@@ -50,7 +50,7 @@ states[supersparkles] = {
 
 local angle_triggerfall = ANG1*6
 local angle_wholerange = angle_triggerfall*2
-local speed_threshold = 5*FRACUNIT
+local speed_threshold = 5*FU
 
 addHook("PlayerThink", function(p)
 	if not p.mo then return end
@@ -65,20 +65,20 @@ addHook("PlayerThink", function(p)
 			end
 		else
 			if not (leveltime % 8) then
-				local radius = p.mo.radius/FRACUNIT
-				local height = p.mo.height/FRACUNIT
+				local radius = p.mo.radius/FU
+				local height = p.mo.height/FU
 
 				local sparkle = P_SpawnMobjFromMobj(p.mo,
-					P_RandomRange(-radius, radius) * FRACUNIT,
-					P_RandomRange(-radius, radius) * FRACUNIT,
-					P_RandomRange(-height/4, height) * FRACUNIT,
+					P_RandomRange(-radius, radius) * FU,
+					P_RandomRange(-radius, radius) * FU,
+					P_RandomRange(-height/4, height) * FU,
 				MT_PARTICLE)
 
 				sparkle.fuse = TICRATE*2
 				sparkle.scale = (sparkle.scale*3)/2
 
 				if not P_IsObjectOnGround(p.mo) then
-					sparkle.momz = -9 * FRACUNIT * P_MobjFlip(p.mo)
+					sparkle.momz = -9 * FU * P_MobjFlip(p.mo)
 				end
 
 				sparkle.state = supersparkles
@@ -120,13 +120,13 @@ addHook("PlayerThink", function(p)
 
 		if p.powers[pw_invulnerability] then
 			if not (leveltime % 12) then
-				local radius = p.mo.radius/FRACUNIT
-				local height = p.mo.height/FRACUNIT
+				local radius = p.mo.radius/FU
+				local height = p.mo.height/FU
 
 				local sparkle = P_SpawnMobjFromMobj(p.mo,
-					P_RandomRange(-radius, radius) * FRACUNIT,
-					P_RandomRange(-radius, radius) * FRACUNIT,
-					P_RandomRange(-height/4, height) * FRACUNIT,
+					P_RandomRange(-radius, radius) * FU,
+					P_RandomRange(-radius, radius) * FU,
+					P_RandomRange(-height/4, height) * FU,
 				MT_PARTICLE)
 
 				sparkle.fuse = TICRATE/2

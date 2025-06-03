@@ -9,7 +9,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 
 local api = tbsrequire 'styles_api'
 
@@ -83,6 +83,7 @@ local current_track = ""
 local current_typetrack = ""
 local old_typetrack = ""
 local our_track = false
+local speedup = false
 
 local event = false
 local lenght = 0
@@ -100,6 +101,15 @@ end)
 
 addHook("PostThinkFrame", do
 	if displayplayer and displayplayer == consoleplayer then
+		if displayplayer.powers[pw_sneakers] == TICRATE/2 then
+			if speedup then
+				S_SpeedMusic(FRACUNIT, displayplayer)
+				speedup = nil
+			end
+		elseif displayplayer.powers[pw_sneakers] > TICRATE/2 and speedup then
+			S_SpeedMusic(FRACUNIT*2, displayplayer)
+		end
+
 		if our_track then
 			if event then
 				lenght = S_GetMusicLength()
@@ -165,6 +175,9 @@ addHook("MusicChange", function(oldname, newname, mflags, looping, position, pre
 
 		if option.values[option.cv.value] then
 			music_change = option.values[option.cv.value]
+		elseif option.cv.value < 0 then
+			speedup = true
+			return S_MusicName(displayplayer)
 		end
 
 		our_track = true

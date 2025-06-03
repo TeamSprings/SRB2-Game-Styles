@@ -60,7 +60,7 @@ local function V_DrawLevelActNum(v, x, y, num, ttlnum) -- Also ported from v_vid
 end
 
 local function V_DrawTitle(v, x, y, str, flags)
-	drawf(v, 'LCDFT', x*FRACUNIT, y*FRACUNIT, FRACUNIT, str, flags, v.getColormap(TC_DEFAULT, 1), "left")
+	drawf(v, 'LCDFT', x*FU, y*FU, FU, str, flags, v.getColormap(TC_DEFAULT, 1), "left")
 end
 
 local function V_GetLenght(v, str)
@@ -79,7 +79,7 @@ return{
 
 	titlecard = function(v, player, tctime, etime, fade)
 		if tctime > etime-1 then return end
-		if p == secondarydisplayplayer then return end -- remove this once adjusted
+		if player == secondarydisplayplayer then return end -- remove this once adjusted
 
 		if #ttlnum == 0 then
 			for i = 0, 9 do -- preparing ttllnum
@@ -111,29 +111,29 @@ return{
 		local totalsubstr = substr1..substr2
 
 		if tctime < 10 then -- Slide in
-			local fractime = tctime*FRACUNIT/10
+			local fractime = tctime*FU/10
 
 			v.draw(30, interpolate(-168, 0, fractime), back, V_SNAPTOTOP)
 
-			v.drawFill(-500, interpolate(131, 250, FRACUNIT-fractime), 9999, 9, 31|V_SNAPTOTOP)
+			v.drawFill(-500, interpolate(131, 250, FU-fractime), 9999, 9, 31|V_SNAPTOTOP)
 			local subttl = "Sonic Robo Blast CD"
 
 			if mapheaderinfo[gamemap].subttl ~= "" then
-				v.drawString(interpolate(-v.stringWidth(mapheaderinfo[gamemap].subttl), 63, fractime), interpolate(132, 251, FRACUNIT-fractime),
+				v.drawString(interpolate(-v.stringWidth(mapheaderinfo[gamemap].subttl), 63, fractime), interpolate(132, 251, FU-fractime),
 				mapheaderinfo[gamemap].subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 			else
 				local gpatch = v.cachePatch("LTCDGAME")
 
-				v.draw(interpolate(-gpatch.width, 63, fractime), interpolate(132, 251, FRACUNIT-fractime), gpatch, V_SNAPTOTOP)
+				v.draw(interpolate(-gpatch.width, 63, fractime), interpolate(132, 251, FU-fractime), gpatch, V_SNAPTOTOP)
 			end
 
 			if mapheaderinfo[gamemap].subttl ~= "" then subttl = mapheaderinfo[gamemap].subttl end
-			v.drawString(interpolate(-v.stringWidth(subttl), 63, fractime), interpolate(132, 251, FRACUNIT-fractime),
+			v.drawString(interpolate(-v.stringWidth(subttl), 63, fractime), interpolate(132, 251, FU-fractime),
 			subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 
 			V_DrawTitle(v, interpolate(-V_GetLenght(v, superstr), 40, fractime), 80, superstr, V_SNAPTOTOP)
-			V_DrawTitle(v, interpolate(40, 400, FRACUNIT-fractime), 136, substr1, V_SNAPTOTOP)
-			V_DrawTitle(v, interpolate(40, 400, FRACUNIT-fractime)+V_GetLenght(v, substr1), 104, substr2, V_SNAPTOTOP)
+			V_DrawTitle(v, interpolate(40, 400, FU-fractime), 136, substr1, V_SNAPTOTOP)
+			V_DrawTitle(v, interpolate(40, 400, FU-fractime)+V_GetLenght(v, substr1), 104, substr2, V_SNAPTOTOP)
 
 			local iiiW = 142
 			if V_GetLenght(v, superstr) > 102 then
@@ -141,16 +141,16 @@ return{
 			elseif V_GetLenght(v, totalsubstr) > 102 then
 				iiiW = 142 + V_GetLenght(v, totalsubstr) - 102
 			end
-			v.draw(interpolate(iiiW, iiiW+360, FRACUNIT-fractime), 80, iii, V_SNAPTOTOP)
+			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
-			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
+			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(-48, 104, fractime), 147, zonegr) end
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
 					actw = 134
 				end
-				V_DrawLevelActNum(v, actw, interpolate(150, 320, FRACUNIT-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
+				V_DrawLevelActNum(v, actw, interpolate(150, 320, FU-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
 			end
 
 			return true
@@ -159,20 +159,20 @@ return{
 
 			return true
 		elseif tctime > etime-11 then -- Slide out
-			local fractime = (etime-tctime-1)*FRACUNIT/10
+			local fractime = (etime-tctime-1)*FU/10
 
 			v.draw(30, interpolate(-168, 0, fractime), back, V_SNAPTOTOP)
 
 			v.drawFill(-500, interpolate(-10, 131, fractime), 9999, 9, 31|V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].subttl ~= "" then
-				v.drawString(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime),
+				v.drawString(interpolate(63, 184, FU-fractime), interpolate(-10, 131, fractime),
 				mapheaderinfo[gamemap].subttl, V_SNAPTOTOP|V_ALLOWLOWERCASE, "thin")
 			else
-				v.draw(interpolate(63, 184, FRACUNIT-fractime), interpolate(-10, 131, fractime), v.cachePatch("LTCDGAME"), V_SNAPTOTOP)
+				v.draw(interpolate(63, 184, FU-fractime), interpolate(-10, 131, fractime), v.cachePatch("LTCDGAME"), V_SNAPTOTOP)
 			end
 
-			V_DrawTitle(v, interpolate(40, 400, FRACUNIT-fractime), 80, superstr, V_SNAPTOTOP)
+			V_DrawTitle(v, interpolate(40, 400, FU-fractime), 80, superstr, V_SNAPTOTOP)
 			V_DrawTitle(v, interpolate(-V_GetLenght(v, totalsubstr), 40, fractime), 136, substr1, V_SNAPTOTOP)
 			V_DrawTitle(v, interpolate(-V_GetLenght(v, totalsubstr), 40, fractime)+V_GetLenght(v, substr1), 104, substr2, V_SNAPTOTOP)
 
@@ -182,16 +182,16 @@ return{
 			elseif V_GetLenght(v, totalsubstr) > 102 then
 				iiiW = 142 + V_GetLenght(v, totalsubstr) - 102
 			end
-			v.draw(interpolate(iiiW, iiiW+360, FRACUNIT-fractime), 80, iii, V_SNAPTOTOP)
+			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
-			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FRACUNIT-fractime), gear) end
-			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(104, 320, FRACUNIT-fractime), 147, zonegr) end
+			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
+			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(104, 320, FU-fractime), 147, zonegr) end
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
 					actw = 134
 				end
-				V_DrawLevelActNum(v, actw, interpolate(150, 320, FRACUNIT-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
+				V_DrawLevelActNum(v, actw, interpolate(150, 320, FU-fractime), mapheaderinfo[gamemap].actnum, ttlnum)
 			end
 
 			return true
@@ -273,8 +273,8 @@ return{
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
 
-			--v.drawScaled((lives_x+9)*FRACUNIT, (hudinfo[HUD_LIVES].y+7)*FRACUNIT, FRACUNIT/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
-			--v.drawScaled((lives_x+60)*FRACUNIT, (hudinfo[HUD_LIVES].y)*FRACUNIT, FRACUNIT/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
+			--v.drawScaled((lives_x+9)*FU, (hudinfo[HUD_LIVES].y+7)*FU, FU/2, v.cachePatch('TIMEPER'..curtm) or v.cachePatch("TIMEPER0"), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
+			--v.drawScaled((lives_x+60)*FU, (hudinfo[HUD_LIVES].y)*FU, FU/2, v.cachePatch("TTPER0"..curtm), V_SNAPTOLEFT|V_SNAPTOBOTTOM|V_PERPLAYER|V_HUDTRANS)
 		end
 	end,
 
@@ -299,19 +299,19 @@ return{
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
 
-			--drawf(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+			--drawf(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
 		else
 			local skin_name = "YOU"
 			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			--drawf(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+			--drawf(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
 		end
 
 		if act ~= "0" then
 			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
 			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
-			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 55*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
@@ -331,7 +331,7 @@ return{
 			end
 		end
 
-		--drawS3KTXT(v, 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+		--drawS3KTXT(v, 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
 	end,
 	--]]
 }

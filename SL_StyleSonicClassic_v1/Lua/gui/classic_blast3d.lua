@@ -23,8 +23,8 @@ return{
 
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
-		--local scale = FRACUNIT
-		local offset = (#lvlt)*FRACUNIT
+		--local scale = FU
+		local offset = (#lvlt)*FU
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
 		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
@@ -34,12 +34,12 @@ return{
 		if t and t <= e then
 			local easet = clamping(0, t, TICRATE/3) - clamping(e-TICRATE/3, t, e)
 
-			tryx = ease.linear(easet, 200*FRACUNIT, 0)
+			tryx = ease.linear(easet, 200*FU, 0)
 			tryy = -tryx
 
 			if act ~= "0" and titlelenm then
-				v.draw(303-titlelenm-offset*3/FRACUNIT, 112+tryy/FRACUNIT, v.cachePatch('S3BTFNTACT'), 0)
-				drawf(v, 'S3BTFNT', (331-titlelenm)*FRACUNIT-offset*3, 97*FRACUNIT+tryy, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+				v.draw(303-titlelenm-offset*3/FU, 112+tryy/FU, v.cachePatch('S3BTFNTACT'), 0)
+				drawf(v, 'S3BTFNT', (331-titlelenm)*FU-offset*3, 97*FU+tryy, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
 			if p.styles_entercut_timer == nil then
@@ -52,11 +52,11 @@ return{
 			end
 
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'S3BTFNT', (262-titlelenm)*FRACUNIT-tryx-offset*3, 90*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
+				drawf(v, 'S3BTFNT', (262-titlelenm)*FU-tryx-offset*3, 90*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
 			end
 
 			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, 0|V_ALLOWLOWERCASE, "center")
-			drawf(v, 'S3BTFNT', 262*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+			drawf(v, 'S3BTFNT', 262*FU+tryx-offset*3, 72*FU, FU, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 
 			return true
 		end
@@ -90,7 +90,7 @@ return{
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, prefix..'TNUM', (lives_x+18)*FRACUNIT, (lives_y+1)*FRACUNIT, FRACUNIT, 'X'..p.lives, lives_f, colorprofile, "left")
+				drawf(v, prefix..'TNUM', (lives_x+18)*FU, (lives_y+1)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
@@ -103,9 +103,9 @@ return{
 
 		if mo then
 			local skin_name = nametrim(skins[mo.skin].realname)
-			drawf(v, 'S3BTFNT', (96-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, string.upper((overwrite and overwrite or skin_name).." got"))
+			drawf(v, 'S3BTFNT', (96-offsetx)*FU, 48*FU, FU, string.upper((overwrite and overwrite or skin_name).." got"))
 		else
-			drawf(v, 'S3BTFNT', (72-offsetx)*FRACUNIT, 48*FRACUNIT, FRACUNIT, "YOU GOT")
+			drawf(v, 'S3BTFNT', (72-offsetx)*FU, 48*FU, FU, "YOU GOT")
 		end
 
 		local gotthrough = "THROUGH "
@@ -116,10 +116,10 @@ return{
 			gotthrough = $..'ACT'
 		end
 
-		drawf(v, 'S3BTFNT', (72-offsetx)*FRACUNIT, 66*FRACUNIT, FRACUNIT, gotthrough)
+		drawf(v, 'S3BTFNT', (72-offsetx)*FU, 66*FU, FU, gotthrough)
 
 		if act ~= "0" and titlelenm then
-			drawf(v, 'S3BTFNT', (200-offsetx)*FRACUNIT, 72*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S3BTFNT', (200-offsetx)*FU, 72*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
@@ -139,7 +139,7 @@ return{
 			end
 		end
 
-		drawf(v, 'S3BTFNT', 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC3DB_TALLY"), "center")
+		drawf(v, 'S3BTFNT', 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC3DB_TALLY"), "center")
 	end,
 
 	tallybg = function(v, p, offsetx, color, color2, fading)

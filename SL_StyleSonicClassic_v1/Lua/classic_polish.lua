@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire 'helpers/create_cvar'
+local Options = tbsrequire 'helpers/create_cvar' ---@type CvarModule
 local retrolib = {val = 0}
 local monitoriconrot = 0
 
@@ -35,7 +35,7 @@ function retrolib.shortFading(mo)
 		mo.flags2 = $ &~ MF2_DONTDRAW
 
 		if mo.fuse and mo.fuse < TICRATE/4 then
-			mo.alpha = mo.fuse * FRACUNIT / (TICRATE/4)
+			mo.alpha = mo.fuse * FU / (TICRATE/4)
 		end
 	end
 end
@@ -45,7 +45,7 @@ function retrolib.fading(mo)
 		mo.flags2 = $ &~ MF2_DONTDRAW
 
 		if mo.fuse and mo.fuse < 2 * TICRATE then
-			mo.alpha = mo.fuse * FRACUNIT / (2 * TICRATE)
+			mo.alpha = mo.fuse * FU / (2 * TICRATE)
 		end
 	end
 end
@@ -74,7 +74,7 @@ function retrolib.fadingStateNull(mo)
 		end
 
 		if mo.styles_lifespan < 3 then
-			mo.alpha = (mo.styles_lifespan * 6 / 3) * FRACUNIT / 6
+			mo.alpha = (mo.styles_lifespan * 6 / 3) * FU / 6
 		end
 	end
 end
@@ -101,7 +101,7 @@ function retrolib.fadingStateNullLonger(mo)
 		end
 
 		if mo.styles_lifespan < TICRATE/3 then
-			mo.alpha = (mo.styles_lifespan) * FRACUNIT / (TICRATE/3)
+			mo.alpha = (mo.styles_lifespan) * FU / (TICRATE/3)
 		end
 	end
 end
@@ -133,7 +133,7 @@ function retrolib.fadingMonitorStateNull(mo)
 			end
 
 			if mo.styles_lifespan < 3 then
-				mo.alpha = (mo.styles_lifespan * 6 / 3) * FRACUNIT / 6
+				mo.alpha = (mo.styles_lifespan * 6 / 3) * FU / 6
 			end
 		end
 	end

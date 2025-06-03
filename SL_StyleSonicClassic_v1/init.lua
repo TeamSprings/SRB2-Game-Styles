@@ -8,8 +8,8 @@ print(__devMode)
 
 local gameString = "classic"
 
-local packVersion = '3.680'
-rawset(_G, "Style_ClassicVersion", 3680)
+local packVersion = '3.780'
+rawset(_G, "Style_ClassicVersion", 3780)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active", true)
 
@@ -111,11 +111,13 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 		return modio:register(0, ...)
 	end)
 
-	-- RUN
+	-- RUN ALREADY
 	safeDoFile("libs/sal_lib-customhud-v4-2.lua")
 
 	-- Game Assets
 	safeDoFile(gameString.."_init.lua")
+
+	safeDoFile(gameString.."_disable.lua")
 
 	safeDoFile("assets/"..gameString.."_jingles.lua")
 	safeDoFile("gameplay/"..gameString.."_inter.lua")

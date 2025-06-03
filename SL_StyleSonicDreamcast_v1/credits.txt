@@ -24,3 +24,7 @@ Special Thanks:
     "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
     "Team Blue Spring"
     "STJR"
+
+-- TODO: Add Extended Rank List (S + F)
+-- TODO: Fix Multi-checkpoints
+-- TODO: Change sprite name of dashpads to avoid model coflict

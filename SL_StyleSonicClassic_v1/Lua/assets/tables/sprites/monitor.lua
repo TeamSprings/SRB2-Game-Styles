@@ -4,4 +4,5 @@ return {
 	{nil, "s3",					"Sonic 3"},
 	{nil, "b3d",				"Sonic 3D Blast"},
 	{nil, "mania",				"Sonic Mania"},
+	{nil, "chaotix",			"Knuckles' Chaotix/Vanilla"},
 }

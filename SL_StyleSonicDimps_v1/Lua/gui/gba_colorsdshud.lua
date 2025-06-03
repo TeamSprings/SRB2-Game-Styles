@@ -39,15 +39,15 @@ return {
 
 	time = function(v, p, t, e, font_type)
 		local timestr = timeget(p)
-		drawf(v, font_type, 313*FRACUNIT, (hudinfo[HUD_SECONDS].y - 21)*FRACUNIT, FRACUNIT, "T"..timestr, (hudinfo[HUD_RINGS].f|V_PERPLAYER|V_SNAPTORIGHT) &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "right", -1, 0)
+		drawf(v, font_type, 313*FU, (hudinfo[HUD_SECONDS].y - 21)*FU, FU, "T"..timestr, (hudinfo[HUD_RINGS].f|V_PERPLAYER|V_SNAPTORIGHT) &~ V_SNAPTOLEFT, v.getColormap(TC_DEFAULT, 0), "right", -1, 0)
 	end,
 
 	rings = function(v, p, t, e, font_type)
 		v.draw(2, 1, v.cachePatch("RINGCOLR"), hudinfo[HUD_RINGS].f|V_PERPLAYER)
 
-		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-59)*FRACUNIT, (hudinfo[HUD_SECONDS].y-20)*FRACUNIT, FRACUNIT, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", -1, 3, '0')
+		drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-59)*FU, (hudinfo[HUD_SECONDS].y-20)*FU, FU, p.rings, hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", -1, 3, '0')
 		if p.rings < 1 and (leveltime % 8) / 4 then
-			drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-59)*FRACUNIT, (hudinfo[HUD_SECONDS].y-20)*FRACUNIT, FRACUNIT, "RRR", hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", -1, 0)
+			drawf(v, font_type, (hudinfo[HUD_RINGSNUM].x-59)*FU, (hudinfo[HUD_SECONDS].y-20)*FU, FU, "RRR", hudinfo[HUD_RINGS].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), "right", -1, 0)
 		end
 	end,
 
@@ -66,7 +66,7 @@ return {
 				draw_lifeicon(v, hudinfo[HUD_LIVES].x-4, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style == nil and 0 or V_FLIP), {1, p.mo.color}, p)
 
 				if G_GametypeUsesLives() then
-					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+7)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+7)*FU, (hudinfo[HUD_LIVES].y+10)*FU, FU, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
 				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 					v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+1, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
@@ -76,7 +76,7 @@ return {
 				bot_existance = nil
 
 				if G_GametypeUsesLives() then
-					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+					drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FU, (hudinfo[HUD_LIVES].y+10)*FU, FU, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
 				elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 					v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+1, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 				end
@@ -85,7 +85,7 @@ return {
 			draw_lifeicon(v, hudinfo[HUD_LIVES].x-2, hudinfo[HUD_LIVES].y+13, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), hudinfo[HUD_LIVES].f|V_PERPLAYER|(icon_style == nil and 0 or V_FLIP), {1, p.mo.color}, p)
 
 			if G_GametypeUsesLives() then
-				drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FRACUNIT, (hudinfo[HUD_LIVES].y+10)*FRACUNIT, FRACUNIT, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
+				drawf(v, 'COLCNT', (hudinfo[HUD_LIVES].x+3)*FU, (hudinfo[HUD_LIVES].y+10)*FU, FU, "X"..lives, hudinfo[HUD_LIVES].f|V_PERPLAYER, v.getColormap(TC_DEFAULT, 0), 0, -1, 0)
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(hudinfo[HUD_LIVES].x+14, hudinfo[HUD_LIVES].y+1, v.cachePatch('CLASSICIT'), hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER)
 			end

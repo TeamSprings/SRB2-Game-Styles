@@ -170,7 +170,7 @@ local function G_InteprateStyleSectors(finish)
 	local check = nil
 
 	if finish[7] and finish[7].floorheight then
-		check = finish[7].floorheight/FRACUNIT
+		check = finish[7].floorheight/FU
 	end
 
 	customexit = (finish[6][0] > 0 and finish[6][0] or check) or customexit

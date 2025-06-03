@@ -1,10 +1,10 @@
 freeslot("SPR_S3KC")
 
 addHook("MapThingSpawn", function(a, tm)
-	a.radius = 46*FRACUNIT
-	a.height = 84*FRACUNIT
+	a.radius = 46*FU
+	a.height = 84*FU
 	a.spaz = a.z
-	P_TeleportMove(a, tm.x*FRACUNIT, tm.y*FRACUNIT, tm.z*FRACUNIT-a.scale*200)
+	P_TeleportMove(a, tm.x*FU, tm.y*FU, tm.z*FU-a.scale*200)
 	a.disty = -a.scale*200
 	
 	for sector in sectors.iterate do
@@ -14,7 +14,7 @@ addHook("MapThingSpawn", function(a, tm)
 	end
 	
 	a.capsule = {}
-	a.scale = $+FRACUNIT/4
+	a.scale = $+FU/4
 		local topSuSpawn = P_SpawnMobjFromMobj(a, 0,0,0, MT_BUSH)
 		topSuSpawn.target = a
 		topSuSpawn.scale = a.scale
@@ -150,7 +150,7 @@ addHook("MobjThinker", function(a)
 	end
 	
 	if a.fuse > 3*TICRATE then
-				local z = a.subsector.sector.floorheight + FRACUNIT + (P_RandomKey(a.height/FRACUNIT) << FRACBITS)		
+				local z = a.subsector.sector.floorheight + FU + (P_RandomKey(a.height/FU) << FRACBITS)		
 				local fa = P_RandomRange(1,360) *ANG1
 				local ns = a.radius
 				local x = a.x + FixedMul(sin(fa), ns)
@@ -158,7 +158,7 @@ addHook("MobjThinker", function(a)
 
 				local mo2 = P_SpawnMobj(x, y, z, MT_EXPLODE)
 				mo2.state = S_XPLD_EGGTRAP -- so the flickies don't lose their target if they spawn
-				ns = 2*FRACUNIT
+				ns = 2*FU
 				mo2.momx = FixedMul(sin(fa), ns)
 				mo2.momy = FixedMul(cos(fa), ns)
 				mo2.angle = fa
@@ -174,7 +174,7 @@ end, MT_EGGTRAP)
 addHook("MobjCollide", function(a,mt)
 	if mt.player and a.activatable == true then
 		local discenter = P_AproxDistance(a.x - mt.x, a.y - mt.y)
-		if discenter < 26*a.scale and a.z+a.height+10*FRACUNIT > mt.z then
+		if discenter < 26*a.scale and a.z+a.height+10*FU > mt.z then
 			a.activated = true
 		end
 	end

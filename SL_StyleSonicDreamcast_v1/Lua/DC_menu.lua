@@ -89,7 +89,7 @@ HOOK("dc_menu", "dchud", function(v, p, t, e)
 				local y = 100+i*60-z
 
 				v.draw(x_off, y, v.cachePatch(menu_select == i and "SHMENUBUT1" or "SHMENUBUT2"))
-				drawf(v, 'SH2ENUHEADFNT', (x_off+8)*2*FRACUNIT, (y+12)*2*FRACUNIT, FRACUNIT/2, string.upper(item.name), 0, v.getColormap(TC_DEFAULT, 1), "left")
+				drawf(v, 'SH2ENUHEADFNT', (x_off+8)*2*FU, (y+12)*2*FU, FU/2, string.upper(item.name), 0, v.getColormap(TC_DEFAULT, 1), "left")
 				if item.cv then
 					local font = "center"
 					local yfnt = y+28
@@ -98,11 +98,11 @@ HOOK("dc_menu", "dchud", function(v, p, t, e)
 						font = "thin-center"
 						yfnt = $ + 1
 					end
-					drawf(v, 'SHMENUHEADFNT', (x_off+230)*2*FRACUNIT, (y+12)*2*FRACUNIT, FRACUNIT/2, string.upper(item.cv.string), 0, v.getColormap(TC_DEFAULT, 1), "right")
+					drawf(v, 'SHMENUHEADFNT', (x_off+230)*2*FU, (y+12)*2*FU, FU/2, string.upper(item.cv.string), 0, v.getColormap(TC_DEFAULT, 1), "right")
 				end
 			elseif type(item) == "string" then
 				local y = 100+i*60-z
-				drawf(v, 'SHMENUHEADFNT', 160*FRACUNIT, (y+16)*FRACUNIT, FRACUNIT, item, 0, v.getColormap(TC_DEFAULT, 1), "center")
+				drawf(v, 'SHMENUHEADFNT', 160*FU, (y+16)*FU, FU, item, 0, v.getColormap(TC_DEFAULT, 1), "center")
 			end
 		end
 

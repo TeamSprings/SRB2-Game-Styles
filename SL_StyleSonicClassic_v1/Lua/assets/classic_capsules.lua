@@ -1,6 +1,6 @@
 freeslot("SPR_CAPSULE_S2", "SPR_CAPSULE_CD")
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 
 local S3K_SPR = freeslot("SPR_CAPSULE_S3K")
 local EGGTRAP = freeslot("MT_STYLES_EGGTR")
@@ -13,8 +13,8 @@ mobjinfo[EGGTRAP] = {
 	spawnhealth = 1,
 	reactiontime = 1,
 	speed = 12,
-	radius = 32*FRACUNIT,
-	height = 64*FRACUNIT,
+	radius = 32*FU,
+	height = 64*FU,
 	mass = 100,
 	flags = MF_NOGRAVITY|MF_SOLID,
 	dispoffset = -1
@@ -25,8 +25,8 @@ mobjinfo[EGGTRAPPART] = {
 	spawnhealth = 1,
 	reactiontime = 1,
 	speed = 12,
-	radius = 32*FRACUNIT,
-	height = 64*FRACUNIT,
+	radius = 32*FU,
+	height = 64*FU,
 	mass = 100,
 	flags = (mobjinfo[MT_BUSH].flags|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT|MF_PAPERCOLLISION) &~ MF_NOTHINK,
 }
@@ -36,8 +36,8 @@ mobjinfo[EGGTRAPTRIGGER] = {
 	spawnhealth = 1,
 	reactiontime = 1,
 	speed = 12,
-	radius = 24*FRACUNIT,
-	height = 16*FRACUNIT,
+	radius = 24*FU,
+	height = 16*FU,
 	mass = 100,
 	flags = MF_SOLID|MF_NOGRAVITY,
 }
@@ -47,8 +47,8 @@ mobjinfo[EGGTRAPTRIGGERTOUCH] = {
 	spawnhealth = 1,
 	reactiontime = 1,
 	speed = 12,
-	radius = 24*FRACUNIT,
-	height = 16*FRACUNIT,
+	radius = 24*FU,
+	height = 16*FU,
 	mass = 100,
 	flags = MF_SPECIAL|MF_NOGRAVITY,
 }
@@ -91,7 +91,7 @@ local TRPPF_DISOLVE = 16
 local models = {
 	-- SONIC 2 CAPSULE
 	function(a) 
-		a.scale = $+FRACUNIT/4
+		a.scale = $+FU/4
 			local topSuSpawn = P_SpawnMobjFromMobj(a, 0,0,0, MT_BUSH)
 			topSuSpawn.target = a
 			topSuSpawn.scale = a.scale
@@ -149,7 +149,7 @@ local models = {
 	-- SONIC CD CAPSULE
 	function(a)
 		a.capsule = {}
-		a.scale = $+FRACUNIT/4
+		a.scale = $+FU/4
 		
 		local stem = P_SpawnMobjFromMobj(a, 0,0,0, EGGTRAPPART)
 		stem.target = a
@@ -170,7 +170,7 @@ local models = {
 	-- SONIC 3 & KNUCKLES CAPSULE
 	function(a)
 		a.capsule = {}
-		a.scale = $+FRACUNIT/4
+		a.scale = $+FU/4
 			local body = P_SpawnMobjFromMobj(a, 0,0,0, EGGTRAPPART)
 			body.target = a
 			body.scale = a.scale
@@ -271,8 +271,8 @@ local models = {
 addHook("MobjSpawn", function(a, tm)
 	a.styles_flags = 0
 	
-	a.radius = 46*FRACUNIT
-	a.height = 84*FRACUNIT
+	a.radius = 46*FU
+	a.height = 84*FU
 
 	models[model_type](a)
 
@@ -324,7 +324,7 @@ addHook("MobjThinker", function(a)
 			a.styles_tagged = nil
 			for _,v in ipairs(a.capsule) do
 				if v then
-					v.alpha = FRACUNIT
+					v.alpha = FU
 
 					if v.info.flags & MF_SOLID then
 						v.flags = $ | MF_SOLID
@@ -332,7 +332,7 @@ addHook("MobjThinker", function(a)
 				end
 			end
 
-			a.alpha = FRACUNIT
+			a.alpha = FU
 		else
 			if not a.styles_movement then
 				for _,v in ipairs(a.capsule) do
@@ -352,7 +352,7 @@ addHook("MobjThinker", function(a)
 
 				if a.styles_flags & TRAPF_LIFT then
 					a.styles_movement = TICRATE
-					P_SetOrigin(a, a.x, a.y, a.z - 200*FRACUNIT)
+					P_SetOrigin(a, a.x, a.y, a.z - 200*FU)
 				end
 			end
 		end
@@ -361,7 +361,7 @@ addHook("MobjThinker", function(a)
 			if a.styles_flags & TRAPF_LIFT then
 				a.flags = $ | (MF_NOGRAVITY|MF_NOCLIPHEIGHT)
 
-				P_SetOrigin(a, a.x, a.y, ease.linear(a.styles_movement * FRACUNIT / TICRATE, a.z, a.styles_movetarget))
+				P_SetOrigin(a, a.x, a.y, ease.linear(a.styles_movement * FU / TICRATE, a.z, a.styles_movetarget))
 				a.styles_movement = $ - 1
 				
 				if not a.styles_movement then
@@ -382,7 +382,7 @@ addHook("MobjThinker", function(a)
 	end
 
 	if a.openinganim and a.openinganim > TICRATE then
-				local z = a.subsector.sector.floorheight + FRACUNIT + (P_RandomKey(a.height/FRACUNIT) << FRACBITS)
+				local z = a.subsector.sector.floorheight + FU + (P_RandomKey(a.height/FU) << FRACBITS)
 				local fa = P_RandomRange(1,360) *ANG1
 				local ns = a.radius
 				local x = a.x + FixedMul(sin(fa), ns)
@@ -390,7 +390,7 @@ addHook("MobjThinker", function(a)
 
 				local mo2 = P_SpawnMobj(x, y, z, MT_EXPLODE)
 				mo2.state = S_XPLD1
-				ns = 2*FRACUNIT
+				ns = 2*FU
 				mo2.momx = FixedMul(sin(fa), ns)
 				mo2.momy = FixedMul(cos(fa), ns)
 				mo2.angle = fa
@@ -457,7 +457,7 @@ addHook("MobjThinker", function(a)
 		if a.styles_trflags then
 			if a.target.press then
 				if (a.styles_trflags & TRPPF_HEADTOP) then
-					a.spriteyoffset = -16*FRACUNIT
+					a.spriteyoffset = -16*FU
 				end
 			else
 				if (a.styles_trflags & TRPPF_HEADTOP) then
@@ -489,7 +489,7 @@ addHook("MobjThinker", function(a)
 				end
 			else
 				if (a.styles_trflags & TRPPF_HEADLOW) then
-					a.alpha = FRACUNIT
+					a.alpha = FU
 				end
 			end
 		end
@@ -517,7 +517,7 @@ addHook("MobjThinker", function(a)
 				end
 			else
 				if (a.styles_trflags & TRPPF_HEADLOW) then
-					a.alpha = FRACUNIT
+					a.alpha = FU
 				end
 			end
 		end
@@ -531,7 +531,7 @@ addHook("MobjCollide", function(a,mt)
 		if a.target and a.target.activatable == true then
 			local discenter = P_AproxDistance(a.x - mt.x, a.y - mt.y)
 			
-			if discenter < 26*a.scale and a.z+a.height+10*FRACUNIT > mt.z then
+			if discenter < 26*a.scale and a.z+a.height+10*FU > mt.z then
 				if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement) 
 				or ((a.target.styles_flags & TRAPF_LIFT) ~= 1) then
 					a.target.activated = true

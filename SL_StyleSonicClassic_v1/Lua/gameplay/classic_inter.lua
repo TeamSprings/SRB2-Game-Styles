@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar')
+local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
 
 local list = tbsrequire 'gameplay/compact/specialpacks'
 local calc_help = tbsrequire 'helpers/c_inter'
@@ -187,7 +187,7 @@ local function G_InteprateStyleSectors(finish)
 	local check = nil
 
 	if finish[7] and finish[7].floorheight then
-		check = finish[7].floorheight/FRACUNIT
+		check = finish[7].floorheight/FU
 	end
 
 	customexit = (finish[6][0] > 0 and finish[6][0] or check) or customexit
@@ -321,7 +321,7 @@ local function G_StylesTallyBackend(p)
 					-- Sending the 222s to score counter. Mainly to grant all lives and everything like that.
 					if p.styles_tallytimer > 0 and p.styles_tallytimer < p.styles_tallyfakecounttimer then
 
-						if p.cmd.buttons & BT_SPIN then
+						if p.cmd and p.cmd.buttons & BT_SPIN then
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
 							calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
 
@@ -367,7 +367,7 @@ local function G_StylesTallyBackend(p)
 
 					p.styles_tallytimer = $+1
 
-					if p.styles_tallytimer > p.styles_tallyendtime then
+					if p.styles_tallytimer > p.styles_tallyendtime and p.styles_exitcut == nil then
 						p.exiting = 1
 						p.styles_tallylastscore = p.score
 						p.styles_tallylastlives = p.lives

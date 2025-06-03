@@ -52,8 +52,8 @@ return{
 
 		local lvlt = string.upper(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = tostring(mapheaderinfo[gamemap].actnum)
-		--local scale = FRACUNIT
-		local offset = (#lvlt)*FRACUNIT
+		--local scale = FU
+		local offset = (#lvlt)*FU
 
 		local isSpecialStage = G_IsSpecialStage(gamemap)
 		local fade = isSpecialStage and 0xFB00 or (bfade and 0xFA00 or 0xFF00)
@@ -72,22 +72,22 @@ return{
 		if t and t <= e then
 			local easet = clamping(0, t, title_dur) - clamping(e-title_dur, t, e)
 
-			tryx = ease.linear(easet, 200*FRACUNIT, 0)
+			tryx = ease.linear(easet, 200*FU, 0)
 			tryy = -tryx
 
-			v.draw(69-(offset/FRACUNIT)/2, tryy/FRACUNIT-10, v.cachePatch(special_gp), 0)
+			v.draw(69-(offset/FU)/2, tryy/FU-10, v.cachePatch(special_gp), 0)
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 104*FRACUNIT, FRACUNIT, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+				drawf(v, 'S3KTT', 288*FU+tryx-offset*3, 104*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
 
 			if act ~= "0" then
-				v.draw(247+(tryx-offset*3)/FRACUNIT, 131, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
-				v.draw(233+(tryx-offset*3)/FRACUNIT, 156, v.cachePatch('S3KTTACTC'), 0)
-				drawf(v, 'S3KANUM', 258*FRACUNIT+tryx-offset*3, 135*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+				v.draw(247+(tryx-offset*3)/FU, 131, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
+				v.draw(233+(tryx-offset*3)/FU, 156, v.cachePatch('S3KTTACTC'), 0)
+				drawf(v, 'S3KANUM', 258*FU+tryx-offset*3, 135*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
 			v.drawString(175, 158, mapheaderinfo[gamemap].subttl, 0|V_ALLOWLOWERCASE, "center")
-			drawf(v, 'S3KTT', 288*FRACUNIT+tryx-offset*3, 72*FRACUNIT, FRACUNIT, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+			drawf(v, 'S3KTT', 288*FU+tryx-offset*3, 72*FU, FU, lvlt, 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 
 			return true
 		end
@@ -160,19 +160,19 @@ return{
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
 
-			drawS3KTXT(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
 		else
 			local skin_name = "YOU"
 			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			drawS3KTXT(v, (158-offsetx)*FRACUNIT, 54*FRACUNIT, FRACUNIT, skin_name, 0, color_1, color_2, "right")
+			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
 		end
 
 		if act ~= "0" then
 			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
 			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
-			drawf(v, 'S3KANUM', (239-offsetx)*FRACUNIT, 55*FRACUNIT, FRACUNIT, act, 0, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
@@ -192,6 +192,6 @@ return{
 			end
 		end
 
-		drawS3KTXT(v, 160*FRACUNIT, 48*FRACUNIT, FRACUNIT, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+		drawS3KTXT(v, 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
 	end,
 }

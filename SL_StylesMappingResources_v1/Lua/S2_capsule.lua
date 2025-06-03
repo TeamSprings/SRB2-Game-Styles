@@ -14,7 +14,7 @@ Contains:
 freeslot("SPR_S2CA")
 
 addHook("MapThingSpawn", function(a, tm)
-	a.scale = $+FRACUNIT/4
+	a.scale = $+FU/4
 		local topSuSpawn = P_SpawnMobjFromMobj(a, 0,0,0, MT_BUSH)
 		topSuSpawn.target = a
 		topSuSpawn.scale = a.scale

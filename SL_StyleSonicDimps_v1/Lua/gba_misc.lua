@@ -157,7 +157,7 @@ addHook("MobjSpawn", function(a, tm)
 		debree.momx = 9*cos(randoma)
 		debree.momy = 9*sin(randoma)
 		debree.momz = P_RandomRange(7,10)*a.scale
-		debree.scale = FRACUNIT/2
+		debree.scale = FU/2
 		debree.fuse = 8*TICRATE
 	end
 end, MT_SONIC3KBOSSEXPLODE)
@@ -286,8 +286,8 @@ addHook("PlayerThink", function(p)
 			p.advance_shine_fol = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_OVERLAY)
 			p.advance_shine_fol.target = p.mo
 			p.advance_shine_fol.state = S_INVINCIBILITY_ADVANCE
-			p.advance_shine_fol.spritexscale = 3*FRACUNIT/2
-			p.advance_shine_fol.spriteyscale = 3*FRACUNIT/2
+			p.advance_shine_fol.spritexscale = 3*FU/2
+			p.advance_shine_fol.spriteyscale = 3*FU/2
 		end
 	else
 		if p.advance_shine_fol then

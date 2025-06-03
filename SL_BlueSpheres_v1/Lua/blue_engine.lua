@@ -5,7 +5,7 @@ freeslot("S_S3KBSPHERES", "SPR_S3KS", "S_PLAY_S3KWALK")
 --
 
 -- Game info
-local inbdistance = FRACUNIT/64
+local inbdistance = FU/64
 local sphereplayer = {
 	active = nil,
 	map = 1,
@@ -138,8 +138,8 @@ addHook("MapLoad", function()
 			sector.floorpic = 'S3KSSFL'..sphereplayer.map
 			table.insert(scrollysec, sector)
 
-			sector.floorxoffset = 172*FRACUNIT
-			sector.flooryoffset = -172*FRACUNIT
+			sector.floorxoffset = 172*FU
+			sector.flooryoffset = -172*FU
 		end
 
 		if sector.ceilingpic == 'S3KSPLIT' then
@@ -185,10 +185,10 @@ local dist_opaq = {
 }
 
 local dist_scale = {
-	[9] = FRACUNIT/3,
-	[8] = FRACUNIT/4,
-	[7] = FRACUNIT/6,
-	[6] = FRACUNIT/8,
+	[9] = FU/3,
+	[8] = FU/4,
+	[7] = FU/6,
+	[6] = FU/8,
 }
 
 
@@ -198,7 +198,7 @@ addHook("MapThingSpawn", function(a, mt)
 	if not mapheaderinfo[gamemap].spheremode then return end
 		a.sprite = SPR_S3KS
 		a.flags = $ &~ MF_NOGRAVITY
-		a.scale = FRACUNIT+FRACUNIT/4
+		a.scale = FU+FU/4
 		a.posx = pos[mt.angle][1]
 		a.posy = pos[mt.angle][2]
 
@@ -208,7 +208,7 @@ addHook("MapThingSpawn", function(a, mt)
 			a.scale = $-dist_scale[dist]
 		end
 
-		a.spriteyoffset = -4*FRACUNIT
+		a.spriteyoffset = -4*FU
 		a.shadowscale = 0
 end, MT_BLUESPHERE)
 
@@ -223,7 +223,7 @@ addHook("MobjThinker", function(a)
 		a.frame = frames[(mapin or 0)][2]
 
 		if a and a.valid then
-			P_SetOrigin(a, a.spawnpoint.x*FRACUNIT-(((sphereplayer.x*64) % FRACUNIT)*96), a.spawnpoint.y*FRACUNIT+(((sphereplayer.y*64) % FRACUNIT)*96), a.floorz)
+			P_SetOrigin(a, a.spawnpoint.x*FU-(((sphereplayer.x*64) % FU)*96), a.spawnpoint.y*FU+(((sphereplayer.y*64) % FU)*96), a.floorz)
 			P_SetOrigin(a, a.x, a.y, a.floorz) -- stupid method of updating a.floorz
 		end
 	end
@@ -510,8 +510,8 @@ addHook("PlayerThink", function(p)
 
 		for k,sec in ipairs(scrollysec) do
 			if sec and sec.valid then
-				sec.floorxoffset = p.mo.x + 6144*sphereplayer.x - FRACUNIT*48 -- offset
-				sec.flooryoffset = p.mo.y + 6144*sphereplayer.y - FRACUNIT*96
+				sec.floorxoffset = p.mo.x + 6144*sphereplayer.x - FU*48 -- offset
+				sec.flooryoffset = p.mo.y + 6144*sphereplayer.y - FU*96
 			end
 		end
 
@@ -531,12 +531,12 @@ addHook("PlayerThink", function(p)
 			end
 		end
 		p.mo.angle = sphereplayer.angle
-		camera.z = p.mo.z+200*FRACUNIT
+		camera.z = p.mo.z+200*FU
 		--camera.aiming = -ANGLE_45/5*2
 		camera.aiming = -ANGLE_90/2
 
 		if input.gameControlDown(GC_JUMP) and P_IsObjectOnGround(p.mo) then
-			p.mo.z = $+42*FRACUNIT
+			p.mo.z = $+42*FU
 		end
 
 		input.setMouseGrab(false)
@@ -590,7 +590,7 @@ local function numfont(d, font, x, y, scale, value)
 		else
 			patch = d.cachePatch(font..''..0)
 		end
-		d.drawScaled(x+((patch.width+2)*(i-1))*FRACUNIT, y, scale, patch)
+		d.drawScaled(x+((patch.width+2)*(i-1))*FU, y, scale, patch)
 	end
 end
 
@@ -599,20 +599,20 @@ hud.add(function(v, p, c)
 	local xpos, ypos, pspRS, frame
 
 	local background = v.cachePatch("SP1")
-	v.drawScaled(-background.width/5*FRACUNIT, background.height/7*FRACUNIT, FRACUNIT*3/2, background)
+	v.drawScaled(-background.width/5*FU, background.height/7*FU, FU*3/2, background)
 	for y = -sphereplayer.viewdistancey/2,sphereplayer.viewdistancey/2 do
 		for x = -sphereplayer.viewdistancex/2,sphereplayer.viewdistancex/2 do
 			xpos = abs(((x+sphereplayer.x[#p]/inbdistance) % 63)-31)
 			ypos = abs(((y+sphereplayer.y[#p]/inbdistance) % 63)-31)
 			v.drawScaled(
-			abs((x+7)*40*FRACUNIT)-125*FRACUNIT,
-			-130*FRACUNIT+abs((y+7)*32*FRACUNIT)+abs(((max(sphereplayer.x[#p], sphereplayer.y[#p]))/4 % 64)+1)*FRACUNIT,
-			((FRACUNIT-2*FRACUNIT/16-(abs(x)*FRACUNIT/5)+(abs(y+7)*FRACUNIT/7))/3),
+			abs((x+7)*40*FU)-125*FU,
+			-130*FU+abs((y+7)*32*FU)+abs(((max(sphereplayer.x[#p], sphereplayer.y[#p]))/4 % 64)+1)*FU,
+			((FU-2*FU/16-(abs(x)*FU/5)+(abs(y+7)*FU/7))/3),
 			v.cachePatch("SPOBJ"..S3KSS_Map[spheremap][ypos][xpos]))
 		end
 	end
 	pspr = v.getSprite2Patch(p.mo.skin, SPR2_WALK, falseS, A, 5)
-	v.draw(160, 50, FRACUNIT, pspr)
+	v.draw(160, 50, FU, pspr)
 
 end, "game")
 --]]

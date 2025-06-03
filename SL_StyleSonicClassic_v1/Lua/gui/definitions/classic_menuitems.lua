@@ -1,6 +1,6 @@
 return {
 	{
-		name = "PRESETS",
+		name = "GENERAL",
 
 		-- SETTINGS
 
@@ -22,6 +22,32 @@ return {
 
 		},
 
+		"DISABLE",
+
+		{name = "HUD", 		opt = "disablegui",
+
+		desc = [[disables all HUD elements that do replace vanilla HUD. - i.e RINGS/TIME/SCORE]],
+
+		},
+
+		{name = "Assets", 	opt = "disableassets",
+
+		desc = [[disables all major asset replacements. - i.e monitors]],
+
+		},
+
+		{name = "Level tweaks", 	opt = "disablelevel",
+
+		desc = [[disables level tweaks to base game levels.]],
+
+		},
+
+		{name = "Cutscenes", 	opt = "disablecutscenes",
+
+		desc = [[disables singleplayer only level-transitional cutscenes in vanilla levels.]],
+
+		},
+
 		-- END SETTINGS
 
 	},
@@ -34,12 +60,6 @@ return {
 		{name = "MAIN LAYOUT", 		opt = "hudlayout",
 
 		desc = [[changes layout of RINGS/TIME/SCORE display]],
-
-		},
-
-		{name = "LIFE COUNTER", 	opt = "lifeicon",
-
-		desc = [[changes apperance of life counter]],
 
 		},
 
@@ -68,15 +88,47 @@ return {
 
 		},
 
-		{minv = 0, maxv = 1, name = "FORCE USERNAME", 	cv = CV_FindVar("classic_username"),
+		{minv = 0, maxv = 1, name = "RINGS COUNTER", 	cv = CV_FindVar("classic_ringcounter"),
+
+		desc = [[adds hud element that shows count of all the rings in the map]],
+
+		},
+
+		{name = "TIME FORMAT", 	opt = "timeformat",
+
+		desc = [[changes formatting of time. this overrides vanilla option that does same thing]],
+
+		},
+
+		{name = "LIVES STYLE", 	opt = "lifeicon",
+
+		desc = [[changes apperance of life counter]],
+
+		},
+
+		{name = "LIVES POSITION", 	opt = "lifepos",
+
+		desc = [[arrangment of emeralds in the tab display]],
+
+		},
+
+		"EXTRAS",
+
+		{minv = 0, maxv = 1, name = "HUD USERNAME", 	cv = CV_FindVar("classic_username"),
 
 		desc = [[forces username into S1/S2/S3 life counters and tally titles]],
 
 		},
 
-		{minv = 0, maxv = 1, name = "RINGS COUNTER", 	cv = CV_FindVar("classic_ringcounter"),
+		{name = "EMERALD DISPLAY", 	opt = "emeraldpos",
 
-		desc = [[adds hud element that shows count of all the rings in the map]],
+		desc = [[arrangment of emeralds in the tab display]],
+
+		},
+
+		{name = "EMERALD FLASH", 	opt = "emeraldanim",
+
+		desc = [[various options on how emeralds animate in the hud]],
 
 		},
 
@@ -180,7 +232,7 @@ return {
 
 		desc = [[sprite rotation based on slope yaw & smoothing]],
 
-		},
+		},		
 
 		-- END SETTINGS
 	},
@@ -218,6 +270,12 @@ return {
 		{name = "BOSS THEME", 		opt = "bosstheme"},
 		{name = "LEVEL CLEAR THEME", 		opt = "levelendtheme"},
 		{name = "DROWNING THEME", 		opt = "drowntheme"},
+
+		"SFX",
+
+		{name = "JUMP SFX", 				opt = "jumpsfx"},
+		{name = "SPIN SFX", 				opt = "spinsfx"},	
+		{name = "SPINDASH SFX", 			opt = "dashsfx"},	
 
 		-- END SETTINGS
 

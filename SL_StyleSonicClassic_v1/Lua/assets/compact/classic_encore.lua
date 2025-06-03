@@ -26,7 +26,7 @@ return {
 
 		if not itemdata then return end
 
-		local newmobj = P_SpawnMobjFromMobj(actor, 0, 0, 13*FRACUNIT, itemdata)
+		local newmobj = P_SpawnMobjFromMobj(actor, 0, 0, 13*FU, itemdata)
 
 		if target then
 			newmobj.target = target -- Transfer target
@@ -148,7 +148,7 @@ return {
 				actor.overlay.tics = $ + 1
 
 				actor.overlay.dispoffset = 3
-				actor.overlay.spriteyoffset = 4*FRACUNIT
+				actor.overlay.spriteyoffset = 4*FU
 			end
 
 			if actor.flags2 & MF2_DONTDRAW then

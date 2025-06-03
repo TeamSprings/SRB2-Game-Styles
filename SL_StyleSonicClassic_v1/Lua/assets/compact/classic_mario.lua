@@ -60,7 +60,7 @@ local function P_MarioMonitorThink(a, sprite, oldframe)
 	if marioconfirmed then
 		a.sprite = SPR_MMON
 		a.frame = typepw
-		a.spriteyoffset = -FRACUNIT*16
+		a.spriteyoffset = -FU*16
 	else
 		a.sprite = sprite
 		a.frame = oldframe
