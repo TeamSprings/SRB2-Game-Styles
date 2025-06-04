@@ -49,61 +49,39 @@ jobs:
       run: |
           TAG_VERSION_STRING="${{ env.TAG_VERSION_STRING }}"
           NUMERIC_VERSION="${{ env.NUMERIC_VERSION }}"
-  
-          # List of directories containing init.lua files for each style
+
           DIRS=(
             "./SL_StyleSonicClassic_v1"
             "./SL_StyleSonicDimps_v1"
-            "./SL_StyleSonicDreamcast_v1" # Assuming this is the Adventure style directory
+            "./SL_StyleSonicDreamcast_v1"
           )
-  
+
           for DIR in "${DIRS[@]}"; do
             INIT_FILE="$DIR/init.lua"
             echo "Processing $INIT_FILE..."
-  
-            if [ -f "$INIT_FILE" ]; then
-              # --- Using Extended Regular Expressions (-E) for clearer syntax ---
-              # --- Using '@' as the delimiter for the sed 's' command ---
 
-              # Update 'local packVersion = 'X.YYY'' line
-              # Pattern: ^(local packVersion = ')[^']*'
-              # - ^: Start of line
-              # - (...): ERE grouping (captured in \1). Matches 'local packVersion = ''
-              # - [^']*: Matches zero or more characters that are NOT a single quote (the current version string)
-              # - ': Matches the literal closing single quote
+            if [ -f "$INIT_FILE" ]; then
+              # --- Using Extended Regular Expressions (-E) ---
+              # --- Using '@' as the delimiter for 's' for the first two commands ---
+              # --- Using '/' as the delimiter for the third command ---
+
+              # Update 'local packVersion = 'X.YYY'' line (Using @)
+              # Pattern: ^(local packVersion = ').*
               # Replacement: \1$TAG_VERSION_STRING'
-              # - \1: The captured start part 'local packVersion = ''
-              # - $TAG_VERSION_STRING: The new version string
-              # - ': A literal closing single quote
-              # Using '@' delimiter now: s@pattern@replacement@
-              sed -i -E "s@^(local packVersion = ')[^']*'@\1$TAG_VERSION_STRING'@" "$INIT_FILE"
+              sed -i -E "s@^(local packVersion = ').*@\1$TAG_VERSION_STRING'@" "$INIT_FILE"
               echo "  - Updated 'packVersion' to '$TAG_VERSION_STRING' in $INIT_FILE"
-  
-              # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line
-              # Pattern: ^(rawset\(_G, "Style_[A-Za-z]*Version", \))[0-9]*(\))
-              # - ^: Start of line
-              # - (...): ERE grouping (captured in \1). Matches 'rawset(_G, "Style_XXXVersion", ' (parentheses escaped as literal)
-              # - [0-9]*: Matches the current numeric version (zero or more digits)
-              # - (...): ERE grouping (captured in \2). Matches the literal closing parenthesis ')' (escaped)
+
+              # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line (Using @)
+              # Pattern: ^(rawset\(_G, \"Style_[A-Za-z]*Version\", \))[0-9]*(\))
               # Replacement: \1$NUMERIC_VERSION\2
-              # - \1: The captured start part 'rawset(_G, "Style_XXXVersion", '
-              # - $NUMERIC_VERSION: The new numeric version
-              # - \2: The captured closing parenthesis ')'
-              # Using '@' delimiter now: s@pattern@replacement@
               sed -i -E "s@^(rawset\(_G, \"Style_[A-Za-z]*Version\", \))[0-9]*(\))@\1$NUMERIC_VERSION\2@" "$INIT_FILE"
               echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
-              
-              # Set '__devMode' to nil
+
+              # Set '__devMode' to nil (Switching to / delimiter for this command)
               # Pattern: ^(local __devMode = ).*$
-              # - ^: Start of line
-              # - (...): ERE grouping (captured in \1). Matches 'local __devMode = '
-              # - .*: Matches the rest of the line
-              # - $: End of line
               # Replacement: \1nil
-              # - \1: The captured start part 'local __devMode = '
-              # - nil: The literal 'nil'
-              # Using '@' delimiter now: s@pattern@replacement@
-              sed -i -E "s@^(local __devMode = ).*$@\1nil@" "$INIT_FILE"
+              # The pattern and replacement do not contain '/', so this should be safe.
+              sed -i -E "s/^(local __devMode = ).*$/\1nil/" "$INIT_FILE"
               echo "  - Set '__devMode' to 'nil' in $INIT_FILE"
             else
               echo "  - Warning: $INIT_FILE not found. Skipping."
