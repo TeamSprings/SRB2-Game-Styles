@@ -16,21 +16,16 @@ jobs:
     - name: Get commit message and sanitize for filename
       id: commit_info # Assigns an ID to this step to reference its outputs later.
       run: |
-        # Get the full commit message from the latest commit on the current branch.
-        # Ensure 'fetch-depth: 0' is used in actions/checkout@v4 for full history.
+        # When triggered manually, there isn't a direct 'head_commit' from a push event.
+        # We'll use the latest commit message on the branch the workflow is run on.
+        # This assumes you're running the workflow on the branch where the relevant commit exists.
         COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-        echo "DEBUG: Raw COMMIT_MESSAGE: '$COMMIT_MESSAGE'"
 
         # Sanitize the commit message to create a valid and safe filename base.
-        # 1. Replace spaces with hyphens.
-        # 2. Convert to lowercase.
-        # 3. Remove any characters that are not alphanumeric, hyphens, underscores, or dots.
-        # 4. Truncate the name to a maximum of 50 characters to prevent overly long filenames.
         SANITIZED_NAME=$(echo "$COMMIT_MESSAGE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-.' | head -c 50)
-        echo "DEBUG: SANITIZED_NAME after processing: '$SANITIZED_NAME'"
 
-        # Fallback: If the sanitized name ends up empty (e.g., commit message was just emojis),
-        # use the short commit SHA as a reliable fallback.
+        # Fallback: If the sanitized name ends up empty, use the short commit SHA.
+        # We'll use the SHA of the commit the workflow is currently running on.
         if [ -z "$SANITIZED_NAME" ]; then
           SANITIZED_NAME="${{ github.sha_short }}"
           echo "Sanitized name was empty, falling back to short SHA: $SANITIZED_NAME"
@@ -38,7 +33,6 @@ jobs:
           echo "Sanitized filename base: $SANITIZED_NAME"
         fi
 
-        # Set the sanitized name as an output variable for subsequent steps.
         echo "filename_base=$SANITIZED_NAME" >> "$GITHUB_OUTPUT"
 
     - name: Install zip utility
