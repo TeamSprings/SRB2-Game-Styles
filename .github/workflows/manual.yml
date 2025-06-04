@@ -52,9 +52,6 @@ jobs:
               # Example: local packVersion = '3.780' -> local packVersion = 'cutscenetest'
               sed -i "s/^\(local packVersion = '\)[^']*\('\)/\1${{ env.SHORT_SHA }}\2/" "$INIT_FILE"
               echo "  - Updated 'packVersion' to '${{ env.SHORT_SHA }}' in $INIT_FILE"
-            
-              sed -i "s/^\(local __devMode = \).*$/\1nil/" "$INIT_FILE"
-              echo "  - Set '__devMode' to 'nil' in $INIT_FILE"
             else
               echo "  - Warning: $INIT_FILE not found. Skipping."
             fi
