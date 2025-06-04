@@ -62,24 +62,50 @@ jobs:
             echo "Processing $INIT_FILE..."
   
             if [ -f "$INIT_FILE" ]; then
+              # --- Using Extended Regular Expressions (-E) for clearer syntax ---
+              # --- Using '#' as the delimiter for the sed 's' command ---
+
               # Update 'local packVersion = 'X.YYY'' line
               # Example: local packVersion = '3.780' -> local packVersion = 'cutscenetest'
-              # Using '#' as delimiter just in case the version string *could* contain '/'
-              sed -i "s#^\(local packVersion = '\)[^']*('\)#\1$TAG_VERSION_STRING\2#" "$INIT_FILE"
+              # Pattern: ^(local packVersion = ')[^']*(')
+              # - ^: Start of line
+              # - (...): ERE grouping (captured in \1)
+              # - local packVersion = ': Matches literal string
+              # - ': Matches literal single quote
+              # - [^']*: Matches zero or more characters that are NOT a single quote
+              # - (...): ERE grouping (captured in \2)
+              # - ': Matches literal single quote
+              # - ): Matches literal closing parenthesis (this part was incorrect in previous attempts' BRE syntax)
+              # Correction: The regex should capture the opening quote in \1 and the closing quote in \2.
+              # The previous attempt had '\)' capturing the closing quote which was BRE group end syntax.
+              # Correct ERE pattern: ^(local packVersion = ')[^']*(')
+              sed -i -E "s#^(local packVersion = ')[^']*('#\\1$TAG_VERSION_STRING\\2#" "$INIT_FILE"
               echo "  - Updated 'packVersion' to '$TAG_VERSION_STRING' in $INIT_FILE"
   
               # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line
-              # The regex '[A-Za-z]*' matches 'Classic', 'Dimps', 'Dreamcast', etc.
               # Example: rawset(_G, "Style_ClassicVersion", 3780) -> rawset(_G, "Style_ClassicVersion", 0) or 3780
-              # Escaped literal parentheses '(' and ')' in the pattern for BRE compatibility.
-              # Original pattern: ^\(rawset(_G, \"Style_[A-Za-z]*Version\", \)[0-9]*\()
-              # Corrected pattern: ^\(rawset\(_G, \"Style_[A-Za-z]*Version\", \)\)[0-9]*\(\)\)
-              sed -i "s/^\(rawset\(_G, \"Style_[A-Za-z]*Version\", \)\)[0-9]*\(\)\)/\1$NUMERIC_VERSION\2/" "$INIT_FILE"
+              # Pattern: ^(rawset\(_G, "Style_[A-Za-z]*Version", \))[0-9]*(\))
+              # - ^: Start of line
+              # - (...): ERE grouping (captured in \1)
+              # - rawset: Literal
+              # - \(_G, : Matches literal '(', '_G', ',' (parentheses escaped as they are literal)
+              # - "Style_[A-Za-z]*Version", : Matches literal string pattern
+              # - \): Matches literal ')' (parenthesis escaped as it is literal)
+              # - [0-9]*: Matches zero or more digits (the number)
+              # - (...): ERE grouping (captured in \2)
+              # - \): Matches literal ')' (parenthesis escaped as it is literal)
+              sed -i -E "s#^(rawset\(_G, \"Style_[A-Za-z]*Version\", \))[0-9]*(\))#\\1$NUMERIC_VERSION\\2#" "$INIT_FILE"
               echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
               
               # Set '__devMode' to nil
               # Example: local __devMode = true -> local __devMode = nil
-              sed -i "s/^\(local __devMode = \).*$/\1nil/" "$INIT_FILE"
+              # Pattern: ^(local __devMode = ).*$
+              # - ^: Start of line
+              # - (...): ERE grouping (captured in \1)
+              # - local __devMode = : Matches literal string
+              # - .*: Matches any character zero or more times
+              # - $: End of line
+              sed -i -E "s#^(local __devMode = ).*$#\\1nil#" "$INIT_FILE"
               echo "  - Set '__devMode' to 'nil' in $INIT_FILE"
             else
               echo "  - Warning: $INIT_FILE not found. Skipping."
