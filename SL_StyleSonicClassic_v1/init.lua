@@ -1,5 +1,4 @@
 local __devMode = nil
-print(__devMode)
 
 --[[
 	Classic Stylized Pack for SRB2

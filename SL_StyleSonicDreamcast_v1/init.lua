@@ -1,3 +1,5 @@
+local __devMode = nil
+
 local gameString = "DC"
 
 local packVersion = '3.500'

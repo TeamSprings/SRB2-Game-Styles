@@ -1,3 +1,5 @@
+local __devMode = nil
+
 local gameString = "gba"
 
 local packVersion = '3.500'
