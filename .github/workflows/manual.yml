@@ -15,7 +15,7 @@ jobs:
       id: commit_info # Assigns an ID to this step to reference its outputs later.
       run: |
         # Get the full commit message from the push event.
-        COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+        COMMIT_MESSAGE=$(git log -1 --pretty=%B)
 
         # Sanitize the commit message to create a valid and safe filename base.
         # 1. Replace spaces with hyphens.
@@ -61,7 +61,7 @@ jobs:
     - name: Upload PK3s as artifacts
       uses: actions/upload-artifact@v4 # This action uploads the generated PK3 files as workflow artifacts.
       with:
-        name: pk3-files # The name of the artifact bundle.
+        name: Style Files  # The name of the artifact bundle.
         path: |
           L_ClassicStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
           L_DimpsStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
