@@ -1,0 +1,57 @@
+name: Build PK3s from Folders
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'info'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Uses the latest Ubuntu runner environment.
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Checks out your repository code.
+
+    - name: Get short commit SHA
+      id: get_short_sha
+      run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)" >> $GITHUB_ENV
+      # Alternatively, for a more robust short SHA generation, especially if you need to ensure it's a valid short SHA
+      # run: |
+      #   CALCULATED_SHA=$(git rev-parse --short ${{ github.sha }})
+      #   echo "SHORT_SHA=$CALCULATED_SHA" >> $GITHUB_ENV
+
+    - name: Install zip utility
+      run: |
+        sudo apt-get update # Updates the package list.
+        sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
+
+    - name: Zipping Classic Style contents into PK3
+      run: zip -r "../L_ClassicStyle_${{ env.SHORT_SHA }}.pk3" ./*
+      working-directory: ./SL_StyleSonicClassic_v1 # <<-- IMPORTANT: Replace 'my_folder_1' with your actual first folder name.
+
+    - name: Zipping Dimps Style contents into PK3
+      run: zip -r "../L_DimpsStyle_${{ env.SHORT_SHA }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDimps_v1 # <<-- IMPORTANT: Replace 'my_folder_2' with your actual second folder name.
+
+    - name: Zipping Adventure Style contents into PK3
+      run: zip -r "../L_AdventureStyle_${{ env.SHORT_SHA }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDreamcast_v1 # <<-- IMPORTANT: Replace 'my_folder_3' with your actual third folder name.
+
+    - name: Upload PK3s as artifacts
+      uses: actions/upload-artifact@v4 # This action uploads the generated PK3 files as workflow artifacts.
+      with:
+        name: Style Files  # The name of the artifact bundle.
+        path: |
+          L_ClassicStyle_${{ env.SHORT_SHA }}.pk3
+          L_DimpsStyle_${{ env.SHORT_SHA }}.pk3
+          L_AdventureStyle_${{ env.SHORT_SHA }}.pk3
+        # These paths specify which files to upload. They should match the names generated in the zip steps.
