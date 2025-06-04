@@ -63,8 +63,7 @@ jobs:
   
             if [ -f "$INIT_FILE" ]; then
               # --- Using Extended Regular Expressions (-E) for clearer syntax ---
-              # --- Using '#' as the delimiter for the sed 's' command ---
-              # --- Using \1 and \2 directly in replacement string (standard) ---
+              # --- Using '@' as the delimiter for the sed 's' command ---
 
               # Update 'local packVersion = 'X.YYY'' line
               # Pattern: ^(local packVersion = ')[^']*'
@@ -76,8 +75,8 @@ jobs:
               # - \1: The captured start part 'local packVersion = ''
               # - $TAG_VERSION_STRING: The new version string
               # - ': A literal closing single quote
-              # This avoids the pattern ending in `(')` which might be causing the issue.
-              sed -i -E "s#^(local packVersion = ')[^']*'#\1$TAG_VERSION_STRING'#" "$INIT_FILE"
+              # Using '@' delimiter now: s@pattern@replacement@
+              sed -i -E "s@^(local packVersion = ')[^']*'@\1$TAG_VERSION_STRING'@" "$INIT_FILE"
               echo "  - Updated 'packVersion' to '$TAG_VERSION_STRING' in $INIT_FILE"
   
               # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line
@@ -90,8 +89,8 @@ jobs:
               # - \1: The captured start part 'rawset(_G, "Style_XXXVersion", '
               # - $NUMERIC_VERSION: The new numeric version
               # - \2: The captured closing parenthesis ')'
-              # This pattern and replacement seem correct and haven't been the primary cause of the repeated error.
-              sed -i -E "s#^(rawset\(_G, \"Style_[A-Za-z]*Version\", \))[0-9]*(\))#\1$NUMERIC_VERSION\2#" "$INIT_FILE"
+              # Using '@' delimiter now: s@pattern@replacement@
+              sed -i -E "s@^(rawset\(_G, \"Style_[A-Za-z]*Version\", \))[0-9]*(\))@\1$NUMERIC_VERSION\2@" "$INIT_FILE"
               echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
               
               # Set '__devMode' to nil
@@ -103,13 +102,14 @@ jobs:
               # Replacement: \1nil
               # - \1: The captured start part 'local __devMode = '
               # - nil: The literal 'nil'
-              sed -i -E "s#^(local __devMode = ).*$#\1nil#" "$INIT_FILE"
+              # Using '@' delimiter now: s@pattern@replacement@
+              sed -i -E "s@^(local __devMode = ).*$@\1nil@" "$INIT_FILE"
               echo "  - Set '__devMode' to 'nil' in $INIT_FILE"
             else
               echo "  - Warning: $INIT_FILE not found. Skipping."
             fi
           done
-
+          
     - name: Zipping Classic Style contents into PK3
       # Using VERSION_NUMBER for a cleaner artifact name, or TAG_NAME if you prefer the 'v' prefix
       run: zip -r "../L_ClassicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
