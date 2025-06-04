@@ -64,13 +64,17 @@ jobs:
             if [ -f "$INIT_FILE" ]; then
               # Update 'local packVersion = 'X.YYY'' line
               # Example: local packVersion = '3.780' -> local packVersion = 'cutscenetest'
-              sed -i "s/^\(local packVersion = '\)[^']*\('\)/\1$TAG_VERSION_STRING\2/" "$INIT_FILE"
+              # Using '#' as delimiter just in case the version string *could* contain '/'
+              sed -i "s#^\(local packVersion = '\)[^']*('\)#\1$TAG_VERSION_STRING\2#" "$INIT_FILE"
               echo "  - Updated 'packVersion' to '$TAG_VERSION_STRING' in $INIT_FILE"
   
               # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line
               # The regex '[A-Za-z]*' matches 'Classic', 'Dimps', 'Dreamcast', etc.
               # Example: rawset(_G, "Style_ClassicVersion", 3780) -> rawset(_G, "Style_ClassicVersion", 0) or 3780
-              sed -i "s/^\(rawset(_G, \"Style_[A-Za-z]*Version\", \)[0-9]*\()/\1$NUMERIC_VERSION\2/" "$INIT_FILE"
+              # Escaped literal parentheses '(' and ')' in the pattern for BRE compatibility.
+              # Original pattern: ^\(rawset(_G, \"Style_[A-Za-z]*Version\", \)[0-9]*\()
+              # Corrected pattern: ^\(rawset\(_G, \"Style_[A-Za-z]*Version\", \)\)[0-9]*\(\)\)
+              sed -i "s/^\(rawset\(_G, \"Style_[A-Za-z]*Version\", \)\)[0-9]*\(\)\)/\1$NUMERIC_VERSION\2/" "$INIT_FILE"
               echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
               
               # Set '__devMode' to nil
