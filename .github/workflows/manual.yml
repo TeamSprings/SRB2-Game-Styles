@@ -34,6 +34,32 @@ jobs:
         sudo apt-get update # Updates the package list.
         sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
 
+    - name: Update init files with version from tag
+      run: |
+          # List of directories containing init.lua files for each style
+          DIRS=(
+            "./SL_StyleSonicClassic_v1"
+            "./SL_StyleSonicDimps_v1"
+            "./SL_StyleSonicDreamcast_v1" # Assuming this is the Adventure style directory
+          )
+  
+          for DIR in "${DIRS[@]}"; do
+            INIT_FILE="$DIR/init.lua"
+            echo "Processing $INIT_FILE..."
+  
+            if [ -f "$INIT_FILE" ]; then
+              # Update 'local packVersion = 'X.YYY'' line
+              # Example: local packVersion = '3.780' -> local packVersion = 'cutscenetest'
+              sed -i "s/^\(local packVersion = '\)[^']*\('\)/\1${{ env.SHORT_SHA }}\2/" "$INIT_FILE"
+              echo "  - Updated 'packVersion' to '${{ env.SHORT_SHA }}' in $INIT_FILE"
+            
+              sed -i "s/^\(local __devMode = \)nil/\1true/" "$INIT_FILE"
+              echo "  - Set '__devMode' to 'true' in $INIT_FILE"
+            else
+              echo "  - Warning: $INIT_FILE not found. Skipping."
+            fi
+          done
+
     - name: Zipping Classic Style contents into PK3
       run: zip -r "../L_ClassicStyle_${{ env.SHORT_SHA }}.pk3" ./*
       working-directory: ./SL_StyleSonicClassic_v1 # <<-- IMPORTANT: Replace 'my_folder_1' with your actual first folder name.
