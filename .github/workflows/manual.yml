@@ -2,6 +2,16 @@ name: Build PK3s from Folders
 
 on:
   workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'info'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug  
 
 jobs:
   build:
@@ -10,51 +20,30 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4 # Checks out your repository code.
-      with:
-        fetch-depth: 0 # IMPORTANT: Fetch all history for git log to work reliably      
 
-    - name: Get commit message and sanitize for filename
-      id: commit_info # Assigns an ID to this step to reference its outputs later.
-      run: |
-        # When triggered manually, there isn't a direct 'head_commit' from a push event.
-        # We'll use the latest commit message on the branch the workflow is run on.
-        # This assumes you're running the workflow on the branch where the relevant commit exists.
-        COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-
-        # Sanitize the commit message to create a valid and safe filename base.
-        SANITIZED_NAME=$(echo "$COMMIT_MESSAGE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-.' | head -c 50)
-
-        # Fallback: If the sanitized name ends up empty, use the short commit SHA.
-        # We'll use the SHA of the commit the workflow is currently running on.
-        if [ -z "$SANITIZED_NAME" ]; then
-          SANITIZED_NAME="${{ github.sha_short }}"
-          echo "Sanitized name was empty, falling back to short SHA: $SANITIZED_NAME"
-        else
-          echo "Sanitized filename base: $SANITIZED_NAME"
-        fi
-
-        echo "filename_base=$SANITIZED_NAME" >> "$GITHUB_OUTPUT"
+    - name: Get short commit SHA
+      id: get_short_sha
+      run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)" >> $GITHUB_ENV
+      # Alternatively, for a more robust short SHA generation, especially if you need to ensure it's a valid short SHA
+      # run: |
+      #   CALCULATED_SHA=$(git rev-parse --short ${{ github.sha }})
+      #   echo "SHORT_SHA=$CALCULATED_SHA" >> $GITHUB_ENV
 
     - name: Install zip utility
       run: |
         sudo apt-get update # Updates the package list.
         sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
 
-    - name: Zip Folder 1 contents into PK3
-      # The 'working-directory' specifies that the 'zip' command should be executed from inside 'my_folder_1'.
-      # 'zip -r "../${{ steps.commit_info.outputs.filename_base }}_folder1.pk3" ./*'
-      #   - '-r': Recursively includes directories.
-      #   - '"../...pk3"': Specifies the output PK3 file path, placing it one directory up (in the repository root).
-      #   - './*': Zips all files and subdirectories directly within 'my_folder_1'.
-      run: zip -r "../L_ClassicStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+    - name: Zipping Classic Style contents into PK3
+      run: zip -r "../L_ClassicStyle_${{ env.SHORT_SHA }}.pk3" ./*
       working-directory: ./SL_StyleSonicClassic_v1 # <<-- IMPORTANT: Replace 'my_folder_1' with your actual first folder name.
 
-    - name: Zip Folder 2 contents into PK3
-      run: zip -r "../L_DimpsStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+    - name: Zipping Dimps Style contents into PK3
+      run: zip -r "../L_DimpsStyle_${{ env.SHORT_SHA }}.pk3" ./*
       working-directory: ./SL_StyleSonicDimps_v1 # <<-- IMPORTANT: Replace 'my_folder_2' with your actual second folder name.
 
-    - name: Zip Folder 3 contents into PK3
-      run: zip -r "../L_AdventureStyle_${{ steps.commit_info.outputs.filename_base }}.pk3" ./*
+    - name: Zipping Adventure Style contents into PK3
+      run: zip -r "../L_AdventureStyle_${{ env.SHORT_SHA }}.pk3" ./*
       working-directory: ./SL_StyleSonicDreamcast_v1 # <<-- IMPORTANT: Replace 'my_folder_3' with your actual third folder name.
 
     - name: Upload PK3s as artifacts
@@ -62,7 +51,7 @@ jobs:
       with:
         name: Style Files  # The name of the artifact bundle.
         path: |
-          L_ClassicStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
-          L_DimpsStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
-          L_AdventureStyle_${{ steps.commit_info.outputs.filename_base }}.pk3
+          L_ClassicStyle_${{ env.SHORT_SHA }}.pk3
+          L_DimpsStyle_${{ env.SHORT_SHA }}.pk3
+          L_AdventureStyle_${{ env.SHORT_SHA }}.pk3
         # These paths specify which files to upload. They should match the names generated in the zip steps.
