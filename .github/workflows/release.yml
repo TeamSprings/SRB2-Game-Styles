@@ -29,15 +29,15 @@ jobs:
 
     - name: Zipping Classic Style contents into PK3
       # Using VERSION_NUMBER for a cleaner artifact name, or TAG_NAME if you prefer the 'v' prefix
-      run: zip -r "../L_ClassicSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      run: zip -r "../L_ClassicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
       working-directory: ./SL_StyleSonicClassic_v1
 
     - name: Zipping Dimps Style contents into PK3
-      run: zip -r "../L_DimpsSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      run: zip -r "../L_DimpsStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
       working-directory: ./SL_StyleSonicDimps_v1
 
     - name: Zipping Adventure Style contents into PK3
-      run: zip -r "../L_AdventureSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      run: zip -r "../L_AdventureStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
       working-directory: ./SL_StyleSonicDreamcast_v1
 
     - name: Upload PK3s as artifacts
@@ -45,9 +45,9 @@ jobs:
       with:
         name: Style Release - ${{ env.TAG_NAME }} # Naming the artifact bundle with the full tag name
         path: |
-          L_ClassicSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
-          L_DimpsSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
-          L_AdventureSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_ClassicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_DimpsStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_AdventureStyle_v${{ env.VERSION_NUMBER }}.pk3
           
     - name: Create GitHub Release
       id: create_release
@@ -60,9 +60,9 @@ jobs:
         draft: true  # Set to true if you want to manually review before publishing
         prerelease: false # Set to true if this is a pre-release
         files: |
-          L_ClassicSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
-          L_DimpsSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
-          L_AdventureSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_ClassicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_DimpsStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_AdventureStyle_v${{ env.VERSION_NUMBER }}.pk3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by GitHub Actions
           
