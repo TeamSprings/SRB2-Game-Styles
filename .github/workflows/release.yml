@@ -1,0 +1,64 @@
+name: Build PK3s from Folders on Tag
+
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest # Uses the latest Ubuntu runner environment.
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Checks out your repository code.
+
+    - name: Get tag name and short commit SHA
+      id: get_versions
+      run: |
+        TAG_NAME="${{ github.ref_name }}"
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+    - name: Install zip utility
+      run: |
+        sudo apt-get update # Updates the package list.
+        sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
+
+    - name: Zipping Classic Style contents into PK3
+      # Using VERSION_NUMBER for a cleaner artifact name, or TAG_NAME if you prefer the 'v' prefix
+      run: zip -r "../L_ClassicSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      working-directory: ./SL_StyleSonicClassic_v1
+
+    - name: Zipping Dimps Style contents into PK3
+      run: zip -r "../L_DimpsSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDimps_v1
+
+    - name: Zipping Adventure Style contents into PK3
+      run: zip -r "../L_AdventureSonicStyle_v${{ env.VERSION_NUMBER }}.pk3" ./*
+      working-directory: ./SL_StyleSonicDreamcast_v1
+
+    - name: Upload PK3s as artifacts
+      uses: actions/upload-artifact@v4 # This action uploads the generated PK3 files as workflow artifacts.
+      with:
+        name: Style Release - ${{ env.TAG_NAME }} # Naming the artifact bundle with the full tag name
+        path: |
+          L_ClassicSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_DimpsSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          L_AdventureSonicStyle_v${{ env.VERSION_NUMBER }}.pk3
+          
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v2 # Use a specific version, e.g., v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Styles - ${{ github.ref_name#v }}
+        body: |
+          Automated release for ${{ github.ref_name }}
+        draft: true  # Set to true if you want to manually review before publishing
+        prerelease: false # Set to true if this is a pre-release
+        files: |
+          L_ClassicStyle_${{ env.VERSION_NUMBER }}.pk3
+          L_DimpsStyle_${{ env.VERSION_NUMBER }}.pk3
+          L_AdventureStyle_${{ env.VERSION_NUMBER }}.pk3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by GitHub Actions
+          
