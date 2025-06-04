@@ -19,13 +19,63 @@ jobs:
       run: |
         TAG_NAME="${{ github.ref_name }}"
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-        VERSION_NUMBER="${TAG_NAME#v}" # Removes 'v' prefix
-        echo "VERSION_NUMBER=$VERSION_NUMBER" >> $GITHUB_ENV        
+        
+        # VERSION_NUMBER will be the tag name without the 'v' prefix
+        VERSION_NUMBER="${TAG_NAME#v}"
+        echo "VERSION_NUMBER=$VERSION_NUMBER" >> $GITHUB_ENV
+
+        # TAG_VERSION_STRING will be used for string versions in init.lua (e.g., '3.780' or 'cutscenetest')
+        # This is simply the VERSION_NUMBER as it handles cases like "cutscenetest" or "3.500internal"
+        echo "TAG_VERSION_STRING=$VERSION_NUMBER" >> $GITHUB_ENV
+
+        # Determine NUMERIC_VERSION for rawset(_G, "Style_XXXVersion", NNNN)
+        # Check if VERSION_NUMBER is purely numeric (e.g., 3.780, 3.5, 4). It allows for one optional dot.
+        if echo "$VERSION_NUMBER" | grep -P '^\d+(\.\d+)?$' > /dev/null; then
+          # If purely numeric, remove dot and convert to integer string (e.g., 3.780 -> 3780)
+          NUMERIC_VERSION=$(echo "$VERSION_NUMBER" | sed 's/\.//g')
+        else
+          # If not purely numeric (e.g., "cutscenetest", "3.500internal"), set to 0.
+          # This aligns with "ignore numeric version variable" for non-numerical tags.
+          NUMERIC_VERSION="0"
+        fi
+        echo "NUMERIC_VERSION=$NUMERIC_VERSION" >> $GITHUB_ENV        
 
     - name: Install zip utility
       run: |
         sudo apt-get update # Updates the package list.
         sudo apt-get install -y zip # Installs the zip utility, which is needed for creating archives.
+
+    - name: Update init files with version from tag
+      run: |
+          TAG_VERSION_STRING="${{ env.TAG_VERSION_STRING }}"
+          NUMERIC_VERSION="${{ env.NUMERIC_VERSION }}"
+  
+          # List of directories containing init.lua files for each style
+          DIRS=(
+            "./SL_StyleSonicClassic_v1"
+            "./SL_StyleSonicDimps_v1"
+            "./SL_StyleSonicDreamcast_v1" # Assuming this is the Adventure style directory
+          )
+  
+          for DIR in "${DIRS[@]}"; do
+            INIT_FILE="$DIR/init.lua"
+            echo "Processing $INIT_FILE..."
+  
+            if [ -f "$INIT_FILE" ]; then
+              # Update 'local packVersion = 'X.YYY'' line
+              # Example: local packVersion = '3.780' -> local packVersion = 'cutscenetest'
+              sed -i "s/^\(local packVersion = '\)[^']*\('\)/\1$TAG_VERSION_STRING\2/" "$INIT_FILE"
+              echo "  - Updated 'packVersion' to '$TAG_VERSION_STRING' in $INIT_FILE"
+  
+              # Update 'rawset(_G, "Style_XXXVersion", NNNN)' line
+              # The regex '[A-Za-z]*' matches 'Classic', 'Dimps', 'Dreamcast', etc.
+              # Example: rawset(_G, "Style_ClassicVersion", 3780) -> rawset(_G, "Style_ClassicVersion", 0) or 3780
+              sed -i "s/^\(rawset(_G, \"Style_[A-Za-z]*Version\", \)[0-9]*\()/\1$NUMERIC_VERSION\2/" "$INIT_FILE"
+              echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
+            else
+              echo "  - Warning: $INIT_FILE not found. Skipping."
+            fi
+          done
 
     - name: Zipping Classic Style contents into PK3
       # Using VERSION_NUMBER for a cleaner artifact name, or TAG_NAME if you prefer the 'v' prefix
