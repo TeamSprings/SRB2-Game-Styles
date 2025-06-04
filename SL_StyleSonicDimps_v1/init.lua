@@ -1,4 +1,4 @@
-local __devMode = nil
+local __devMode = true
 
 local gameString = "gba"
 
