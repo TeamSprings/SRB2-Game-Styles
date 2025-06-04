@@ -50,7 +50,7 @@ jobs:
       uses: softprops/action-gh-release@v2 # Use a specific version, e.g., v2
       with:
         tag_name: ${{ github.ref_name }}
-        name: Styles - ${{ github.ref_name#v }}
+        name: Styles - ${{ github.ref_name }}
         body: |
           Automated release for ${{ github.ref_name }}
         draft: true  # Set to true if you want to manually review before publishing
