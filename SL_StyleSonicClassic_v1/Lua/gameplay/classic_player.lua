@@ -51,6 +51,21 @@ local thok_cv = thok_opt.cv
 local grounding_cv = grounding_opt.cv
 
 --
+--  RUN ON WATER
+--
+
+local ronw_state = freeslot('S_STYLES_RUNONWATER')
+local ronw_sprite = freeslot('SPR_WATERRUN_S3')
+local ronw_angle = ANG1 * 28
+
+states[ronw_state] = {
+	sprite = ronw_sprite,
+	frame = 0|FF_PAPERSPRITE|FF_ANIMATE|FF_ADD|FF_TRANS60,
+	var1 = 4,
+	var2 = 2,
+}
+
+--
 --	Thinker
 --
 
@@ -96,6 +111,41 @@ addHook("PlayerThink", function(p)
 		end
 
 		p.styles_runonwater = nil
+	end
+
+	if 	(p.mo.eflags & MFE_TOUCHWATER) 
+	and (p.mo.state == S_PLAY_RUN or p.mo.state == S_PLAY_WALK)
+	and  p.speed > min(7*p.normalspeed/8, p.runspeed) then
+		if not p.styles_waterrunpart1 then
+			p.styles_waterrunpart1 = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_ROTATEOVERLAY)
+			p.styles_waterrunpart1.state = ronw_state
+			p.styles_waterrunpart1.target = p.mo
+			p.styles_waterrunpart1.tracer = p.mo
+			p.styles_waterrunpart1.angle = p.mo.angle - ronw_angle
+			p.styles_waterrunpart1.scale = FixedMul(p.mo.scale, p.speed/32)
+		else
+			p.styles_waterrunpart1.angle = p.mo.angle - ronw_angle
+			p.styles_waterrunpart1.scale = FixedMul(p.mo.scale, p.speed/32)
+		end
+
+		if not p.styles_waterrunpart2 then
+			p.styles_waterrunpart2 = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_ROTATEOVERLAY)
+			p.styles_waterrunpart2.state = ronw_state
+			p.styles_waterrunpart2.target = p.mo
+			p.styles_waterrunpart2.tracer = p.mo
+			p.styles_waterrunpart2.angle = p.mo.angle + ronw_angle
+			p.styles_waterrunpart2.scale = FixedMul(p.mo.scale, p.speed/32)
+		else
+			p.styles_waterrunpart2.angle = p.mo.angle + ronw_angle
+			p.styles_waterrunpart2.scale = FixedMul(p.mo.scale, p.speed/32)
+		end
+
+	elseif p.styles_waterrunpart1 or p.styles_waterrunpart2 then
+		P_RemoveMobj(p.styles_waterrunpart1)
+		P_RemoveMobj(p.styles_waterrunpart2)
+
+		p.styles_waterrunpart1 = nil
+		p.styles_waterrunpart2 = nil
 	end
 
 	-- EYE CANDY
