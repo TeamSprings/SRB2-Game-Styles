@@ -10,12 +10,16 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4 # Checks out your repository code.
+      with:
+        fetch-depth: 0 # IMPORTANT: Fetch all history for git log to work reliably      
 
     - name: Get commit message and sanitize for filename
       id: commit_info # Assigns an ID to this step to reference its outputs later.
       run: |
-        # Get the full commit message from the push event.
+        # Get the full commit message from the latest commit on the current branch.
+        # Ensure 'fetch-depth: 0' is used in actions/checkout@v4 for full history.
         COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+        echo "DEBUG: Raw COMMIT_MESSAGE: '$COMMIT_MESSAGE'"
 
         # Sanitize the commit message to create a valid and safe filename base.
         # 1. Replace spaces with hyphens.
@@ -23,6 +27,7 @@ jobs:
         # 3. Remove any characters that are not alphanumeric, hyphens, underscores, or dots.
         # 4. Truncate the name to a maximum of 50 characters to prevent overly long filenames.
         SANITIZED_NAME=$(echo "$COMMIT_MESSAGE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-.' | head -c 50)
+        echo "DEBUG: SANITIZED_NAME after processing: '$SANITIZED_NAME'"
 
         # Fallback: If the sanitized name ends up empty (e.g., commit message was just emojis),
         # use the short commit SHA as a reliable fallback.
