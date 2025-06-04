@@ -72,6 +72,11 @@ jobs:
               # Example: rawset(_G, "Style_ClassicVersion", 3780) -> rawset(_G, "Style_ClassicVersion", 0) or 3780
               sed -i "s/^\(rawset(_G, \"Style_[A-Za-z]*Version\", \)[0-9]*\()/\1$NUMERIC_VERSION\2/" "$INIT_FILE"
               echo "  - Updated 'Style_*Version' (numeric) to '$NUMERIC_VERSION' in $INIT_FILE"
+              
+              # Set '__devMode' to nil
+              # Example: local __devMode = true -> local __devMode = nil
+              sed -i "s/^\(local __devMode = \).*$/\1nil/" "$INIT_FILE"
+              echo "  - Set '__devMode' to 'nil' in $INIT_FILE"
             else
               echo "  - Warning: $INIT_FILE not found. Skipping."
             fi
