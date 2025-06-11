@@ -66,7 +66,7 @@ Options:new("capsule", {
 end, CV_NETVAR)
 
 addHook("MapChange", function()
-	if change_var > -1 then 
+	if change_var > -1 then
 		model_type = change_var
 		change_var = -1
 	end
@@ -85,12 +85,12 @@ local TRPPF_HEADTOP = 8
 local TRPPF_DISOLVE = 16
 
 -- FIX: CAPSULES, (CD CAPSULE AND THE ANIM)
--- TODO: ADD MORE CAPSULES
+-- TODO: ADD MORE CAPSULES (S1, MANIA and finish CD)
 -- TODO: ADD MORE FEATURES (flight, drop and item drop)
 -- TODO: MAKE IT FIRST UDMF CUSTOMIZABLE OBJECT
 local models = {
 	-- SONIC 2 CAPSULE
-	function(a) 
+	function(a)
 		a.scale = $+FU/4
 			local topSuSpawn = P_SpawnMobjFromMobj(a, 0,0,0, MT_BUSH)
 			topSuSpawn.target = a
@@ -143,14 +143,14 @@ local models = {
 			topSuSpawn.scale = a.scale
 			topSuSpawn.state = S_BUSH
 			topSuSpawn.sprite = SPR_CAPSULE_S2
-			topSuSpawn.frame = J	
+			topSuSpawn.frame = J
 	end,
 
 	-- SONIC CD CAPSULE
 	function(a)
 		a.capsule = {}
 		a.scale = $+FU/4
-		
+
 		local stem = P_SpawnMobjFromMobj(a, 0,0,0, EGGTRAPPART)
 		stem.target = a
 		stem.scale = a.scale
@@ -270,7 +270,7 @@ local models = {
 
 addHook("MobjSpawn", function(a, tm)
 	a.styles_flags = 0
-	
+
 	a.radius = 46*FU
 	a.height = 84*FU
 
@@ -363,7 +363,7 @@ addHook("MobjThinker", function(a)
 
 				P_SetOrigin(a, a.x, a.y, ease.linear(a.styles_movement * FU / TICRATE, a.z, a.styles_movetarget))
 				a.styles_movement = $ - 1
-				
+
 				if not a.styles_movement then
 					a.flags = $ &~ (MF_NOGRAVITY|MF_NOCLIPHEIGHT)
 					a.styles_movement = nil
@@ -484,7 +484,7 @@ addHook("MobjThinker", function(a)
 					a.alpha = 0
 				end
 
-				if (a.styles_flags & TRPPF_DISOLVE) then
+				if (a.styles_trflags & TRPPF_DISOLVE) then
 					P_RemoveMobj(a)
 				end
 			else
@@ -530,9 +530,9 @@ addHook("MobjCollide", function(a,mt)
 	if mt.player then
 		if a.target and a.target.activatable == true then
 			local discenter = P_AproxDistance(a.x - mt.x, a.y - mt.y)
-			
+
 			if discenter < 26*a.scale and a.z+a.height+10*FU > mt.z then
-				if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement) 
+				if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement)
 				or ((a.target.styles_flags & TRAPF_LIFT) ~= 1) then
 					a.target.activated = true
 				end
@@ -547,8 +547,8 @@ end, EGGTRAPTRIGGER)
 
 addHook("TouchSpecial", function(a,mt)
 	if mt.player then
-		if a.target and a.target.activatable == true then	
-			if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement) 
+		if a.target and a.target.activatable == true then
+			if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement)
 			or ((a.target.styles_flags & TRAPF_LIFT) ~= 1) then
 				a.target.activated = true
 			end

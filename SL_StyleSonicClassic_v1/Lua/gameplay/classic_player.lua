@@ -26,7 +26,11 @@ local thok_opt = Options:new("thok", "gameplay/cvars/thok", nil, CV_NETVAR)
 
 local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
 
+local momentum_opt = Options:new("momentum", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
+
 local runonwater_opt = Options:new("runonwater", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
+
+local preserveshield_opt = Options:new("preserveshield", {{nil, "disable", "Disabled"}, {1, "managed", "Managed"}, {2, "zone", "Zone only"}, {3, "always", "Always"}}, nil, CV_NETVAR)
 
 local jumpsounds_opt = Options:new("jumpsfx", "gameplay/sfx/jumpsfx", nil, 0)
 
@@ -56,11 +60,11 @@ local grounding_cv = grounding_opt.cv
 
 local ronw_state = freeslot('S_STYLES_RUNONWATER')
 local ronw_sprite = freeslot('SPR_WATERRUN_S3')
-local ronw_angle = ANG1 * 28
+local ronw_angle = ANG1 * 20
 
 states[ronw_state] = {
 	sprite = ronw_sprite,
-	frame = 0|FF_PAPERSPRITE|FF_ANIMATE|FF_ADD|FF_TRANS60,
+	frame = 0|FF_PAPERSPRITE|FF_ANIMATE|FF_ADD|FF_TRANS20,
 	var1 = 4,
 	var2 = 2,
 }
@@ -69,12 +73,43 @@ states[ronw_state] = {
 --	Thinker
 --
 
+local lastzone
+
+addHook("PlayerSpawn", function(p)
+	if not (gametyperules & GTR_FRIENDLY) then return end
+	if (G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS)) then return end
+
+	local preservation = preserveshield_opt()
+	local currentzone = mapheaderinfo[gamemap].lvlttl
+	local newzone = false
+
+	if currentzone ~= lastzone then
+		newzone = true
+		lastzone = currentzone
+	end
+
+	if preservation and p.styles_preserveshield then
+		if preservation > 2 or (
+			newzone == false and (preservation == 2 or (preservation == 1 and mapheaderinfo[gamemap].bonustype < 1))) then
+			p.powers[pw_shield] = p.styles_preserveshield
+			P_SpawnShieldOrb(p)
+		end
+	end
+
+	p.styles_preserveshield = nil
+end)
+
 addHook("PlayerThink", function(p)
 	if not p.mo then return end
 
 	if spindash_cv.value and p.mo.state == S_PLAY_SPINDASH then
 		p.mo.state = S_PLAY_ROLL
 	end
+
+	local speedv = FixedDiv(FixedHypot(p.rmomx, p.rmomy), p.mo.scale)
+	local onground = P_IsObjectOnGround(p.mo)
+	local waterfactor = 1 + (p.mo.eflags & MFE_UNDERWATER) / MFE_UNDERWATER
+	local skin = skins[p.mo.skin]
 
 	-- SFX
 
@@ -92,10 +127,54 @@ addHook("PlayerThink", function(p)
 		S_StopSoundByID(p.realmo, sfx_spin)
 		S_StartSound(p.realmo, spinsfx)
 	end
-	
+
 	if dashsfx and S_SoundPlaying(p.realmo, sfx_zoom) then
 		S_StopSoundByID(p.realmo, sfx_zoom)
 		S_StartSound(p.realmo, dashsfx)
+	end
+
+	-- PRESERVE SHIELDS
+
+	if (gametyperules & GTR_FRIENDLY) and not (G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS)) then
+		local preservation = preserveshield_opt()
+
+		if preservation then
+			if p.exiting then
+				p.styles_preserveshield = p.powers[pw_shield]
+			end
+		else
+			p.styles_preserveshield = nil
+		end
+	end
+
+	-- MOMENTUM
+	-- Edited Clairbun's work
+
+	local momentumtog = momentum_opt()
+
+	if momentumtog then
+		local nmom = skin.normalspeed
+		local pmom = speedv
+
+		local friction = FixedDiv(p.mo.friction, p.mo.movefactor)
+
+		if p.dashmode >= 3*TICRATE then
+			nmom = p.normalspeed
+		end
+
+		if (p.powers[pw_sneakers] or p.powers[pw_super]) then
+			pmom = $*3/5
+		end
+
+		if (p.mo.eflags & MFE_JUSTHITFLOOR) then
+			p.normalspeed = skin.normalspeed
+			p.mo.friction = $-$/10
+		elseif onground then
+			local sustain = FixedDiv(min(pmom * waterfactor, 3*nmom/2), friction)
+			p.normalspeed = max(nmom, ease.linear(FRACUNIT/186, sustain, nmom))
+		elseif not(p.dashmode) then
+			p.normalspeed = skin.normalspeed
+		end
 	end
 
 	-- ABILITIES
@@ -103,29 +182,44 @@ addHook("PlayerThink", function(p)
 	local runwater = runonwater_opt()
 
 	if runwater then
-		p.charflags = $|SF_RUNONWATER
+		if not (skin.flags & SF_RUNONWATER) then
+			if skin.normalspeed <= speedv then
+				p.charflags = $|SF_RUNONWATER
+			else
+				p.charflags = $ &~ SF_RUNONWATER
+			end
+		else
+			p.charflags = $|SF_RUNONWATER
+		end
+
 		p.styles_runonwater = true
 	elseif p.styles_runonwater then
-		if not skins[p.mo.skin].flags & SF_RUNONWATER then
+		if not (skin.flags & SF_RUNONWATER) then
 			p.charflags = $ &~ SF_RUNONWATER
 		end
 
 		p.styles_runonwater = nil
 	end
 
-	if 	(p.mo.eflags & MFE_TOUCHWATER) 
+	if 	(p.charflags & SF_RUNONWATER)
+	and (p.mo.eflags & MFE_TOUCHWATER)
 	and (p.mo.state == S_PLAY_RUN or p.mo.state == S_PLAY_WALK)
-	and  p.speed > min(7*p.normalspeed/8, p.runspeed) then
+	and skin.normalspeed-FRACUNIT/2 <= speedv then
 		if not p.styles_waterrunpart1 then
 			p.styles_waterrunpart1 = P_SpawnMobjFromMobj(p.mo, 0, 0, 0, MT_ROTATEOVERLAY)
 			p.styles_waterrunpart1.state = ronw_state
 			p.styles_waterrunpart1.target = p.mo
 			p.styles_waterrunpart1.tracer = p.mo
-			p.styles_waterrunpart1.angle = p.mo.angle - ronw_angle
-			p.styles_waterrunpart1.scale = FixedMul(p.mo.scale, p.speed/32)
+			p.styles_waterrunpart1.angle = R_PointToAngle2(0, 0, p.mo.momx, p.mo.momy) - ronw_angle
+			p.styles_waterrunpart1.scale = 0
+			p.styles_waterrunpart1.styles_spla = true
+			p.styles_waterrunpart1.styles_offx = FixedMul(cos(p.mo.angle + ANGLE_90), p.mo.scale * 12)
+			p.styles_waterrunpart1.styles_offy = FixedMul(sin(p.mo.angle + ANGLE_90), p.mo.scale * 12)
 		else
-			p.styles_waterrunpart1.angle = p.mo.angle - ronw_angle
-			p.styles_waterrunpart1.scale = FixedMul(p.mo.scale, p.speed/32)
+			p.styles_waterrunpart1.angle = R_PointToAngle2(0, 0, p.mo.momx, p.mo.momy) - ronw_angle
+			p.styles_waterrunpart1.scale = ease.linear(FRACUNIT/2, $, FixedMul(p.mo.scale, p.speed/32))
+			p.styles_waterrunpart1.styles_offx = FixedMul(cos(p.mo.angle + ANGLE_90), p.mo.scale * 12)
+			p.styles_waterrunpart1.styles_offy = FixedMul(sin(p.mo.angle + ANGLE_90), p.mo.scale * 12)
 		end
 
 		if not p.styles_waterrunpart2 then
@@ -133,16 +227,26 @@ addHook("PlayerThink", function(p)
 			p.styles_waterrunpart2.state = ronw_state
 			p.styles_waterrunpart2.target = p.mo
 			p.styles_waterrunpart2.tracer = p.mo
-			p.styles_waterrunpart2.angle = p.mo.angle + ronw_angle
-			p.styles_waterrunpart2.scale = FixedMul(p.mo.scale, p.speed/32)
+			p.styles_waterrunpart2.angle = R_PointToAngle2(0, 0, p.mo.momx, p.mo.momy) + ronw_angle
+			p.styles_waterrunpart2.scale = 0
+			p.styles_waterrunpart2.styles_spla = true
+			p.styles_waterrunpart2.styles_offx = FixedMul(cos(p.mo.angle - ANGLE_90), p.mo.scale * 12)
+			p.styles_waterrunpart2.styles_offy = FixedMul(sin(p.mo.angle - ANGLE_90), p.mo.scale * 12)
 		else
-			p.styles_waterrunpart2.angle = p.mo.angle + ronw_angle
-			p.styles_waterrunpart2.scale = FixedMul(p.mo.scale, p.speed/32)
+			p.styles_waterrunpart2.angle = R_PointToAngle2(0, 0, p.mo.momx, p.mo.momy) + ronw_angle
+			p.styles_waterrunpart2.scale = ease.linear(FRACUNIT/2, $, FixedMul(p.mo.scale, p.speed/32))
+			p.styles_waterrunpart2.styles_offx = FixedMul(cos(p.mo.angle - ANGLE_90), p.mo.scale * 12)
+			p.styles_waterrunpart2.styles_offy = FixedMul(sin(p.mo.angle - ANGLE_90), p.mo.scale * 12)
 		end
 
 	elseif p.styles_waterrunpart1 or p.styles_waterrunpart2 then
-		P_RemoveMobj(p.styles_waterrunpart1)
-		P_RemoveMobj(p.styles_waterrunpart2)
+		if p.styles_waterrunpart1 then
+			p.styles_waterrunpart1.target = nil
+		end
+
+		if p.styles_waterrunpart2 then
+			p.styles_waterrunpart2.target = nil
+		end
 
 		p.styles_waterrunpart1 = nil
 		p.styles_waterrunpart2 = nil
@@ -157,9 +261,9 @@ addHook("PlayerThink", function(p)
 
 		p.styles_swappedthok = true
 	elseif p.styles_swappedthok then
-		p.thokitem = skins[p.mo.skin].thokitem == -1 and MT_THOK or skins[p.mo.skin].thokitem
-		p.spinitem = skins[p.mo.skin].spinitem == -1 and MT_THOK or skins[p.mo.skin].spinitem
-		p.revitem = skins[p.mo.skin].revitem -1 and MT_NULL or skins[p.mo.skin].revitem
+		p.thokitem = skin.thokitem == -1 and MT_THOK or skin.thokitem
+		p.spinitem = skin.spinitem == -1 and MT_THOK or skin.spinitem
+		p.revitem = skin.revitem -1 and MT_NULL or skin.revitem
 
 		p.styles_swappedthok = nil
 	end
@@ -190,14 +294,14 @@ addHook("PlayerThink", function(p)
 
 	if ((springtroll_cv.value == 2 or (springtroll_cv.value == 1 and p.mo.style_spring_type == 1))
 	and not p.cd_springtwirl and p.mo.state == S_PLAY_SPRING
-	or (p.style_springroll and not P_IsObjectOnGround(p.mo))) then
+	or (p.style_springroll and not onground)) then
 
 		if p.mo.state ~= S_PLAY_WALK then
 			p.mo.state = S_PLAY_WALK
 		end
 		p.mo.rollangle = $+ANG1*10
 		p.style_springroll = true
-	elseif p.style_springroll and (p.mo.state ~= S_PLAY_WALK or P_IsObjectOnGround(p.mo)) then
+	elseif p.style_springroll and (p.mo.state ~= S_PLAY_WALK or onground) then
 		p.mo.rollangle = 0
 		p.style_springroll = nil
 	end
@@ -265,8 +369,8 @@ local function Spring_Check(a, sp)
 
 	if not (sp.flags & MF_SPRING) then return end
 
-	if 	sp.z+sp.height > a.z
-	and a.z+a.height > sp.z then
+	if 	sp.z+sp.height >= a.z
+	and a.z+a.height >= sp.z then
 		a.style_spring_type = sp.info.damage and 1 or 2
 	end
 end

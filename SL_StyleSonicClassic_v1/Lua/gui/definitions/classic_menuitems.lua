@@ -165,6 +165,8 @@ return {
 
 		},
 
+		{name = "PRESERVE SHIELD",			opt = "preserveshield"},
+
 		{name = "END-LEVEL SIGN BEHAVIOR", 	opt = "sign_movement",
 
 		desc = [[changes way signs move at activation]],
@@ -197,6 +199,12 @@ return {
 		name = "PLAYER",
 
 		-- SETTINGS
+
+		{name = "MOMENTUM", 				opt = "momentum"},
+
+		{name = "RUN ON WATER", 			opt = "runonwater"},
+
+		"VISUALS",
 
 		{name = "THOK TRAIL", 				opt = "thok",
 
@@ -232,7 +240,7 @@ return {
 
 		desc = [[sprite rotation based on slope yaw & smoothing]],
 
-		},		
+		},
 
 		-- END SETTINGS
 	},
@@ -274,8 +282,8 @@ return {
 		"SFX",
 
 		{name = "JUMP SFX", 				opt = "jumpsfx"},
-		{name = "SPIN SFX", 				opt = "spinsfx"},	
-		{name = "SPINDASH SFX", 			opt = "dashsfx"},	
+		{name = "SPIN SFX", 				opt = "spinsfx"},
+		{name = "SPINDASH SFX", 			opt = "dashsfx"},
 
 		-- END SETTINGS
 

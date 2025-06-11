@@ -257,7 +257,7 @@ local function SP_LoadState(map)
 				if subsector and subsector.sector then
 					local sector = subsector.sector
 
-					if (sector.damagetype > 0 
+					if (sector.damagetype > 0
 					or (displayplayer.mo.floorrover and displayplayer.mo.floorrover.sector and displayplayer.mo.floorrover.sector.damagetype > 0)
 					or (displayplayer.mo.ceilingrover and displayplayer.mo.ceilingrover.sector and displayplayer.mo.ceilingrover.sector.damagetype > 0))
 					and displayplayer.starpostnum > 0 then
@@ -327,12 +327,12 @@ local function SP_LoadState(map)
 
 					if ((sector.damagetype > 0)
 					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
-					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0))					
+					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0))
 					and secondarydisplayplayer.starpostnum > 0 then
 						P_SetOrigin(secondarydisplayplayer.mo, secondarydisplayplayer.starpostx, secondarydisplayplayer.starposty, secondarydisplayplayer.starpostz)
 						secondarydisplayplayer.mo.angle = data.starpostangle
 						secondarydisplayplayer.mo.scale = data.starpostscale
-					elseif sector.damagetype == 0 
+					elseif sector.damagetype == 0
 					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
 					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0) then
 						P_SetOrigin(secondarydisplayplayer.mo, data.x, data.y, data.z)

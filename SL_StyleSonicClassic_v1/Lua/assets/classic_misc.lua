@@ -173,12 +173,16 @@ addHook("ThinkFrame", do
 
 		if expl then
 			expl_state = S_ERAEXPL1
+			local sprite = expl[1]
+			local len_stateexp = expl[2]
+			local dur_stateexp = expl[3]
+			local ext_stateexp = expl[4] or 0
 
-			states[S_ERAEXPL1].sprite = expl[1]
-			states[S_ERAEXPL1].tics = expl[2]
-			states[S_ERAEXPL1].var1 = expl[3]
-			states[S_ERAEXPL1].var2 = expl[4]
-			states[S_ERAEXPL1].frame = A|FF_ANIMATE|expl[5]
+			states[S_ERAEXPL1].sprite = sprite
+			states[S_ERAEXPL1].tics = (len_stateexp + 1) * dur_stateexp
+			states[S_ERAEXPL1].var1 = len_stateexp
+			states[S_ERAEXPL1].var2 = dur_stateexp
+			states[S_ERAEXPL1].frame = A|FF_ANIMATE|ext_stateexp
 		else
 			expl_state = S_SONIC3KBOSSEXPLOSION1
 		end

@@ -3,9 +3,7 @@
 
     This might allow some light level changes to adjust some mod objects in certain levels
 
-    TODO : (Will only do Vanilla and maybe MRCE, however anyone is free to add here anything)
     TODO : Fix interactions between level editing and special entrances
-    TODO : Level end cutscenes
 
 --]]
 
@@ -186,19 +184,24 @@ addHook("PlayerThink", function(p)
 	--
 
 	if p.styles_entercut ~= nil then
-        if leveltime > TICRATE and p.cmd and p.cmd.buttons & BT_SPIN 
+        if leveltime > TICRATE and p.cmd and p.cmd.buttons & BT_SPIN
         and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
             local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
             thrd:interupt()
         end
 
         if p.teamsprings_scenethread and not p.teamsprings_scenethread.valid then
+			if not p.styles_entercut.notitlecard then
+				p.styles_entercut_timer = 0
+				p.styles_entercut_etimer = 3*TICRATE
+			else
+				p.styles_entercut_timer = nil
+				p.styles_entercut_etimer = nil
+			end
+
             p.styles_entercut = nil
             p.teamsprings_scenethread = nil
-
-            p.styles_entercut_timer = 0
-            p.styles_entercut_etimer = 3*TICRATE
-            p.styles_cutscenetime_prize = 3*TICRATE + leveltime
+			p.styles_cutscenetime_prize = 3*TICRATE + leveltime
         end
 
         cutlib:newCutscene(p, p.styles_entercut)
@@ -212,15 +215,15 @@ addHook("PlayerThink", function(p)
             p.styles_entercut_etimer = nil
         end
     end
-    
-    if p.styles_tallyendtime 
+
+    if p.styles_tallyendtime
     and p.styles_exitcut ~= nil and p.styles_tallytimer > p.styles_tallyendtime-1 then
-        if p.cmd and p.cmd.buttons & BT_SPIN 
+        if p.cmd and p.cmd.buttons & BT_SPIN
         and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
             local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
             thrd:interupt()
-        end        
-        
+        end
+
         if p.teamsprings_scenethread and not p.teamsprings_scenethread.valid then
             p.styles_exitcut = nil
             p.teamsprings_scenethread = nil

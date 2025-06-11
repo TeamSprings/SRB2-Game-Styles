@@ -63,6 +63,16 @@ local monitor_jump_cv = CV_RegisterVar{
 	PossibleValue = {disabled=0, enabled=1}
 }
 
+local static_simple = {0, 2}
+local static_anim = {0, 0, 0, 2, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 2}
+local static_maniaanim = {0, 0, 3, 2, 2, 4, 2, 3, 2, 0, 3, 2, 4, 0, 3, 2, 3, 2, 0, 2, 3, 0, 3, 0, 0, 0}
+
+local monitor_staticanim_opt = Options:new("monitorstaticanim", {
+	{static_simple, 	"simple", 	"Simple"},
+	{static_anim, 		"normal", 	"Normal"},
+	{static_maniaanim, 	"mania", 	"Fading"}
+}, nil, CV_NETVAR)
+
 local monitor_typesa_opt = Options:new("monitordistribution", "assets/tables/monitor_distrb", nil, CV_NETVAR)
 local monitor_typesa_cv = monitor_typesa_opt.cv
 
@@ -108,9 +118,6 @@ local function P_SpawnItemBox(a)
 	spawnhook(a.type, a, a.item, a.caps)
 end
 
-local static_anim = {0, 0, 0, 2, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 2}
-local static_maniaanim = {0, 0, 3, 2, 2, 4, 2, 3, 2, 0, 3, 2, 4, 0, 3, 2, 3, 2, 0, 2, 3, 0, 3, 0, 0, 0}
-
 local function P_MonitorThinker(a)
 	if (a and a.valid and a.info.flags & MF_MONITOR) then
 		if not a.originscale then
@@ -131,7 +138,7 @@ local function P_MonitorThinker(a)
 				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * (icon_height + (flip and -16 or 0)))*a.item.spriteyscale)
 				a.item.rollangle = a.rollangle
 
-				local statict = static_maniaanim[(leveltime % #static_maniaanim) + 1]
+				local statict = monitor_staticanim_opt()[(leveltime % #static_maniaanim) + 1]
 
 				-- Static Animation
 				if not statict then

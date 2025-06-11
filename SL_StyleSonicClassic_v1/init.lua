@@ -7,8 +7,8 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.780'
-rawset(_G, "Style_ClassicVersion", 3780)
+local packVersion = '3.800'
+rawset(_G, "Style_ClassicVersion", 3800)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active", true)
 

@@ -72,9 +72,31 @@ mobjinfo[MT_ROTATEOVERLAY] = {
 ---@param a rotovrmobj_t
 addHook("MobjThinker", function(a)
 	if a.target then
-		P_MoveOrigin(a, a.target.x, a.target.y, a.target.z)
+		local x = a.target.x
+		local y = a.target.y
+		local z = a.target.z
+
+		if a.styles_offx then
+			x = $ + a.styles_offx
+		end
+
+		if a.styles_offx then
+			y = $ + a.styles_offy
+		end
+
+		if a.styles_offz then
+			z = $ + a.styles_offz
+		end
+
+		P_MoveOrigin(a, x, y, z)
 	else
-		if a.bubble then
+		if a.styles_spla then
+			if a.scale > 80 then
+				a.scale = 50*$/80
+			else
+				P_RemoveMobj(a)
+			end
+		elseif a.bubble then
 			if a.alpha then
 				a.alpha = $-FU/10
 			else
