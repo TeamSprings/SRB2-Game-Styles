@@ -97,6 +97,7 @@ local function V_FontDrawer(v, font, x, y, scale, value, flags, color, alligment
 	local maxv = #str
 
 	for i = 1,maxv do
+		---@diagnostic disable-next-line
 		local cur = V_CachePatches(v, patch, str, font, val, padding or 0, i)
 		cache[i] = cur
 		lenght = $+cur.width
@@ -127,15 +128,19 @@ end
 
 local function V_GetTextLenght(v, font, str, padding)
 	local lenght = 0
-	local lenstr = #str
+	local lenstr = string.len(str)
+	local _font = fontregistry[font]
 
-	if lenstr then
-		for i = 1, lenstr do
-			lenght = $ + V_GetCharLenght(v, patch, str, font, val, padding, i)
-		end
+	if not _font then
+		V_RegisterFont(v, font, 'x')
+		_font = fontregistry[font]
 	end
 
-	return lenght
+	for i = 1, lenstr do
+		lenght = $ + _font[strsub(str, i, i)].width
+	end
+
+	return lenght + padding * lenstr
 end
 
 local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, alligment, padding, leftadd, symbol, progress, anim, offset, ...)
@@ -152,6 +157,7 @@ local function V_FontAnimDrawer(v, font, x, y, scale, value, flags, color, allig
 	local maxv = #str
 
 	for i = 1,maxv do
+		---@diagnostic disable-next-line
 		local cur = V_CachePatches(v, patch, str, font, val, padding or 0, i)
 		cache[i] = cur
 		lenght = $+cur.width

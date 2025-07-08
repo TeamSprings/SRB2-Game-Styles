@@ -11,7 +11,7 @@ Libraries:
 External Code Use:
 
 	Edited snippet from - Momentum Mod by "clairebun": https://mb.srb2.org/addons/the-momentum-mod.1202/
-
+    JSON library - https://github.com/rxi/json.lua
 
 Sprite Sources:
 
@@ -37,17 +37,3 @@ Special Thanks:
     "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
     "Team Blue Spring"
     "STJR"
-
--- TODO: ALL CAPSULES
--- TODO: ALL CUTSCENES & LEVEL TWEAKS
--- TODO: ADD CD INTERMISSION FONT
--- TODO: ADD ZONE TO S3K INTERMISSION
--- TODO: SPLIT SRB2 AND SONIC 2 INTERMISSION FONT FOR VANILLA SUPPORT
--- TODO: ALL DISABLE STUFF
--- TODO: SKIP CUTSCENE SIMULATION
--- TODO: FIX INTERACTION BETWEEN CUTSCENES AND SPECIAL RING WARPS
--- TODO: MONITOR ICON FADE AWAY (NONE, RETRO, MANIA)
-
--- FUTURE: MONITOR MANIA EXP FX
--- FUTURE: ELEMENTAL SHIELDS OPTIONS
--- FUTURE: S3B GAMEPLAY STUFF

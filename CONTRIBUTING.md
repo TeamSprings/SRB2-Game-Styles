@@ -6,6 +6,10 @@ Contributors:
 "Demnyx",
 "Trimint123",
 
+External Code Use:
+
+Edited snippet from - Momentum Mod by "clairebun": https://mb.srb2.org/addons/the-momentum-mod.1202/
+
 Libraries:
 
 "TehRealSal",

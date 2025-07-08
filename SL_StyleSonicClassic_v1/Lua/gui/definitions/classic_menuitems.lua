@@ -16,7 +16,7 @@ return {
 
 		},
 
-		{name = "SAVE PRESET", 		com = "classic_savepreset",
+		{name = "SAVE PRESET", 		com = "styles_presetsave",
 
 		desc = [[saves custom preset, appears after game restarts.]],
 
@@ -27,12 +27,6 @@ return {
 		{name = "HUD", 		opt = "disablegui",
 
 		desc = [[disables all HUD elements that do replace vanilla HUD. - i.e RINGS/TIME/SCORE]],
-
-		},
-
-		{name = "Assets", 	opt = "disableassets",
-
-		desc = [[disables all major asset replacements. - i.e monitors]],
 
 		},
 

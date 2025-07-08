@@ -4,12 +4,17 @@
     This might allow some light level changes to adjust some mod objects in certain levels
 
     TODO : Fix interactions between level editing and special entrances
+    TODO : 1) INTERACTION S3K LOAD/SAVE FIX
+    TODO : 2) SONIC 1 SP SHOULD DISABLE LEVEL END CUTSCENE
 
 --]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 local lvllib = tbsrequire 'libs/lib_emb_levelverification'
 local cutlib = tbsrequire 'libs/lib_emb_cutscene'
+
+local level_opt = Options:get("disablelevel")
+local cutscene_opt = Options:get("disablecutscenes")
 
 local TRAPF_ENDLVL 	= 1
 local TRAPF_LIFT 	= 2
@@ -103,7 +108,7 @@ local __data = {
 local __playedmaps = {}
 
 addHook("MapLoad", function()
-	if __data[gamemap] then
+	if __data[gamemap] and level_opt and not level_opt() then
         local _get = lvllib:assest()
         local curr = __data[gamemap]
 
@@ -129,9 +134,8 @@ addHook("MapLoad", function()
                         sheet._func()
                     end
 
-
-
                     if not (multiplayer or modeattacking or leveltime)
+                    and cutscene_opt and not cutscene_opt()
                     and (sheet._in or sheet._out) then
 
                         if type(sheet._out) == "function" then
@@ -184,10 +188,13 @@ addHook("PlayerThink", function(p)
 	--
 
 	if p.styles_entercut ~= nil then
-        if leveltime > TICRATE and p.cmd and p.cmd.buttons & BT_SPIN
-        and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
-            local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
-            thrd:interupt()
+        if leveltime > TICRATE and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
+            p.styles_cutscenetime_prize = leveltime
+            
+            if p.cmd and p.cmd.buttons & BT_SPIN then
+                local thrd = p.teamsprings_scenethread ---@type cutscenethread_t
+                thrd:interupt()
+            end
         end
 
         if p.teamsprings_scenethread and not p.teamsprings_scenethread.valid then

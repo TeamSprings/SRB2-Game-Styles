@@ -27,6 +27,7 @@ end)
 -- Stack
 local current_scroll = 1
 local trace_count = 0
+local staticstack = {}
 local stack = {}
 
 -- Optimalization measures
@@ -96,19 +97,19 @@ addHook("KeyDown", function(keyevent)
 end)
 
 
-local function recurse_table_search(depth, array)
+local function recurse_table_search(depth, array, _stack)
 	local indent = string.rep('   ', depth)
 	local tables = {}
 	local functions = {}
 
 	for name, value in pairs(array) do
-		local current = #stack+1
+		local current = #_stack+1
 		if type(value) == 'table' then
 			if formatting then
 				table.insert(tables, {value = value, name = name})
 			else
-				table.insert(stack, indent..' - \132table \128'..name)
-				recurse_table_search(depth+1, value)
+				table.insert(_stack, indent..' - \132table \128'..name)
+				recurse_table_search(depth+1, value, _stack)
 			end
 		elseif type(value) == 'function' then
 			if formatting then
@@ -116,32 +117,32 @@ local function recurse_table_search(depth, array)
 			else
 				if current_scroll == current then
 					if call then
-						pcall(v)
+						pcall(value)
 						call = false
 					end
 
-					table.insert(stack, indent..' -\130 function '..name..'()')
+					table.insert(_stack, indent..' -\130 function '..name..'()')
 				else
-					table.insert(stack, indent..' -\132 function '..name..'()')
+					table.insert(_stack, indent..' -\132 function '..name..'()')
 				end
 			end
 		elseif type(value) ~= 'userdata' then
 			local key_item = indent..' - \140'..type(value)..' \128'..name..' = '
 			local item = tostring(value)
 			if string.len(key_item)+string.len(item) <= 52 then
-				table.insert(stack, key_item..item)
+				table.insert(_stack, key_item..item)
 			else
-				table.insert(stack, key_item)
-				table.insert(stack, indent..item)
+				table.insert(_stack, key_item)
+				table.insert(_stack, indent..item)
 			end
 			--print(name..' = '..value)
 		end
 	end
 
 	if functions then
-		table.insert(stack, '\0')
+		table.insert(_stack, '\0')
 		for i = 1, #functions do
-			local current = #stack+1
+			local current = #_stack+1
 			local afunction = functions[i]
 			if current_scroll == current then
 				if call then
@@ -149,23 +150,23 @@ local function recurse_table_search(depth, array)
 					call = false
 				end
 
-				table.insert(stack, indent..' -\130 function '..(afunction.name)..'()')
+				table.insert(_stack, indent..' -\130 function '..(afunction.name)..'()')
 			else
-				table.insert(stack, indent..' -\132 function '..(afunction.name)..'()')
+				table.insert(_stack, indent..' -\132 function '..(afunction.name)..'()')
 			end
 		end
 	end
 
 	if tables then
-		table.insert(stack, '\0')
+		table.insert(_stack, '\0')
 		for i = 1, #tables do
 			local atable = tables[i]
-			table.insert(stack, indent..' - \132table \128'..(atable.name))
-			table.insert(stack, '\0')
+			table.insert(_stack, indent..' - \132table \128'..(atable.name))
+			table.insert(_stack, '\0')
 
-			recurse_table_search(depth+1, atable.value)
+			recurse_table_search(depth+1, atable.value, _stack)
 
-			table.insert(stack, '\0')
+			table.insert(_stack, '\0')
 		end
 	end
 
@@ -189,118 +190,133 @@ local function surface_userdata_search(array)
 	end
 end
 
--- Debuglib.insertFunction(func, name)
--- Clears profiling procedure
-function Debuglib.insertFunction(func, name)
-	if not toggle then return end
-	local info = debug.getinfo(func, "nS")
-	local source_file = ''
-	for str in string.gmatch(info.short_src, "[^/]+") do
-		source_file = str
-	end
+if debug and debug.getinfo then
 
-	table.insert(stack, "\134>>>\130"..source_file..' -> '..(name or 'function')..'()')
-	table.insert(stack, '\0')
-	--print("\130"..info.short_src)
+	-- Debuglib.insertFunction(func, name)
+	-- Clears profiling procedure
+	function Debuglib.insertFunction(func, name)
+		if not (debug and debug.getinfo) then return end
 
-	table.insert(stack, '\134 Function located at the line: \128'..(info.linedefined))
+		if not toggle then return end
+		local info = debug.getinfo(func, "nS")
+		local source_file = ''
+		for str in string.gmatch(info.short_src, "[^/]+") do
+			source_file = str
+		end
 
-	table.insert(stack, '\0')
+		table.insert(stack, "\134>>>\130"..source_file..' -> '..(name or 'function')..'()')
+		table.insert(stack, '\0')
+		--print("\130"..info.short_src)
 
-	local tables = {}
-	local functions = {}
+		table.insert(stack, '\134 Function located at the line: \128'..(info.linedefined))
 
-	local i = 1
-	repeat
-		local name, value = debug.getupvalue(func, i)
-		local current = #stack+1
+		table.insert(stack, '\0')
 
-		if name then
-			if type(value) == 'table' then
-				if formatting then
-					table.insert(tables, {value = value, name = name})
+		local tables = {}
+		local functions = {}
+
+		local i = 1
+		repeat
+			local name, value = debug.getupvalue(func, i)
+			local current = #stack+1
+			local valtype = type(value)
+
+			if name then
+				if valtype == 'table' then
+					if formatting then
+						table.insert(tables, {value = value, name = name})
+					else
+						table.insert(stack, ' - \132table \128'..name)
+						table.insert(stack, '\0')
+
+						recurse_table_search(1, value, stack)
+
+						table.insert(stack, '\0')
+					end
+				elseif valtype == 'userdata' then
+					table.insert(stack, ' - \132userdata '..userdataType(value)..'\128 '..name)
+					surface_userdata_search(value)
+
+					table.insert(stack, '\0')
+				elseif valtype == 'function' then
+					if formatting then
+						table.insert(functions, {func = value, name = name})
+					else
+						if current_scroll == current then
+							if call then
+								pcall(value)
+								call = false
+							end
+
+							table.insert(stack, ' -\130 function '..name..'()')
+						else
+							table.insert(stack, ' -\132 function '..name..'()')
+						end
+					end
 				else
-					table.insert(stack, ' - \132table \128'..name)
-					table.insert(stack, '\0')
-
-					recurse_table_search(1, value)
-
-					table.insert(stack, '\0')
+					local key_item = ' - \140'..valtype..' \128'..name..' = '
+					local item = tostring(value)
+					if string.len(key_item)+string.len(item) <= 52 then
+						table.insert(stack, key_item..item)
+					else
+						table.insert(stack, key_item)
+						table.insert(stack, item)
+					end
+					--print(name..' = '..value)
 				end
-			elseif type(value) == 'userdata' then
-				table.insert(stack, ' - \132userdata '..userdataType(value)..'\128 '..name)
-				surface_userdata_search(array)
+				i = $+1
+			end
+		until not name
+
+		if functions then
+			table.insert(stack, '\0')
+			for i = 1, #functions do
+				local current = #stack+1
+				local afunction = functions[i]
+				if current_scroll == current then
+					if call then
+						pcall(afunction.func)
+						call = false
+					end
+
+					table.insert(stack, ' -\130 function '..(afunction.name)..'()')
+				else
+					table.insert(stack, ' -\132 function '..(afunction.name)..'()')
+				end
+			end
+		end
+
+		if tables then
+			table.insert(stack, '\0')
+
+			for i = 1, #tables do
+				local atable = tables[i]
+				table.insert(stack, ' - \132table \128'..(atable.name))
+				table.insert(stack, '\0')
+
+				recurse_table_search(1, atable.value)
 
 				table.insert(stack, '\0')
-			elseif type(value) == 'function' then
-				if formatting then
-					table.insert(functions, {func = value, name = name})
-				else
-					if current_scroll == current then
-						if call then
-							pcall(v)
-							call = false
-						end
-
-						table.insert(stack, ' -\130 function '..name..'()')
-					else
-						table.insert(stack, ' -\132 function '..name..'()')
-					end
-				end
-			else
-				local key_item = ' - \140'..type(value)..' \128'..name..' = '
-				local item = tostring(value)
-				if string.len(key_item)+string.len(item) <= 52 then
-					table.insert(stack, key_item..item)
-				else
-					table.insert(stack, key_item)
-					table.insert(stack, item)
-				end
-				--print(name..' = '..value)
-			end
-			i = $+1
-		end
-	until not name
-
-	if functions then
-		table.insert(stack, '\0')
-		for i = 1, #functions do
-			local current = #stack+1
-			local afunction = functions[i]
-			if current_scroll == current then
-				if call then
-					pcall(afunction.func)
-					call = false
-				end
-
-				table.insert(stack, ' -\130 function '..(afunction.name)..'()')
-			else
-				table.insert(stack, ' -\132 function '..(afunction.name)..'()')
 			end
 		end
-	end
 
-	if tables then
+		table.insert(stack, '\0')
 		table.insert(stack, '\0')
 
-		for i = 1, #tables do
-			local atable = tables[i]
-			table.insert(stack, ' - \132table \128'..(atable.name))
-			table.insert(stack, '\0')
-
-			recurse_table_search(1, atable.value)
-
-			table.insert(stack, '\0')
-		end
+		trace_count = $+1
 	end
 
-	table.insert(stack, '\0')
-	table.insert(stack, '\0')
+else
 
-	trace_count = $+1
+	function Debuglib.insertFunction(func, name)
+		return
+	end
+
 end
 
 function Debuglib.insertEditableNumber(number, name, display_scale, increments, max_val, min_val)
+	if not (debug and debug.getinfo) then return end
+
 	if not toggle then return number end
 	if type(tonumber(number)) ~= "number" then return number end
 	display_scale = display_scale or 1
@@ -346,6 +362,28 @@ function Debuglib.insertEditableBool(bool, name)
 	return boolean
 end
 
+function Debuglib.insertTable(tab, name)
+	if type(tab) ~= "table" then return tab end
+
+	table.insert(stack, ' - \132table \128'..name)
+	table.insert(stack, '\0')
+
+	recurse_table_search(1, tab, stack)
+
+	table.insert(stack, '\0')
+end
+
+function Debuglib.insertStaticTable(tab, name)
+	if type(tab) ~= "table" then return tab end
+
+	table.insert(staticstack, ' - \132table \128'..name)
+	table.insert(staticstack, '\0')
+
+	recurse_table_search(1, tab, staticstack)
+
+	table.insert(staticstack, '\0')
+end
+
 
 local LINES = 48
 local MID_LINES = LINES/2
@@ -359,21 +397,22 @@ local function fixedDivInt(int, fixedmultiplier)
 	return FixedInt(FixedDiv(int * FU, fixedmultiplier))
 end
 
-
-addHook("HUD", function(v)
-	if not (stack and toggle) then return end
+customhud.SetupItem("debugpanel", "debugpanel", function(v)
+	if not ((stack or staticstack) and toggle) then return end
 	v.drawFill(0, 0, 148, 500, 159|V_SNAPTOTOP|V_SNAPTOLEFT|V_50TRANS)
 
-	current_scroll = max(min(current_scroll, #stack), 1)
+	local total = #staticstack + #stack
 
-	local scroll_view = min(max(current_scroll-MID_LINES, 1), #stack)
-	local current_max = min(scroll_view+LINES-1, #stack)
+	current_scroll = max(min(current_scroll, total), 1)
+
+	local scroll_view = min(max(current_scroll-MID_LINES, 1), total)
+	local current_max = min(scroll_view+LINES-1, total)
 	local scale = v.dupx()
 	local scale_height = (scale / 3) + 1
 
 	v.drawString(0, 0, '\135>>>>> Debug Panel by \128@SkyDusk', V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
 	v.drawString(0, 8, '\135>>>>> Function Traces: \128'..trace_count, V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
-	v.drawString(0, 16, '\135>>>>> In Stack: \128'..(#stack), V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
+	v.drawString(0, 16, '\135>>>>> In Stack: \128'..(total), V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
 	v.drawString(0, 24, '\135>>>>> Scroll: \128'..current_scroll, V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
 
 	v.drawString(0, 56, '\135>>>>>>>>>>>>>>>>>>>>>', V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
@@ -382,8 +421,15 @@ addHook("HUD", function(v)
 	v.drawFill(0, (8*min(current_scroll, MID_LINES+1)+56)*scale_height, 148*scale, 8*scale_height, 72|V_SNAPTOTOP|V_SNAPTOLEFT|V_NOSCALESTART|V_50TRANS)
 
 	for i = scroll_view, current_max do
+		local item = staticstack[i]
+		if not item then break end
+		v.drawString(0, 8*(i-scroll_view)+64, item, V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
+		--print(item)
+	end	
+
+	for i = (scroll_view - #staticstack), (current_max - #staticstack) do
 		local item = stack[i]
-		if not item then continue end
+		if not item then break end
 		v.drawString(0, 8*(i-scroll_view)+64, item, V_SNAPTOTOP|V_SNAPTOLEFT|V_SMALLSCALEPATCH)
 		--print(item)
 	end
@@ -394,6 +440,6 @@ addHook("HUD", function(v)
 	-- Clear stacks after job is done
 	stack = {}
 	trace_count = 0
-end, "game")
+end, "menu", 128, 8)
 
 rawset(_G, 'Debuglib', Debuglib)

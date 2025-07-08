@@ -11,7 +11,7 @@ freeslot("SPR_MONITORS_CLASSIC",  "SPR_MONITORS_GOLDEN", "SPR_MONITORS_BLUE", "S
 "S_DUMMYMONITOR", "S_DUMMYGMONITOR", "S_DUMMYBMONITOR", "S_DUMMYRMONITOR")
 
 local PolishStyles = tbsrequire('classic_polish')
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 
 local life_up_thinker = tbsrequire 'helpers/monitor_1up'
 local slope_handler = tbsrequire 'helpers/mo_slope'
@@ -63,12 +63,14 @@ local monitor_jump_cv = CV_RegisterVar{
 	PossibleValue = {disabled=0, enabled=1}
 }
 
-local static_simple = {0, 2}
+local static_simple = {0, 0, 2, 2}
+local static_fast = {0, 2}
 local static_anim = {0, 0, 0, 2, 2, 0, 2, 0, 2, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 2}
 local static_maniaanim = {0, 0, 3, 2, 2, 4, 2, 3, 2, 0, 3, 2, 4, 0, 3, 2, 3, 2, 0, 2, 3, 0, 3, 0, 0, 0}
 
 local monitor_staticanim_opt = Options:new("monitorstaticanim", {
 	{static_simple, 	"simple", 	"Simple"},
+	{static_fast, 		"fast", 	"Fast"},
 	{static_anim, 		"normal", 	"Normal"},
 	{static_maniaanim, 	"mania", 	"Fading"}
 }, nil, CV_NETVAR)
@@ -138,22 +140,23 @@ local function P_MonitorThinker(a)
 				P_SetOrigin(a.item, a.x, a.y, a.z+(P_MobjFlip(a) * (icon_height + (flip and -16 or 0)))*a.item.spriteyscale)
 				a.item.rollangle = a.rollangle
 
-				local statict = monitor_staticanim_opt()[(leveltime % #static_maniaanim) + 1]
+				local statictype = monitor_staticanim_opt()
+				local statetype = statictype[(leveltime % #statictype) + 1]
 
 				-- Static Animation
-				if not statict then
+				if not statetype then
 					a.item.flags2 = $ &~ MF2_DONTDRAW
 					a.item.alpha = FU
 					a.frame = frame_offset
 				else
 					a.item.flags2 = $|MF2_DONTDRAW
 
-					if statict > 1 then
+					if statetype > 1 then
 						a.frame = frame_offset+1
 
-						if statict > 2 then
+						if statetype > 2 then
 							a.item.flags2 = $ &~ MF2_DONTDRAW
-							a.item.alpha = FU/(statict-1)
+							a.item.alpha = FU/(statetype-1)
 						end
 					else
 						a.frame = frame_offset

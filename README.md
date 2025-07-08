@@ -38,6 +38,7 @@ It is very flexible, some content even from game not mentioned here in this list
 #### Side Styles
 7) Sonic R,
 8) Sonic X-Treme,
+9) Knuckles' Chaotix,
 
 ### Dimps Style:
 

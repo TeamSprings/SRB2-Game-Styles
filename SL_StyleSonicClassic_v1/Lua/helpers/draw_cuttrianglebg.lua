@@ -13,6 +13,8 @@ return function(v, x, opening, color)
 		local scale = v.dupx()
 		local intwidth = v.width() / scale
 		local intheight = v.height() / scale
+
+		---@cast procentage fixed_t
 		local opent = ease.outsine(procentage, 0, intwidth)
 
 		local new_x = x - intheight/2

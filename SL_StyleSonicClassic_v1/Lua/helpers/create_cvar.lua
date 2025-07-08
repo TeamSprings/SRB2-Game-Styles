@@ -45,6 +45,7 @@ function module:new(name, path, func, addflags, priority)
 	local minv = ""
 
 	-- Get minimum + maximum
+	---@cast get table
 	for k, v in pairs(get) do
 		if k < minc then
 			minv = v[2]
@@ -75,6 +76,7 @@ function module:new(name, path, func, addflags, priority)
 	self.database[name].min = minc
 	self.database[name].max = maxc
 	self.database[name].tags = tags
+	self.database[name].priority = priority or 0
 	self.database[name].values = values
 	self.database[name].flags = flags
 	self.database[name].func = func
@@ -99,6 +101,7 @@ function module:update(name, path)
 	local minv = ""
 
 	-- Get minimum + maximum
+	---@cast get table	
 	for k, v in pairs(get) do
 		if k < minc then
 			minv = v[2]
@@ -114,7 +117,7 @@ function module:update(name, path)
 
 	-- setuping up cvar
 
-	self.database[name].cv = modio:register(priority or 0, {
+	self.database[name].cv = modio:register(self.database[name].priority, {
 		name = "classic_"..name,
 		defaultvalue = minv,
 		flags = self.database[name].flags,
@@ -171,7 +174,7 @@ end
 ---@param name string The name of the option.
 ---@return boolean any True if the CVAR is available, false otherwise.
 function module:available(name)
-	if not self.database[name] then return end
+	if not self.database[name] then return false end
 	local item = self.database[name]
 
 	return (not (item.flags & CV_NETVAR)) or isserver

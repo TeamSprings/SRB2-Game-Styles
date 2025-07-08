@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 
 local list = tbsrequire 'gameplay/compact/specialpacks'
 local calc_help = tbsrequire 'helpers/c_inter'

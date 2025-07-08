@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 
 local api = tbsrequire 'styles_api'
 
@@ -15,15 +15,17 @@ local api = tbsrequire 'styles_api'
 
 local swaphook = 	api:addHook("SwapMisc")
 
---
--- Checkpoint Switching!
---
+-- Background
 
 local switch = false
 
 local function switchon()
 	switch = true
 end
+
+--
+-- Checkpoint Switching!
+--
 
 local starpost = Options:new("checkpoints", "assets/tables/sprites/checkpoint", switchon)
 local checkpoint_current = SPR_STPT
@@ -135,7 +137,7 @@ addHook("MobjThinker", function(a)
 end, MT_EMBLEM)
 
 -- ... this wouldn't be necessary if for some damn reason certain part of code didn't think this was part of "Hud rendering code"
-addHook("ThinkFrame", do
+addHook("ThinkFrame", function()
 	if switch then
 		-- Checkpoint
 

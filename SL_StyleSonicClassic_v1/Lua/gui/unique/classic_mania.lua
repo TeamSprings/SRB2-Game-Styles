@@ -46,6 +46,7 @@ local tryx, tryy = 0, 0
 local moveoffset = 4+8
 
 local function G_EncoreModeColors()
+	---@diagnostic disable-next-line
 	if constants["GT_ENCORE"] then -- Would use GT_ENCORE, thing just doesn't responds.
 		return {true, 124, 135, 137, 51, 213}
 	end
@@ -136,6 +137,7 @@ return {
 
 					fillstretch(v, 100, progress - title_delay4, colors[2])
 
+					---@diagnostic disable-next-line
 					local line_1_x = ease.linear(clamping(0, t-9, 9), -intwidth/2, intwidth+intwidth/2)
 
 					if line_1_x ~= intwidth+intwidth/2 then
@@ -161,9 +163,16 @@ return {
 				local scale = v.dupx()
 				local intheight = v.height() / scale
 
+				---@diagnostic disable-next-line
 				local offy1 = ease.outsine(progress1, intheight, 0) + ease.outsine(progress5, 0, 	-intheight*2) - 100
+
+				---@diagnostic disable-next-line
 				local offy2 = ease.outsine(progress2, intheight, 0) + ease.outsine(progress6, 0, 	-intheight*2) + 74
+
+				---@diagnostic disable-next-line
 				local offy3 = ease.outsine(progress3, intheight, 0) + ease.outsine(progress7, 0, 	-intheight*2) + 121
+				
+				---@diagnostic disable-next-line
 				local offy4 = ease.outsine(progress4, intheight, 0) + ease.outsine(progress8, 0, 	-intheight*2) + 112
 
 				tiltedlines(v, 160-64,  	offy2, 	offy2+150, 82,  colors[4])
@@ -187,6 +196,7 @@ return {
 
 				local encore = colors[1] and "E" or ""
 
+				---@diagnostic disable-next-line
 				if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 					v.draw(229-nw_x-zonepatch.width, 169, v.cachePatch("INTMABGZONE"))
 
@@ -302,11 +312,13 @@ return {
 			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
 			drawf(v, "MATAFNT", (166+text_width-offsetx)*FU, 77*FU, FU, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		else
+			---@diagnostic disable-next-line
 			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				gotthrough = $..' ZONE'
 			else
 				gotthrough = $..' ACT'
 			end
+
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
 
@@ -328,7 +340,7 @@ return {
 			local skin_name = "YOU"
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color1, "right", 1)
+			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, "right", 1)
 		end
 	end,
 
@@ -356,10 +368,11 @@ return {
 		local colors = G_EncoreModeColors()
 
 		v.fadeScreen(colors[2], max(min(fading*10/15, 10), 0))
-		local angl = leveltime*ANG1
+		local angle = leveltime*ANG1
 
-		maniacircles(v, 160, 100, (sin(angl)*60)/FU+100, angl+ANGLE_180, colors[4], colors[4])
-		maniacircles(v, 160, 100, (cos(angl)*60)/FU+100, angl, colors[5], colors[2])
+		---@cast angle angle_t
+		maniacircles(v, 160, 100, (sin(angle)*60)/FU+100, angle+ANGLE_180, colors[4], colors[4])
+		maniacircles(v, 160, 100, (cos(angle)*60)/FU+100, angle, colors[5], colors[2])
 	end,
 }
 

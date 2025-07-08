@@ -60,6 +60,8 @@ return{
 			end
 
 			drawf(v, 'SO1FNT', FixedMul(231*FU, scale) - trx - offset, FixedMul(76*FU, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+			
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				drawf(v, 'SO1FNT', FixedMul(215*FU, scale) - trx2 - offset, FixedMul(96*FU, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end

@@ -88,6 +88,8 @@ return{
 		end
 
 		local gear = v.cachePatch("LTCDACTBLU")
+
+		---@diagnostic disable-next-line
 		if mapheaderinfo[gamemap].levelflags & LF_WARNINGTITLE then
 			gear = v.cachePatch("LTCDACTRED")
 		end
@@ -144,7 +146,10 @@ return{
 			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
+			
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(-48, 104, fractime), 147, zonegr) end
+			
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
@@ -185,7 +190,10 @@ return{
 			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
+			
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(104, 320, FU-fractime), 147, zonegr) end
+			
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
@@ -220,7 +228,10 @@ return{
 			v.draw(iiiW, 80, iii, V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, 150, gear) end
+
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(104, 147, zonegr) end
+			
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then

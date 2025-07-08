@@ -1,6 +1,6 @@
 freeslot("SPR_CAPSULE_S2", "SPR_CAPSULE_CD")
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 
 local S3K_SPR = freeslot("SPR_CAPSULE_S3K")
 local EGGTRAP = freeslot("MT_STYLES_EGGTR")
@@ -84,11 +84,29 @@ local TRPPF_HEADLOW = 4
 local TRPPF_HEADTOP = 8
 local TRPPF_DISOLVE = 16
 
+---@alias eggtrap_types : table<function>
+---| 'Sonic 2'
+---| 'Sonic CD'
+---| 'Sonic 3K'
+
+---@alias eggtrap_flags
+---| 'TRAPF_ENDLVL'
+---| 'TRAPF_LIFT'
+---| 'TRAPF_FLIGHT'
+---| 'TRAPF_DROP'
+
+---@alias eggtrappart_flags
+---| 'TRPPF_CHANGE'
+---| 'TRPPF_POOF'
+---| 'TRPPF_HEADLOW'
+---| 'TRPPF_HEADTOP'
+---| 'TRPPF_DISOLVE'
+
 -- FIX: CAPSULES, (CD CAPSULE AND THE ANIM)
 -- TODO: ADD MORE CAPSULES (S1, MANIA and finish CD)
 -- TODO: ADD MORE FEATURES (flight, drop and item drop)
 -- TODO: MAKE IT FIRST UDMF CUSTOMIZABLE OBJECT
-local models = {
+local models = { ---@type eggtrap_types
 	-- SONIC 2 CAPSULE
 	function(a)
 		a.scale = $+FU/4

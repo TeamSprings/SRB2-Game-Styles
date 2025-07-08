@@ -21,7 +21,6 @@ local skins_colors = {
 
 local trx1, trx2, try
 
-
 return{
 	-- FIX SONIC 2 TITLECARD FOR CUTSCENES -> EASING
 	titlecard = function(v, p, t, e, bfade)
@@ -63,6 +62,9 @@ return{
 				trx2 = $+((screenw-120)/(35/4))+4
 			end
 
+			---@cast trx1 number
+			---@cast trx2 number
+			---@cast try number
 			trx1 = max(min(trx1, screenw*2), 0)
 			trx2 = max(min(trx2, screenw*2), 0)
 			try = max(min(try, screenh*2), 0)
@@ -80,6 +82,7 @@ return{
 			v.drawLevelTitle(287+trx2-rightflg, 51, lvlt, 0)
 			local offset_x = max(rightflg, 164)
 
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				v.drawLevelTitle(382-trx2-offset_x, 76, 'zone', 0)
 			end
@@ -108,6 +111,7 @@ return{
 
 		local gotthrough = "through "
 
+		---@diagnostic disable-next-line
 		if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 			gotthrough = $..'zone'
 		else

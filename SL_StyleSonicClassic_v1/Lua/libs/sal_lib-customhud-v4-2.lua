@@ -730,6 +730,25 @@ function customhud.GetMeta()
 	return hudMeta;
 end
 
+if hud.cachePatch then
+	---* In case of hud.cachePatch existing, just caches patches right away, when not queues strings for patching at first oppurnity.	
+	---* This is more so cross version solution, as cachePatch was made standalone from hook's own videolib
+	---@param container table<string>
+	---@return table<patch_t>
+	function customhud.PreCache(container)	
+		for k,v in ipairs(container) do
+			container[k] = hud.cachePatch(v)
+		end
+	end
+else
+	customhud.cachingQueue = {}
+
+	function customhud.PreCache(container)	
+		table.insert(customhud.cachingQueue, container)
+		return container ---@cast container patch_t
+	end
+end
+
 --#endregion
 --#region Hooks
 
@@ -769,6 +788,16 @@ local function RunCustomHooks(hook, v, ...)
 end
 
 hudadd(function(v, player, camera)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("game", v, player, camera);
 	RunCustomHooks("overlay", v, player, camera);
 
@@ -777,8 +806,8 @@ hudadd(function(v, player, camera)
 
 	RunCustomHooks("ingameintermission", v, player, camera);
 
-	RunCustomHooks("menu", v, player);
 	RunCustomHooks("gamemenu", v, player);
+	RunCustomHooks("menu", v, player);
 end, "game");
 
 hudadd(function(v)
@@ -790,26 +819,76 @@ hudadd(function(v)
 end, "scores");
 
 hudadd(function(v)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("title", v);
 	RunCustomHooks("title", v);
 end, "title");
 
 hudadd(function(v, player, ticker, endtime)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("titlecard", v, player, ticker, endtime);
 	RunCustomHooks("titlecard", v, player, ticker, endtime);
 end, "titlecard");
 
 hudadd(function(v)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("intermission", v);
 	RunCustomHooks("intermission", v);
 end, "intermission");
 
 hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
 	RunCustomHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
 end, "continue");
 
 hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused)
+	if customhud.cachingQueue then
+		for _,containers in ipairs(customhud.cachingQueue) do
+			for k,item in ipairs(containers) do
+				containers[k] = v.cachePatch(item)
+			end
+		end
+
+		customhud.cachingQueue = {}
+	end
+
 	RunRawHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
 	RunCustomHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
 end, "playersetup");

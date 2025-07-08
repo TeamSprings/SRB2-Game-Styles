@@ -7,8 +7,8 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.800'
-rawset(_G, "Style_ClassicVersion", 3800)
+local packVersion = '3.810'
+rawset(_G, "Style_ClassicVersion", 3810)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active", true)
 
@@ -17,8 +17,9 @@ local version = '2.2.15'
 
 rawset(_G, "Style_GamePrefix", gameString)
 rawset(_G, "Style_PrintPrefix", packType)
-rawset(_G, "Style_IOLocation", "client/bluespring/styles/classic_")
+rawset(_G, "Style_IOLocation", "client/teamsprings/gamestyles/classic/")
 
+rawset(_G, "Style_DebugMode", __devMode)
 rawset(_G, "Style_DebugScriptsLoaded", 0)
 rawset(_G, "Style_DebugScriptsTotal", 0)
 rawset(_G, "Style_DebugErrorPrinter", "")
@@ -94,7 +95,6 @@ local function safeDoFile(path)
 	Style_DebugScriptsTotal = $ + 1
 end
 
-
 if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_AdventureVersion then
 	local start_metric = getTimeMicros()
 
@@ -103,7 +103,7 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 
 	local modio = tbsrequire 'classic_io'
 
-	modio.file = Style_IOLocation.."cvars.dat"
+	modio.file = Style_IOLocation.."config.cfg"
 	modio.pointer = CV_RegisterVar
 
 	rawset(_G, "CV_RegisterVar", function(...)
@@ -138,6 +138,13 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 	rawset(_G, "CV_RegisterVar", modio.pointer)
 
 	modio:load()
+
+	if __devMode then
+		safeDoFile("libs/lib_emb_debug.lua")
+		Debuglib.insertStaticTable(modio.registry, "STYLES_MODIO")
+		Debuglib.insertStaticTable(tbsrequire('styles_api'), "STYLES_API")
+		Debuglib.insertStaticTable(tbsrequire('libs/lib_emb_levelverification'), "STYLES_LVLVERIF")
+	end
 
 	styles_errprint(packType .. "Mod loaded in " .. ( getTimeMicros() - start_metric ) .. " ms")
 elseif Style_DimpsVersion or Style_AdventureVersion then

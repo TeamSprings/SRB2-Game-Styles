@@ -9,7 +9,7 @@ local function GENESIS_ROT(a, stop)
 		local aim = slope_handler.slopeRotBaseReturnSplice(a, a.standingslope, GENESIS_ROT_THR)
 
 		a.rollangle = aim
-	else
+	elseif not stop then
 		a.rollangle = 0
 	end
 
@@ -46,6 +46,7 @@ local function MANIA_ROT(a, stop)
 end
 
 local function FULL_ROT(a, stop)
+	if stop then return end
 	slope_handler.slopeRotation(a)
 end
 

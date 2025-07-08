@@ -80,8 +80,11 @@ function library.spriteObj(mobj, state, frame)
 
     if _state.frame & FF_ANIMATE then
         local timer = (leveltime / _state.var2) % (_state.var1 + 1)
+
+        ---@diagnostic disable-next-line
         mobj.frame  = frame or _state.frame + timer
     else
+        ---@diagnostic disable-next-line
         mobj.frame  = frame or _state.frame
     end
 end
@@ -102,7 +105,7 @@ end
 
 ---@class actorslib_t
 ---@field create        fun(self: self, x: fixed_t, y: fixed_t, z: fixed_t, mt: integer, keep: boolean): mobj_t
----@field assign        fun(self: self, mobj: mobj_t): mobj_t
+---@field assign        fun(self: self, mobj: mobj_t)
 ---@field clean         fun(self: self)
 local actors_t = {}
 
@@ -150,6 +153,7 @@ function actors_t:create(x, y, z, mt, keep)
     local mobj = P_SpawnMobj(x, y, z, mt)
     
     if not keep then
+        ---@diagnostic disable-next-line
         mobj.teamsprings_tempactor = true
     end
     
@@ -160,7 +164,6 @@ end
 ---assigns actor
 ---@param self  self
 ---@param mobj mobj_t
----@return mobj_t
 function actors_t:assign(mobj)
     table.insert(self, mobj)
 end
@@ -318,7 +321,7 @@ function thread_t:think(player)
 
             if self.scenes[self.scene] then
                 self.tics = self.scenes[self.scene].tics
-                self.etics = self.tics                
+                self.etics = self.tics         
             
                 if self.scenes[self.scene].func then
                     self.scenes[self.scene].func(
@@ -330,6 +333,14 @@ function thread_t:think(player)
                     )
                 end
             else
+                if self.scenes.finish then
+                    self.scenes.finish(
+                        player,
+                        self.actors,
+                        library
+                    )
+                end
+
                 self.valid  = false
                 self.tics   = -1
                 self.actors:clean()
@@ -484,6 +495,7 @@ function module:newCutscene(player, scenes)
         return
     end
 
+    ---@diagnostic disable-next-line
     player.teamsprings_scenethread = self:newThread(scenes)
 end
 
@@ -569,7 +581,7 @@ addHook("NetVars", function(net)
     module.globalevents = net($)
 end)
 
-addHook("ThinkFrame", do
+addHook("ThinkFrame", function()
     if module.globalevents then
         for _,v in ipairs(module.globalevents) do
             v:think()

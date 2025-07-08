@@ -51,6 +51,7 @@ return{
 				end
 			end
 
+			---@diagnostic disable-next-line			
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				drawf(v, 'S3BTFNT', (262-titlelenm)*FU-tryx-offset*3, 90*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
 			end
@@ -110,6 +111,7 @@ return{
 
 		local gotthrough = "THROUGH "
 
+		---@diagnostic disable-next-line
 		if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 			gotthrough = $..'ZONE'
 		else
@@ -118,7 +120,8 @@ return{
 
 		drawf(v, 'S3BTFNT', (72-offsetx)*FU, 66*FU, FU, gotthrough)
 
-		if act ~= "0" and titlelenm then
+		-- TODO: Check for level long (ZONE) in S3K and 3D Blast
+		if act ~= "0" then
 			drawf(v, 'S3BTFNT', (200-offsetx)*FU, 72*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,

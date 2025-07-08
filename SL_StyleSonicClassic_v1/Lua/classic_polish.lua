@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire 'helpers/create_cvar' ---@type CvarModule
+local Options = tbsrequire 'helpers/create_cvar'
 local retrolib = {val = 0}
 local monitoriconrot = 0
 

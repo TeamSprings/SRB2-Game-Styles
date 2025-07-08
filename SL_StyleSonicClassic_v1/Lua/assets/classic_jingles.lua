@@ -9,7 +9,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 
 local api = tbsrequire 'styles_api'
 
@@ -99,7 +99,7 @@ addHook("BossDeath", function()
 	boss_defeated = 2
 end)
 
-addHook("PostThinkFrame", do
+addHook("PostThinkFrame", function()
 	if displayplayer and displayplayer == consoleplayer then
 		if displayplayer.powers[pw_sneakers] == TICRATE/2 then
 			if speedup then

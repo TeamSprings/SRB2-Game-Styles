@@ -1,6 +1,5 @@
 
 --[[
-	TODO: MAKE SURE THIS WORKS
     This is space, where you can define embedded preset for example. map packs
 
     In similar way you can do in classic_presets

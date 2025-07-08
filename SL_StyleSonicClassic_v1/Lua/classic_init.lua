@@ -90,14 +90,27 @@ addHook("MobjThinker", function(a)
 
 		P_MoveOrigin(a, x, y, z)
 	else
-		if a.styles_spla then
+		if a.styles_monitorfade then
+			if a.alpha > 0 then
+				a.alpha = $-FU/(TICRATE/2)
+			else
+				P_RemoveMobj(a)
+			end
+		elseif a.styles_monitorflash then
+			if a.scale > 80 then
+				a.scale = $-FU/(TICRATE/2)
+				
+			else
+				P_RemoveMobj(a)
+			end
+		elseif a.styles_spla then
 			if a.scale > 80 then
 				a.scale = 50*$/80
 			else
 				P_RemoveMobj(a)
 			end
 		elseif a.bubble then
-			if a.alpha then
+			if a.alpha > 0 then
 				a.alpha = $-FU/10
 			else
 				P_RemoveMobj(a)

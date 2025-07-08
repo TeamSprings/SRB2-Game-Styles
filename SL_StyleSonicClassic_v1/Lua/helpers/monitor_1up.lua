@@ -8,11 +8,14 @@ Contributors: Skydusk
 ]]
 
 freeslot("S_PLAY_NBX1", "S_1UP_NICON1", "S_1UP_NICON2")
+
+---@diagnostic disable-next-line
 states[S_PLAY_NBX1] = {
 	sprite = SPR_PLAY,
 	frame = SPR2_LIFE
 }
 
+---@diagnostic disable-next-line
 states[S_1UP_NICON1] = {
 	sprite = SPR_TV1P,
 	frame = C|FF_ANIMATE,
@@ -22,6 +25,7 @@ states[S_1UP_NICON1] = {
 	nextstate = S_1UP_NICON2,
 }
 
+---@diagnostic disable-next-line
 states[S_1UP_NICON2] = {
 	sprite = SPR_TV1P,
 	frame = C,
@@ -41,6 +45,7 @@ local function New_1upThinker(actor)
 			continue
 		end
 
+		---@diagnostic disable-next-line
 		if players[i].bot == BOT_2PAI or players[i].bot == BOT_2PHUMAN or players[i].spectator then
 			continue
 		end

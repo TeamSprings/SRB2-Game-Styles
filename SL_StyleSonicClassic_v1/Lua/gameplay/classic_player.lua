@@ -7,7 +7,7 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 local slope_handler = tbsrequire 'helpers/mo_slope'
 
 --

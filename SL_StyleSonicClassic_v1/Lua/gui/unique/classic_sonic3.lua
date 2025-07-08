@@ -76,6 +76,8 @@ return{
 			tryy = -tryx
 
 			v.draw(69-(offset/FU)/2, tryy/FU-10, v.cachePatch(special_gp), 0)
+
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				drawf(v, 'S3KTT', 288*FU+tryx-offset*3, 104*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
@@ -156,7 +158,7 @@ return{
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
-			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname), "%d", "")
+			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname))
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
 

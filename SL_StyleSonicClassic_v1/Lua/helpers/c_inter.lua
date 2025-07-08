@@ -118,6 +118,7 @@ end
 addHook("MapLoad", function()
 	helper.Y_ResetCounters()
 
+	---@diagnostic disable-next-line
 	for mobj in mobjs.iterate() do
 		helper.Y_GetTotalCoins(mobj)
 	end

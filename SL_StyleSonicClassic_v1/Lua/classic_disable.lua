@@ -7,25 +7,23 @@ Contributors: Skydusk
 
 ]]
 
-local Options = tbsrequire 'helpers/create_cvar' ---@type CvarModule
+local Options = tbsrequire 'helpers/create_cvar'
 
 local sets = {
-    {nil, "false", "No"},
-    {nil, "true", "Yes"},
+    [0] = {nil, "false", "No"},
+    [1] = {nil, "true", "Yes"},
 }
 
 local level = Options:new("disablelevel", sets, nil, CV_NETVAR, 32)
 
 local cutscenes = Options:new("disablecutscenes", sets, nil, CV_NETVAR, 32)
 
-local assets = Options:new("disableassets", sets, nil, CV_NETVAR, 32)
-
 local gui = Options:new("disablegui", sets, function(cv)
-    if cv.value > 1 then
+    if cv.value then
         for _,hook in pairs(customhud.hookTypes) do
             for _,item in pairs(customhud.hudItems[hook]) do
-                if (item.type == "classichud" and item.isDefaultItem == true) then
-                    customhud.SwapItem(item.name, "vanilla");
+                if (item.type ~= "vanilla" and item.isDefaultItem == true) then
+                    item.type = "vanilla"
                     customhud.UpdateHudItemStatus(item);
                 end
             end
@@ -34,7 +32,7 @@ local gui = Options:new("disablegui", sets, function(cv)
         for _,hook in pairs(customhud.hookTypes) do
             for _,item in pairs(customhud.hudItems[hook]) do
                 if (item.type == "vanilla" and item.funcs["classichud"] and item.isDefaultItem == true) then
-                    customhud.SwapItem(item.name, "classichud");
+                    item.type = "classichud"
                     customhud.UpdateHudItemStatus(item);
                 end
             end

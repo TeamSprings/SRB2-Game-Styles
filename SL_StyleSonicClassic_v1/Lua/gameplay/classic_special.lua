@@ -12,7 +12,7 @@ TODO: Copypaste Events & Document
 
 ]]
 
-local Options = tbsrequire('helpers/create_cvar') ---@type CvarModule
+local Options = tbsrequire('helpers/create_cvar')
 local api = tbsrequire 'styles_api'
 
 -- Hooks for API
