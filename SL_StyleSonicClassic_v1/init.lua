@@ -7,8 +7,8 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.810'
-rawset(_G, "Style_ClassicVersion", 3810)
+local packVersion = '3.820'
+rawset(_G, "Style_ClassicVersion", 3820)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active", true)
 
@@ -111,7 +111,7 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 	end)
 
 	-- RUN ALREADY
-	safeDoFile("libs/sal_lib-customhud-v4-2.lua")
+	safeDoFile("libs/sal_lib-customhud-v4-4.lua")
 
 	-- Game Assets
 	safeDoFile(gameString.."_init.lua")
@@ -144,6 +144,16 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 		Debuglib.insertStaticTable(modio.registry, "STYLES_MODIO")
 		Debuglib.insertStaticTable(tbsrequire('styles_api'), "STYLES_API")
 		Debuglib.insertStaticTable(tbsrequire('libs/lib_emb_levelverification'), "STYLES_LVLVERIF")
+
+		if Style_DebugErrorPrinter then
+			print(packType.."DEBUG PRINT START")
+			
+			for line in string.gmatch(Style_DebugErrorPrinter, "[^\n]+") do
+				print(line)
+			end
+
+			print(packType.."DEBUG PRINT END")
+		end
 	end
 
 	styles_errprint(packType .. "Mod loaded in " .. ( getTimeMicros() - start_metric ) .. " ms")

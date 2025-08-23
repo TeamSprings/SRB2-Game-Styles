@@ -3,10 +3,6 @@
 
     This might allow some light level changes to adjust some mod objects in certain levels
 
-    TODO : Fix interactions between level editing and special entrances
-    TODO : 1) INTERACTION S3K LOAD/SAVE FIX
-    TODO : 2) SONIC 1 SP SHOULD DISABLE LEVEL END CUTSCENE
-
 --]]
 
 local Options = tbsrequire('helpers/create_cvar')
@@ -70,10 +66,13 @@ local __data = {
 
 			_func = function()
 				local center = P_SpawnMobj(4470*FU, 3688*FU, 3552*FU, MT_STYLES_EGGTR)
-				center.styles_flags = TRAPF_ENDLVL|TRAPF_LIFT
+				center.styles_flags = TRAPF_ENDLVL|TRAPF_FLIGHT
 				center.styles_tagged = 382
 				center.styles_list = {mapthings[112].mobj}
-                center.styles_flickylist = {MT_FLICKY_01, MT_FLICKY_02}
+                --center.styles_flickylist = {MT_FLICKY_01, MT_FLICKY_02}
+
+				local side = P_SpawnMobj(5070*FU, 4088*FU, 3552*FU, MT_STYLES_EGGTR)
+                side.z = side.floorz
 
 				sectors[11].special = 0
 				sectors[30].special = 0
@@ -224,6 +223,7 @@ addHook("PlayerThink", function(p)
     end
 
     if p.styles_tallyendtime
+    and styles_tallytimer ~= nil
     and p.styles_exitcut ~= nil and p.styles_tallytimer > p.styles_tallyendtime-1 then
         if p.cmd and p.cmd.buttons & BT_SPIN
         and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then

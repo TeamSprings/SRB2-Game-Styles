@@ -11,6 +11,18 @@ Contributors: Skydusk
 
 local helper = {}
 
+local R_PointToAngle = R_PointToAngle
+local R_PointToDist = R_PointToDist
+local AngleFixed = AngleFixed
+local FixedAngle = FixedAngle
+local FixedMul = FixedMul
+local cos = cos
+local sin = sin
+
+local ease_linear = ease.linear
+
+local FU = FU
+
 -- Taken from MRCELibs, still Skydusk's work, merely borrowing my own functions xd
 function helper.cameraSpriteRotReturn(mo, yaw, roll, pitch)
 	local viewang = R_PointToAngle(mo.x, mo.y)
@@ -52,7 +64,7 @@ function helper.slopeRotBase(mo, slope)
 	-- Reset
 	if not slope then
 		if mo.rollangle then
-			mo.rollangle = ease.linear(FU/4, mo.rollangle, FixedAngle(0))
+			mo.rollangle = ease_linear(FU/4, mo.rollangle, FixedAngle(0))
 		end
 		return
 	end

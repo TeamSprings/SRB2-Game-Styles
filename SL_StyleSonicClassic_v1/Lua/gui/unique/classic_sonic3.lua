@@ -8,7 +8,7 @@ Contributors: Skydusk
 local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
+local textlen = drawlib.text_lenght
 
 local min_lifelen = 6*4
 local min_lifexap = 6*5+2
@@ -95,16 +95,12 @@ return{
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local lifename = string.upper(''..(overwrite and overwrite or skins[p.mo.skin].hudname))
-			local lifenamelenght = 0
-			for i = 1, #lifename do
-				local patch, val
-				lifenamelenght = $+fontlen(v, patch, lifename, 'HUS3NAM', val, 1, i)
-			end
+			local lifenamelenght = textlen(v, 'HUS3NAM', lifename, 1)
 
-			lifenamelenght = min(max(lifenamelenght, min_lifelen), max_lifelen)
+			lifenamelenght = min(max($, min_lifelen), max_lifelen)
 
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
@@ -135,11 +131,17 @@ return{
 				string.upper(''..(overwrite and overwrite or skins[p.mo.skin].hudname)), lives_f, colorprofile, 0, 1)
 
 				if lifenamelenght > min_lifexap then
-					v.draw(lives_x+22, lives_y+10, v.cachePatch('S3CROSS'), lives_f, colorprofile)
+					v.draw(lives_x+22, lives_y+10, v.cachePatch('S3CROSS'), lives_f, colorprofile2)
+				end
+
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
 				end
 
 				drawf(v, 'LIF3NUM', (lives_x+17+lifenamelenght)*FU, (lives_y+9)*FU, FU,
-				(p.lives == 127 and string.char(30) or p.lives), lives_f, colorprofile, "right", 1)
+				lives, lives_f, colorprofile2, "right", 1)
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

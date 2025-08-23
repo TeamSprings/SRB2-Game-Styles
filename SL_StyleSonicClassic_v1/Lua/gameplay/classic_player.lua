@@ -26,6 +26,8 @@ local thok_opt = Options:new("thok", "gameplay/cvars/thok", nil, CV_NETVAR)
 
 local grounding_opt = Options:new("groundrot", "gameplay/cvars/groundrot", nil, CV_NETVAR)
 
+local nightrot_opt = Options:new("nightsrot", "gameplay/cvars/nightsrot", nil, CV_NETVAR)
+
 local momentum_opt = Options:new("momentum", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
 
 local runonwater_opt = Options:new("runonwater", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
@@ -51,8 +53,6 @@ local springtwalk_cv = springtwalk_opt.cv
 local springtroll_cv = springtroll_opt.cv
 
 local thok_cv = thok_opt.cv
-
-local grounding_cv = grounding_opt.cv
 
 --
 --  RUN ON WATER
@@ -268,10 +268,24 @@ addHook("PlayerThink", function(p)
 		p.styles_swappedthok = nil
 	end
 
-	local func = Options:getPureValue("groundrot")
+	local groundrot = grounding_opt()
+	
+	if p.powers[pw_carry] == CR_NIGHTSMODE then
+		local nightsrot = nightrot_opt()
 
-	if func then
-		func(p.mo, p.style_springroll or p.powers[pw_carry] == CR_NIGHTSMODE)
+		if nightsrot 
+		and p.mo.state == S_PLAY_NIGHTS_FLY
+		or  p.mo.state == S_PLAY_NIGHTS_DRILL then
+			nightsrot(p.mo, nil)
+		elseif p.mo.state == S_PLAY_NIGHTS_PULL then
+			p.mo.rollangle = $ + ANG10
+			p.drawangle = $ + ANG10
+		elseif p.mo.style_rollangle_was_enabled then
+			p.mo.rollangle = 0
+			p.mo.style_rollangle_was_enabled = nil
+		end
+	elseif groundrot then
+		groundrot(p.mo, p.style_springroll)
 	elseif p.mo.style_rollangle_was_enabled then
 		p.mo.rollangle = 0
 		p.mo.style_rollangle_was_enabled = nil

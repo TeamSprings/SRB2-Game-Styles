@@ -8,7 +8,7 @@ Contributors: Skydusk
 local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
+local textlen = drawlib.text_lenght
 
 local clamping = tbsrequire 'helpers/anim_clamp'
 
@@ -60,10 +60,10 @@ return{
 			end
 
 			drawf(v, 'SO1FNT', FixedMul(231*FU, scale) - trx - offset, FixedMul(76*FU, scale), scale, string.lower(lvlt), 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
-			
+
 			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				drawf(v, 'SO1FNT', FixedMul(215*FU, scale) - trx2 - offset, FixedMul(96*FU, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
+				drawf(v, 'SO1FNT', FixedMul(212*FU, scale) - trx2 - offset, FixedMul(96*FU, scale), scale, "zone", 0, v.getColormap(TC_DEFAULT, 1, translation), "right")
 			end
 
 			if act ~= "0" then
@@ -77,16 +77,12 @@ return{
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local lifename = string.upper(''..(overwrite and overwrite or skins[p.mo.skin].hudname))
-			local lifenamelenght = 0
-			for i = 1, #lifename do
-				local patch, val
-				lifenamelenght = $+fontlen(v, patch, lifename, 'HUS2NAM', val, 1, i)
-			end
+			local lifenamelenght = textlen(v, 'HUS2NAM', lifename, 1)
 
-			lifenamelenght = min(max(lifenamelenght, min_lifelen), max_lifelen)
+			lifenamelenght = min(max($, min_lifelen), max_lifelen)
 
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
@@ -116,10 +112,17 @@ return{
 				drawf(v, 'HUS2NAM', (lives_x+17)*FU, (lives_y+1)*FU, FU, lifename, lives_f, colorprofile, 0, 1)
 
 				if lifenamelenght > min_lifexap then
-					v.draw(lives_x+22, lives_y+10, v.cachePatch('S2CROSS'), lives_f, colorprofile)
+					v.draw(lives_x+22, lives_y+10, v.cachePatch('S2CROSS'), lives_f, colorprofile2)
 				end
 
-				drawf(v, 'LIFENUM', (lives_x+17+lifenamelenght)*FU, (lives_y+9)*FU, FU, p.lives, lives_f, colorprofile, "right", 1)
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
+				drawf(v, 'LIFENUM', (lives_x+17+lifenamelenght)*FU, (lives_y+9)*FU, FU, lives,
+				lives_f, colorprofile2, "right", 1)
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
@@ -131,21 +134,21 @@ return{
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		v.draw(176-offsetx, 43, v.cachePatch('SO1SPI'), 0, color)
-
+		local colormap = v.getColormap(TC_DEFAULT, 1)
 
 		if mo then
 			local skin_name = skins[mo.skin].realname
 
 			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, string.lower((overwrite and overwrite or skin_name).." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
 		else
-			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, "you have", 0, v.getColormap(TC_DEFAULT, 1), "center")
+			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, "you have", 0, colormap, "center")
 		end
 
-		drawf(v, 'SO1FNT', (160-offsetx)*FU, 64*FU, FU, "passed", 0, v.getColormap(TC_DEFAULT, 1), "center")
+		drawf(v, 'SO1FNT', (160-offsetx)*FU, 64*FU, FU, "passed", 0, colormap, "center")
 
 		if act ~= "0" then
 			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
-			drawf(v, 'S1ANUM', (213-offsetx)*FU, 67*FU+FU/2, FU, string.upper(act), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S1ANUM', (213-offsetx)*FU, 65*FU+FU/2, FU, string.upper(act), V_PERPLAYER, colormap)
 		end
 	end,
 

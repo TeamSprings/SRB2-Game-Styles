@@ -1,4 +1,7 @@
 local circledraw = tbsrequire 'helpers/draw_circle'
+local cos 	= cos
+local sin 	= sin
+local FU 	= FU
 
 return function(v, x_center, y_center, radius, rotation, color1, color2)
 	if radius < 5 then return end

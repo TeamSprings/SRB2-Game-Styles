@@ -7,12 +7,11 @@ Contributors: Skydusk
 
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
 
 local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 
 return{
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
@@ -41,7 +40,13 @@ return{
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, prefix..'TNUM', (lives_x+18)*FU, (lives_y+1)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
+				drawf(v, prefix..'TNUM', (lives_x+18)*FU, (lives_y+1)*FU, FU, 'X'..lives, lives_f, colorprofile2, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

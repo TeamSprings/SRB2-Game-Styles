@@ -16,6 +16,12 @@ return {
 
 		},
 
+		{name = "COLOR PROFILE", 	opt = "hudcolor",
+
+		desc = [[changes color palette of the HUD]],
+
+		},
+
 		{name = "SAVE PRESET", 		com = "styles_presetsave",
 
 		desc = [[saves custom preset, appears after game restarts.]],
@@ -30,13 +36,13 @@ return {
 
 		},
 
-		{name = "Level tweaks", 	opt = "disablelevel",
+		{name = "LEVEL TWEAKS", 	opt = "disablelevel",
 
 		desc = [[disables level tweaks to base game levels.]],
 
 		},
 
-		{name = "Cutscenes", 	opt = "disablecutscenes",
+		{name = "CUTSCENES", 	opt = "disablecutscenes",
 
 		desc = [[disables singleplayer only level-transitional cutscenes in vanilla levels.]],
 
@@ -75,13 +81,6 @@ return {
 
 		},
 
-
-		{name = "COLOR PROFILE", 	opt = "hudcolor",
-
-		desc = [[changes color palette of the HUD]],
-
-		},
-
 		{minv = 0, maxv = 1, name = "RINGS COUNTER", 	cv = CV_FindVar("classic_ringcounter"),
 
 		desc = [[adds hud element that shows count of all the rings in the map]],
@@ -103,6 +102,38 @@ return {
 		{name = "LIVES POSITION", 	opt = "lifepos",
 
 		desc = [[arrangment of emeralds in the tab display]],
+
+		},
+
+		"COLORS",
+
+		{name = "SCORE COLOR", 	opt = "hudcolorscore",
+
+		desc = [[changes color palette of the SCORE GRAPHIC]],
+
+		},
+
+		{name = "TIME COLOR", 	opt = "hudcolortime",
+
+		desc = [[changes color palette of the TIME GRAPHIC]],
+
+		},
+
+		{name = "RINGS COLOR", 	opt = "hudcolorrings",
+
+		desc = [[changes color palette of the RINGS GRAPHIC]],
+
+		},
+
+		{name = "LIVES COLOR", 	opt = "hudcolorlives",
+
+		desc = [[changes color palette of the LIVES FONT]],
+
+		},
+
+		{name = "NUMBERS COLOR", 	opt = "hudcolornumbers",
+
+		desc = [[changes color palette of the HUD NUMBERS]],
 
 		},
 

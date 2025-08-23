@@ -16,7 +16,6 @@ local circles = tbsrequire 'helpers/draw_circle'
 local drawf = drawlib.draw
 local drawanim = drawlib.drawanim
 local textlen = drawlib.text_lenght
-local fontlen = drawlib.lenght
 
 local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
 
@@ -171,7 +170,7 @@ return {
 
 				---@diagnostic disable-next-line
 				local offy3 = ease.outsine(progress3, intheight, 0) + ease.outsine(progress7, 0, 	-intheight*2) + 121
-				
+
 				---@diagnostic disable-next-line
 				local offy4 = ease.outsine(progress4, intheight, 0) + ease.outsine(progress8, 0, 	-intheight*2) + 112
 
@@ -182,9 +181,9 @@ return {
 				tiltedlines(v, 160,     	offy1, 	offy1+350, 64,  colors[5])
 
 				local progress9 = clamping(tiltappear+4, t-tiltdelay3, tiltappear+8)
-				local progress10 = clamping(tiltappear+20, t-tiltdelay3, tiltappear+50)
+				--local progress10 = clamping(tiltappear+20, t-tiltdelay3, tiltappear+50)
 				local progress11 = clamping(tiltdissappear+10, t-tiltdelay3, tiltdissappear+20)
-				local progress12 = clamping(tiltdissappear+10, t-tiltdelay3, tiltdissappear+20)
+				--local progress12 = clamping(tiltdissappear+10, t-tiltdelay3, tiltdissappear+20)
 
 				local nw_x = ease.outsine(progress9, -400, 0) + ease.outsine(progress11, 0, 400)
 
@@ -234,7 +233,7 @@ return {
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
@@ -264,7 +263,13 @@ return {
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, prefix..'TNUM', (lives_x+21)*FU, (lives_y+2)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
+				drawf(v, prefix..'TNUM', (lives_x+21)*FU, (lives_y+2)*FU, FU, 'X'..lives, lives_f, colorprofile2, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

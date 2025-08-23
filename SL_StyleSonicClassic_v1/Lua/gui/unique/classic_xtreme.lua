@@ -7,10 +7,9 @@ Contributors: Skydusk
 
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
 
 return{
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local curtm = 0 --StyleCD_Timetravel.timeline
 			local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
@@ -41,9 +40,14 @@ return{
 				v.draw(lives_x+8, lives_y+10, v.getSprite2Patch(p.mo.skin, SPR2_XTRA, false, C, 0), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
 			end
 
-
 			if G_GametypeUsesLives() then
-				drawf(v, 'XTTNUM', (lives_x+19)*FU, (lives_y+3)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
+				drawf(v, 'XTTNUM', (lives_x+19)*FU, (lives_y+3)*FU, FU, 'X'..lives, lives_f, colorprofile2, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

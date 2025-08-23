@@ -18,7 +18,7 @@ addHook("BossDeath", function()
 	boss_defeated = 2
 end)
 
-addHook("PostThinkFrame", do
+addHook("PostThinkFrame", function()
 	if displayplayer and displayplayer == consoleplayer then
 		if our_track then
 			if event then

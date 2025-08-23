@@ -218,7 +218,9 @@ local function SP_SaveState(mobj, toucher)
 	if not token then
 		token = 1
 	end
-	G_SetCustomExitVars(nil, 1)
+
+	displayplayer.styles_exitcut = nil
+	G_SetCustomExitVars(nil, 1, nil, nil)
 	G_ExitLevel()
 end
 
@@ -404,7 +406,7 @@ addHook("MapLoad", function()
 	if not special_entrance then return end
 
 	if last_map then
-		G_SetCustomExitVars(last_map, 0)
+		G_SetCustomExitVars(last_map, 0, nil, nil)
 		last_map = nil
 	end
 
@@ -555,6 +557,8 @@ addHook("MobjCollide", function(a, k)
 		elseif special_entrance == 1 then
 			if a.state == giantring_endstage or a.state == giantring_tiny then
 				a.state = giantring_flash
+
+				displayplayer.styles_exitcut = nil
 
 				S_StartSound(nil, sfx_s3kb3, k.player)
 				k.player.powers[pw_shield] = 0

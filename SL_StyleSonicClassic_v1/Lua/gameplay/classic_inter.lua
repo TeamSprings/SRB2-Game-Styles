@@ -5,6 +5,7 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
+	TODO: Make this multiplayer compatible
 ]]
 
 local Options = tbsrequire('helpers/create_cvar')
@@ -90,7 +91,7 @@ end)
 --	Setpiece functions
 --
 
-local skiptally = false
+local styles_skiptally = false
 local customexit = nil
 local lastspecialsector = nil
 
@@ -99,104 +100,108 @@ local lastspecialsector = nil
 -- Such a horrible unprotected way to do @override
 --
 
-local G_SetCustomExitOriginal = G_SetCustomExitVars
+if keepcutscene == nil and mapexitflags == nil then
 
-rawset(_G, "G_SetCustomExitVars", function(...)
-	local args = {...}
+	local G_SetCustomExitOriginal = G_SetCustomExitVars
 
-	local skip = args[2]
+		rawset(_G, "G_SetCustomExitVars", function(...)
+			local args = {...}
 
-	-- Force skip true
-	if end_tallyenabled then
-		if skip then
-			skiptally = true
-		else
-			skiptally = false
+			local skip = args[2]
+
+			-- Force skip true
+			if end_tallyenabled then
+				if skip then
+					styles_skiptally = true
+				else
+					styles_skiptally = false
+				end
+
+				skip = 1
+			end
+
+			customexit = args[1]
+			G_SetCustomExitOriginal(args[1], skip, args[3], args[4], args[5], args[6], args[7])
+		end)
+
+		local G_ExitLevelOriginal = G_ExitLevel
+
+		rawset(_G, "G_ExitLevel", function(...)
+			local args = {...}
+
+			local skip = args[2]
+
+			-- Force skip true
+			if end_tallyenabled then
+				if (skip == nil and styles_skiptally) or skip == true then
+					styles_skiptally = true
+				else
+					styles_skiptally = false
+				end
+
+				skip = 1
+			end
+
+			G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
+
+			if customexit then
+				customexit = nil
+			end
+
+			if styles_skiptally then
+				styles_skiptally = false
+			end
+
+			lastspecialsector = nil
+		end)
+
+	--
+	-- 	Setup functions
+	--
+
+	local function G_CheckIfSectorIsCustomExit(s)
+		local result = nil
+
+		for l in lines.tagged(s.tag) do
+			if l.special ~= 2 then continue end
+
+			result = {
+				s,
+				s.tag,
+				s.floorheight,
+				s.ceilingheight,
+				l.flags,
+				l.args,
+				l.frontsector,
+			}
 		end
 
-		skip = 1
+		return result
 	end
 
-	customexit = args[1]
-	G_SetCustomExitOriginal(args[1], skip, args[3], args[4], args[5], args[6], args[7])
-end)
+	local function G_InteprateStyleSectors(finish)
+		if not finish then return end
 
-local G_ExitLevelOriginal = G_ExitLevel
+		local binary_skip = ((finish[5] & ML_NOCLIMB) and true or styles_skiptally)
+		local udmf_skip = ((finish[6][1] & TMEF_SKIPTALLY) and true or styles_skiptally)
 
-rawset(_G, "G_ExitLevel", function(...)
-	local args = {...}
+		styles_skiptally = udmf_skip and true or binary_skip
 
-	local skip = args[2]
+		local check = nil
 
-	-- Force skip true
-	if end_tallyenabled then
-		if (skip == nil and skiptally) or skip == true then
-			skiptally = true
-		else
-			skiptally = false
+		if finish[7] and finish[7].floorheight then
+			check = finish[7].floorheight/FU
 		end
 
-		skip = 1
+		customexit = (finish[6][0] > 0 and finish[6][0] or check) or customexit
+
+		lastspecialsector = finish
 	end
 
-	G_ExitLevelOriginal(args[1] or customexit, skip, args[3], args[4], args[5], args[6], args[7])
-
-	if customexit then
-		customexit = nil
+	local function G_InitiateNewExit()
+		G_SetCustomExitOriginal(nil or customexit, 1)
 	end
 
-	if skiptally then
-		skiptally = false
-	end
-
-	lastspecialsector = nil
-end)
-
---
--- 	Setup functions
---
-
-local function G_CheckIfSectorIsCustomExit(s)
-	local result = nil
-
-	for l in lines.tagged(s.tag) do
-		if l.special ~= 2 then continue end
-
-		result = {
-			s,
-			s.tag,
-			s.floorheight,
-			s.ceilingheight,
-			l.flags,
-			l.args,
-			l.frontsector,
-		}
-	end
-
-	return result
-end
-
-local function G_InteprateStyleSectors(finish)
-	if not finish then return end
-
-	local binary_skip = ((finish[5] & ML_NOCLIMB) and true or skiptally)
-	local udmf_skip = ((finish[6][1] & TMEF_SKIPTALLY) and true or skiptally)
-
-	skiptally = udmf_skip and true or binary_skip
-
-	local check = nil
-
-	if finish[7] and finish[7].floorheight then
-		check = finish[7].floorheight/FU
-	end
-
-	customexit = (finish[6][0] > 0 and finish[6][0] or check) or customexit
-
-	lastspecialsector = finish
-end
-
-local function G_InitiateNewExit()
-	G_SetCustomExitOriginal(nil or customexit, 1)
 end
 
 --
@@ -235,6 +240,50 @@ end
 --	In-Game Handler (SP only)
 --
 
+local function G_StylesSetupTally(p)
+	if mapexitflags ~= nil then
+		if (mapexitflags & EXITMAP_SKIPSTATS) then
+			styles_skiptally = true
+		end
+	elseif keepcutscene ~= nil then
+		if skipstats then
+			styles_skiptally = true
+		end
+	elseif p.exiting and not lastspecialsector then
+		-- Handles cases with skiptally, hopefully.
+		if not p.urhudon then
+			local spacial_sec = P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT)
+
+			if spacial_sec then
+				G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec))
+			end
+
+			if not spacial_sec and p.mo then
+				spacial_sec = p.mo.subsector
+
+				if spacial_sec and spacial_sec.sector then
+					G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec.sector))
+				end
+			end
+
+			G_InitiateNewExit()
+		end
+	end
+end
+
+local function G_StylesExitLevel()
+	if mapexitflags ~= nil then
+		G_SetNextLevel(mapexitflags|EXITMAP_SKIPSTATS, nextmapoverride, nextgametype)
+		styles_skiptally = false
+	elseif keepcutscene ~= nil then
+		G_SetCustomExitVars(nextmapoverride, max(skipstats or 1, 1), nextgametype, keepcutscene)
+		styles_skiptally = false
+	end
+
+
+	G_ExitLevel()
+end
+
 local function G_StylesTallyBackend(p)
 	if (multiplayer and not splitscreen) or not end_tallyenabled then return end
 	if not (p.mo and p.mo.valid) then return end
@@ -251,30 +300,10 @@ local function G_StylesTallyBackend(p)
 
 	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
 
-		if p.exiting and not lastspecialsector then
-			-- Handles cases with skiptally, hopefully.
-			if not p.urhudon then
-				local spacial_sec = P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT)
-
-				if spacial_sec then
-					G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec))
-				end
-
-				if not spacial_sec and p.mo then
-					spacial_sec = p.mo.subsector
-
-					if spacial_sec and spacial_sec.sector then
-						G_InteprateStyleSectors(G_CheckIfSectorIsCustomExit(spacial_sec.sector))
-					end
-				end
-
-				G_InitiateNewExit()
-			end
-		end
-
+		G_StylesSetupTally(p)
 
 		if G_EnoughPlayersFinished() then
-			if not skiptally then
+			if not styles_skiptally then
 				if not stagefailed then
 					G_StylesGrantEmerald(p)
 				end
@@ -308,7 +337,11 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallystoplooping = nil
 					p.styles_tallysoundlenght = S_GetMusicLength() or 0
 
-					p.mo.flags = $|MF_NOCLIPTHING
+					if p.styles_capsule_exit then
+						p.styles_capsule_exit = nil
+					else
+						p.mo.flags = $|MF_NOCLIPTHING
+					end
 
 					setuphook(p.realmo and p.realmo.skin or p.skin, p)
 				-- Background Process
@@ -371,7 +404,7 @@ local function G_StylesTallyBackend(p)
 						p.exiting = 1
 						p.styles_tallylastscore = p.score
 						p.styles_tallylastlives = p.lives
-						G_ExitLevel()
+						G_StylesExitLevel()
 
 						endhook(p.realmo and p.realmo.skin or p.skin, p)
 						return
@@ -382,7 +415,7 @@ local function G_StylesTallyBackend(p)
 			if p.exiting == 1 then
 				p.styles_tallylastscore = p.score
 				p.styles_tallylastlives = p.lives
-				G_ExitLevel()
+				G_StylesExitLevel()
 			end
 		end
 	else

@@ -9,6 +9,17 @@ Contributors: Skydusk
 
 freeslot("S_PLAY_NBX1", "S_1UP_NICON1", "S_1UP_NICON2")
 
+local S_PLAY_NBX1 = S_PLAY_NBX1
+local MF2_DONTDRAW = MF2_DONTDRAW
+local BOT_2PHUMAN = BOT_2PHUMAN
+local INT32_MAX = INT32_MAX
+local BOT_2PAI = BOT_2PAI
+local FU = FU
+
+local P_AproxDistance = P_AproxDistance
+local P_RemoveMobj = P_RemoveMobj
+local P_SpawnMobj = P_SpawnMobj
+
 ---@diagnostic disable-next-line
 states[S_PLAY_NBX1] = {
 	sprite = SPR_PLAY,

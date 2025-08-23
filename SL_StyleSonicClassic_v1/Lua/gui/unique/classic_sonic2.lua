@@ -8,7 +8,6 @@ Contributors: Skydusk
 local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
 
 local skins_colors = {
 	["sonic"] = 153,

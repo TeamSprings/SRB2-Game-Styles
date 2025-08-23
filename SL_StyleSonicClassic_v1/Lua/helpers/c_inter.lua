@@ -7,54 +7,76 @@ Contributors: Skydusk
 
 ]]
 
-local helper = {}
+local helper = {
+	perfectbonus = -1,
+	totalcoinnum = 0
+}
 
--- Helper Variables
+-- Constants
 
-helper.perfectbonus = -1
-helper.totalcoinnum = 0
+local SCORETIC 		= 222
+local RINGREWARD 	= 100
+local TIMETIER		= 30
+
+local GUARDREWARD = {
+	[0] 	= 10000,
+	[1] 	= 5000,
+	[2] 	= 1000,
+	[3] 	= 500,
+	[4] 	= 100
+}
+
+local TIMEREWARD = {
+	[0] 	= 50000,
+	[1] 	= 10000,
+	[2] 	= 5000,
+	[3] 	= 4000,
+	[4] 	= 3000,
+	[5] 	= 2000,
+	[6] 	= 1000,
+	[7] 	= 500,
+	[8] 	= 400,
+	[9] 	= 300,
+	[10] 	= 200,
+	[11] 	= 100,
+	[12] 	= 100,
+	[13] 	= 0,
+}
+
+local RINGCOUNTLUT = {
+	[MT_RING] 		= 1,
+	[MT_COIN] 		= 1,
+	[MT_NIGHTSSTAR] = 1,
+
+	[MT_RING_BOX] 	= 10,
+}
 
 -- Helper functions
 
 function helper.Y_GetPerfectBonus(rings, perfectb, totrings)
-	if (totrings == 0 or perfectb == -1 or rings < totrings) then
+	if (totrings == 0 or perfectb == -1) then
 		return -1
 	end
 
 	if rings >= totrings then
 		return 5000
 	end
+
+	return -1
 end
 
 function helper.Y_GetTimeBonus(time)
-	local secs = time / TICRATE
-	local result
-
-	if (secs <  30) then     --[[   :30 ]] result = 50000
-	elseif (secs <  60) then --[[  1:00 ]] result = 10000
-	elseif (secs <  90) then --[[  1:30 ]] result = 5000
-	elseif (secs < 120) then --[[  2:00 ]] result = 4000
-	elseif (secs < 180) then --[[  3:00 ]] result = 3000
-	elseif (secs < 240) then --[[  4:00 ]] result = 2000
-	elseif (secs < 300) then --[[  5:00 ]] result = 1000
-	elseif (secs < 360) then --[[  6:00 ]] result = 500
-	elseif (secs < 420) then --[[  7:00 ]] result = 400
-	elseif (secs < 480) then --[[  8:00 ]] result = 300
-	elseif (secs < 540) then --[[  9:00 ]] result = 200
-	elseif (secs < 600) then --[[ 10:00 ]] result = 100
-	else  --[[ TIME TAKEN: TOO LONG ]] result = 0
-	end
-
-	return result
+	local secs = max(0, time / TICRATE)
+	
+	return (TIMEREWARD[secs / TIMETIER] or 0)
 end
 
 function helper.Y_GetGuardBonus(guardtime)
-	local guardscoretype = {[0] = 10000, [1] = 5000, [2] = 1000, [3] = 500, [4] = 100}
-	return (guardscoretype[guardtime] and guardscoretype[guardtime] or 0)
+	return (GUARDREWARD[guardtime] or 0)
 end
 
 function helper.Y_GetRingsBonus(rings)
-	return (max(0, (rings)*100))
+	return (max(0, rings * RINGREWARD))
 end
 
 function helper.Y_GetPreCalcPerfectBonus(rings)
@@ -69,6 +91,7 @@ function helper.Y_CalculateAllScore(p)
 	else
 		local ring_bonus = helper.Y_GetRingsBonus(p.rings)
 		local time_bonus = helper.Y_GetTimeBonus(max(p.realtime + (p.style_additionaltime or 0) - (p.styles_cutscenetime_prize or 0), 0))
+
 		local perfct_bonus = max(helper.Y_GetPreCalcPerfectBonus(p.rings), 0)
 
 		return ring_bonus + time_bonus + perfct_bonus
@@ -76,12 +99,37 @@ function helper.Y_CalculateAllScore(p)
 end
 
 function helper.Y_GetDuration(score)
-	return score/222
+	return score / SCORETIC
 end
 
 function helper.Y_GetTimingCalculation(p)
-	return helper.Y_GetDuration(helper.Y_CalculateAllScore(p))
+	return helper.Y_CalculateAllScore(p) / SCORETIC
 end
+
+function helper.Y_ResetCounters()
+	helper.totalcoinnum = 0
+	helper.perfectbonus = 0
+end
+
+addHook("MapChange", helper.Y_ResetCounters)
+
+addHook("MapLoad", function()
+	helper.Y_ResetCounters()
+
+	---@diagnostic disable-next-line
+	for mobj in mobjs.iterate() do
+		if RINGCOUNTLUT[mobj.type] then
+			helper.totalcoinnum = $ + RINGCOUNTLUT[mobj.type]
+			continue
+		end
+
+		if (mobj.type == MT_NIGHTSDRONE) then
+			helper.perfectbonus = -1
+		end
+	end
+end)
+
+-- Abstraction functions
 
 function helper.addScore(p, score)
 	if (maptol & TOL_NIGHTS) then
@@ -90,38 +138,5 @@ function helper.addScore(p, score)
 		P_AddPlayerScore(p, score)
 	end
 end
-
-function helper.Y_ResetCounters()
-	helper.totalcoinnum = 0
-	helper.perfectbonus = 0
-	hud.smooth = nil
-	hud.bosshealth = nil
-	hud.bossbardecrease = nil
-end
-
-addHook("MapChange", helper.Y_ResetCounters)
-
-function helper.Y_GetTotalCoins(a)
-	if (a.type == MT_RING or a.type == MT_COIN or a.type == MT_NIGHTSSTAR) then
-		helper.totalcoinnum = $ + 1
-	end
-
-	if (a.type == MT_RING_BOX) then
-		helper.totalcoinnum = $ + 10
-	end
-
-	if (a.type == MT_NIGHTSDRONE) then
-		helper.perfectbonus = -1
-	end
-end
-
-addHook("MapLoad", function()
-	helper.Y_ResetCounters()
-
-	---@diagnostic disable-next-line
-	for mobj in mobjs.iterate() do
-		helper.Y_GetTotalCoins(mobj)
-	end
-end)
 
 return helper

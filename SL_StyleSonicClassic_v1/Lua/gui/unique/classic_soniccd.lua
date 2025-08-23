@@ -12,7 +12,7 @@ Contributors: Clone Fighter, Skydusk
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawBG = tbsrequire 'helpers/draw_background'
 local drawf = drawlib.draw
-local fontlen = drawlib.lenght
+local textlen = drawlib.text_lenght
 
 local ttlnum = {}
 
@@ -64,12 +64,7 @@ local function V_DrawTitle(v, x, y, str, flags)
 end
 
 local function V_GetLenght(v, str)
-	local lenght = 0
-	for i = 1, #str do
-		local patch, val
-		lenght = $+fontlen(v, patch, str, 'LCDFT', val, 1, i)
-	end
-	return lenght
+	return textlen(v, 'LCDFT', str, 1)
 end
 
 ------------------------------
@@ -146,10 +141,10 @@ return{
 			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
-			
+
 			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(-48, 104, fractime), 147, zonegr) end
-			
+
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
@@ -190,10 +185,10 @@ return{
 			v.draw(interpolate(iiiW, iiiW+360, FU-fractime), 80, iii, V_SNAPTOTOP)
 
 			if mapheaderinfo[gamemap].actnum ~= 0 then v.draw(142, interpolate(150, 320, FU-fractime), gear) end
-			
+
 			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(interpolate(104, 320, FU-fractime), 147, zonegr) end
-			
+
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
@@ -231,7 +226,7 @@ return{
 
 			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then v.draw(104, 147, zonegr) end
-			
+
 			if mapheaderinfo[gamemap].actnum ~= 0 then
 				local actw = 142
 				if mapheaderinfo[gamemap].actnum/10 > 0 then
@@ -244,7 +239,7 @@ return{
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local curtm = 0 --StyleCD_Timetravel.timeline
 			local pos = {{1,0}, {0,1}, {-1,0}, {0,-1}}
@@ -278,8 +273,14 @@ return{
 				local x_p = v.cachePatch(prefix..'XLIFE')
 				local x_py = max(x_p.height - 8, 0)/2
 
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
 				v.draw(lives_x+17, lives_y + 7 - x_py, x_p, lives_f, colorprofile)
-				drawf(v, prefix..'TNUM', (lives_x+25)*FU, (lives_y + 4 - x_py)*FU, FU, p.lives, lives_f, colorprofile, "left")
+				drawf(v, prefix..'TNUM', (lives_x+25)*FU, (lives_y + 4 - x_py)*FU, FU, lives, lives_f, colorprofile2, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end

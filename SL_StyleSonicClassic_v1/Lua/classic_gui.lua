@@ -5,8 +5,7 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
-	TODO: GENERIC NON IN-GAME VARIANT OF INTERMISSION
-	TODO: SOME RANDOM PIECES OF ITEMS - CONTINUE, PAUSE ETC.
+-- TODO: NIGHTS
 
 ]]
 
@@ -17,9 +16,14 @@ local calc_help = tbsrequire 'helpers/c_inter'
 
 local excp = drawlib.exception
 local mono = drawlib.monospace
-local drawf = drawlib.draw
+local write = drawlib.draw
 local textlen = drawlib.text_lenght
 local HOOK = customhud.SetupItem
+
+local FU = FU
+local abs = abs
+local tostring = tostring
+local tonumber = tonumber
 
 excp("STTNUM", ":", "STTCOLON")
 excp("STTNUM", ".", "STTPERIO")
@@ -56,8 +60,29 @@ local hud_data = {
 --	COM
 --
 
-COM_AddCommand("classic_menu", function(p)
+local _combool = {
+	["true"] = true,
+	["t"]    = true,
+	["yes"]  = true,
+	["y"]    = true,
+	["on"]   = true,
+	["1"]    = true,
+	["!"]    = true,
 
+	["false"] = false,
+	["f"]     = false,
+	["no"]    = false,
+	["n"]     = false,
+	["off"]   = false,
+	["0"]     = false,
+	[")"]     = false,
+}
+
+local COM_MENU = "classic_menu"
+
+COM_AddCommand(COM_MENU, function(p, var1)
+	if consoleplayer ~= p then return end
+	
 	if modio.embedded then
 		---@diagnostic disable-next-line
 		menu_toggle = nil
@@ -65,12 +90,30 @@ COM_AddCommand("classic_menu", function(p)
 		return
 	end
 
-	if menu_toggle == nil then
-		menu_toggle = true
+	local var = _combool[var1]
+
+	if var == nil then
+		if menu_toggle == nil then
+			menu_toggle = true
+		else
+			menu_toggle = not (menu_toggle)
+		end
 	else
-		menu_toggle = not (menu_toggle)
+		if var == false and menu_toggle == true then
+			menu_toggle = false
+		elseif var == true then
+			menu_toggle = true
+		end
 	end
 end, COM_LOCAL)
+
+local function MENU_ENABLE()
+	COM_BufInsertText(consoleplayer, COM_MENU.." true")
+end
+
+local function MENU_DISABLE()
+	COM_BufInsertText(consoleplayer, COM_MENU.." false")
+end
 
 --
 -- SWITCHER ONLY WHEN STAGE RESTARTS
@@ -178,17 +221,42 @@ end, 0, 8)
 
 local hud_cv = hud_opt.cv
 
-local color_profile = nil
+local color_profile = {}
+local color_profilefield = {}
+
 local color_changer
 
-local color_opt = Options:new("hudcolor", "gui/cvars/hudcolor", function()
-	if color_changer then
-		color_changer()
-	end
-end, 0, 7)
+local function HUD_ADDCOLORSPACE(hudtype)
+	color_profile[hudtype] = nil
 
-color_changer = function()
-	color_profile = Options:getPureValue("hudcolor")
+	local opt = Options:new("hudcolor"..hudtype, "gui/cvars/hudcolor", function()
+		if color_changer then
+			color_changer(hudtype)
+		end
+	end, 0, 7)
+
+	color_profilefield[hudtype] = opt
+
+	return opt
+end
+
+local scorecolor_opt   = HUD_ADDCOLORSPACE('score')
+local timecolor_opt    = HUD_ADDCOLORSPACE('time')
+local ringscolor_opt   = HUD_ADDCOLORSPACE('rings')
+local livescolor_opt   = HUD_ADDCOLORSPACE('lives')
+local nightscolor_opt  = HUD_ADDCOLORSPACE('nights')
+local numberscolor_opt = HUD_ADDCOLORSPACE('numbers')
+
+local color_opt = Options:new("hudcolor", "gui/cvars/hudcolor", function(var)
+	if color_changer then
+		for _, opt in pairs(color_profilefield) do
+			CV_Set(opt.cv, 	var.value)
+		end
+	end
+end, 0, 8)
+
+color_changer = function(setting)
+	color_profile[setting] = Options:getPureValue("hudcolor"..setting)
 end
 
 local emeraldpos_opt = Options:new("emeraldpos",
@@ -292,9 +360,10 @@ HOOK("lives", "classichud", function(v, p, t, e)
 
 	hud_data[lifeicon].lives(
 		v, p, t, e, prefix, mo, hide_offset_x,
-		v.getColormap(TC_DEFAULT, 1, color_profile),
+		v.getColormap(TC_DEFAULT, 1, color_profile.lives),
 		force_usernameinhud.value and p.name or nil,
-		life_pos
+		life_pos,
+		v.getColormap(TC_DEFAULT, 1, color_profile.numbers)
 	)
 	return true
 end, "game", 1, 3)
@@ -326,7 +395,7 @@ HOOK("score", "classichud", function(v, p, t, e)
 			hudinfo[HUD_SCORE].y+layout_opt.yoffset_score,
 			v.cachePatch(prefix..'TSCODB'),
 			layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER,
-			v.getColormap(TC_DEFAULT, 1, color_profile))
+			v.getColormap(TC_DEFAULT, 1, color_profile.score))
 		end
 
 		-- Debug Mode
@@ -339,15 +408,15 @@ HOOK("score", "classichud", function(v, p, t, e)
 		if debugmode == 2 then
 			local pvz, cvz = abs(mo.z/bitf)/4, abs(t.z/bitf)/4
 
-			drawf(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FU, FU,
-			string.upper(string.format("%04x%04x%04x", pvx, pvy, pvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), layout_opt.debugalligment)
-			drawf(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FU, FU,
-			string.upper(string.format("%04x%04x%04x", cvx, cvy, cvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), layout_opt.debugalligment)
+			write(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FU, FU,
+			string.upper(string.format("%04x%04x%04x", pvx, pvy, pvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), layout_opt.debugalligment)
+			write(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FU, FU,
+			string.upper(string.format("%04x%04x%04x", cvx, cvy, cvz)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), layout_opt.debugalligment)
 		else
-			drawf(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FU, FU,
-			string.upper(string.format("%04x%04x", pvx, pvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), layout_opt.debugalligment)
-			drawf(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FU, FU,
-			string.upper(string.format("%04x%04x", cvx, cvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), layout_opt.debugalligment)
+			write(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y-1+layout_opt.yoffset_score)*FU, FU,
+			string.upper(string.format("%04x%04x", pvx, pvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), layout_opt.debugalligment)
+			write(v, debugft..'DBM', xval*FU, (hudinfo[HUD_SCORE].y+7+layout_opt.yoffset_score)*FU, FU,
+			string.upper(string.format("%04x%04x", cvx, cvy)), layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), layout_opt.debugalligment)
 		end
 	else
 		local xnum = hudinfo[HUD_SCORENUM].x+hideoffset+layout_opt.xoffset_scorenum+layout_opt.xoffset_score
@@ -374,16 +443,16 @@ HOOK("score", "classichud", function(v, p, t, e)
 
 			-- no debug
 			v.draw(_x, hudinfo[HUD_SCORE].y+layout_opt.yoffset_score,
-			graphic, layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile))
+			graphic, layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 		end
 
-		drawf(v, prefix..'TNUM',
+		write(v, prefix..'TNUM',
 		xnum*FU,
 		(hudinfo[HUD_SCORENUM].y+layout_opt.yoffset_scorenum+layout_opt.yoffset_score)*FU,
 		FU,
 		score_numupdt,
 		layout_opt.scoreflags|V_HUDTRANS|V_PERPLAYER,
-		v.getColormap(TC_DEFAULT, 1, color_profile), allign, txtpadding)
+		v.getColormap(TC_DEFAULT, 1, color_profile.numbers), allign, txtpadding)
 	end
 
 	return true
@@ -400,6 +469,10 @@ local function gettimedisplay_cv()
 		return time_display_settingscv.value
 	end
 end
+
+local SECONDSIZE 	= 60
+local TICSTOSECOND 	= TICRATE
+local TICSTOMINUTE 	= TICRATE * SECONDSIZE
 
 HOOK("time", "classichud", function(v, p, t, e)
 	if G_IsSpecialStage(gamemap) or (maptol & TOL_NIGHTS) then return end
@@ -432,22 +505,17 @@ HOOK("time", "classichud", function(v, p, t, e)
 	if time_display_settings == 3 then
 		time_string = tostring(tics)
 		show_tic = true
-	elseif time_display_settings == 2 or time_display_settings == 1 then
-		local mint = G_TicsToMinutes(tics, true)
-		local sect = G_TicsToSeconds(tics)
-		local cent = G_TicsToCentiseconds(tics)
-		sect = (sect < 10 and '0'..sect or sect)
-		cent = (cent < 10 and '0'..cent or cent)
-
-		time_string = mint..":"..sect.."."..cent
-
-		show_tic = true
 	else
-		local mint = G_TicsToMinutes(tics, true)
-		local sect = G_TicsToSeconds(tics)
-		sect = (sect < 10 and '0'..sect or sect)
+		local sect = (tics / TICSTOSECOND) % SECONDSIZE
+		local mint = tics / TICSTOMINUTE
 
-		time_string = mint..":"..sect
+		if time_display_settings == 2 or time_display_settings == 1 then
+			time_string = string.format("%d:%02d:%02d", mint, sect, G_TicsToCentiseconds(tics))
+			show_tic = true
+		else
+			sect = (sect < 10 and '0'..sect or sect)
+			time_string = mint..":"..sect
+		end
 	end
 
 	if layout_opt.force_ticspos ~= nil then
@@ -461,7 +529,7 @@ HOOK("time", "classichud", function(v, p, t, e)
 	-- drawing
 	if countdown and tics < 10*TICRATE and (leveltime % red_flashing_timer)/red_flashing_thred then
 		local allign = layout_opt.timenumalligment
-		
+
 		if layout_opt.timegraphic then
 			local graphic = v.cachePatch(prefix..'TRTIME')
 			local graphic_x = hudinfo[HUD_TIME].x+hideoffset+layout_opt.xoffset_time
@@ -476,15 +544,15 @@ HOOK("time", "classichud", function(v, p, t, e)
 			end
 
 			v.draw(graphic_x, (hudinfo[HUD_TIME].y+layout_opt.yoffset_time),
-			graphic, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile))
+			graphic, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.time))
 		end
 
 		if prefix == "KC" then
-			drawf(v, prefix..'RNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU, time_string,
-			layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), layout_opt.timenumalligment, txtpadding)
+			write(v, prefix..'RNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU, time_string,
+			layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), layout_opt.timenumalligment, txtpadding)
 		else
-			drawf(v, prefix..'TNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU, time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER,
-			v.getColormap(TC_DEFAULT, 1, color_profile), allign, txtpadding)
+			write(v, prefix..'TNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU, time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER,
+			v.getColormap(TC_DEFAULT, 1, color_profile.numbers), allign, txtpadding)
 		end
 	else
 		local allign = layout_opt.timenumalligment
@@ -503,11 +571,11 @@ HOOK("time", "classichud", function(v, p, t, e)
 			end
 
 			v.draw(graphic_x, hudinfo[HUD_TIME].y+layout_opt.yoffset_time,
-			graphic, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile))
+			graphic, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.time))
 		end
 
-		drawf(v, prefix..'TNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU,
-		time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), allign, txtpadding)
+		write(v, prefix..'TNUM', tics_xcor*FU, (hudinfo[HUD_SECONDS].y+layout_opt.yoffset_time+layout_opt.yoffset_timenum)*FU, FU,
+		time_string, layout_opt.timeflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), allign, txtpadding)
 	end
 
 	return true
@@ -544,7 +612,7 @@ HOOK("rings", "classichud", function(v, p, t, e)
 	if p.rings < 1 and (leveltime % red_flashing_timer)/red_flashing_thred then
 		local num_font = prefix == "KC" and prefix..'RNUM' or prefix..'TNUM'
 		local allign = layout_opt.ringsnumalligment
-		
+
 		if layout_opt.ringsgraphic then
 			local graphic = v.cachePatch(layout_opt.redringsgraphiccustom or (prefix..((mariomode and prefix ~= "ST") and 'TRCOIN' or 'TRRING')))
 			local graphic_x = hudinfo[HUD_RINGS].x + hideoffset + layout_opt.xoffset_rings
@@ -560,11 +628,11 @@ HOOK("rings", "classichud", function(v, p, t, e)
 			end
 
 			v.draw(graphic_x, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings,
-			graphic, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile))
+			graphic, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.rings))
 		end
 
-		drawf(v, num_font, x_num*FU, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FU, FU, rings_str,
-		layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), allign, txtpadding, layout_opt.rings_padds_numb, layout_opt.rings_padds_symb)
+		write(v, num_font, x_num*FU, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FU, FU, rings_str,
+		layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), allign, txtpadding, layout_opt.rings_padds_numb, layout_opt.rings_padds_symb)
 	else
 		local allign = layout_opt.ringsnumalligment
 
@@ -583,11 +651,11 @@ HOOK("rings", "classichud", function(v, p, t, e)
 			end
 
 			v.draw(graphic_x, hudinfo[HUD_RINGS].y + layout_opt.yoffset_rings,
-			graphic, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile))
+			graphic, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.rings))
 		end
 
-		drawf(v, prefix..'TNUM', x_num*FU, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FU,
-		FU, rings_str, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile), allign, txtpadding, layout_opt.rings_padds_numb, layout_opt.rings_padds_symb)
+		write(v, prefix..'TNUM', x_num*FU, (hudinfo[HUD_RINGSNUM].y + layout_opt.yoffset_rings + layout_opt.yoffset_ringsnum)*FU,
+		FU, rings_str, layout_opt.ringsflags|V_HUDTRANS|V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), allign, txtpadding, layout_opt.rings_padds_numb, layout_opt.rings_padds_symb)
 	end
 
 	return true
@@ -658,6 +726,7 @@ local function P_GetNextEmerald()
 	return 0;
 end
 
+---@param v videolib
 HOOK("nightsrings", "classichud", function(v, stplyr)
 	if not ((maptol & TOL_NIGHTS) or G_IsSpecialStage(gamemap)) then return end
 
@@ -669,7 +738,9 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 	local total_spherecount = 0;
 	local total_ringcount = 0;
 
-	v.draw(16, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+	local nights_colormap = v.getColormap(TC_DEFAULT, 0, nightscolor_opt())
+
+	v.draw(16, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 
 	if (isspecialstage) then
 		v.draw(24, 16,
@@ -702,7 +773,7 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 
 		local origamount = stplyr.capsule.spawnpoint.args[1];
 
-		v.draw(72, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+		v.draw(72, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 		v.draw(74, 12, v.cachePatch("MINICAPS"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
 
 		if (stplyr.capsule.reactiontime ~= 0) then
@@ -744,14 +815,14 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 			amount = (amount * length)/origamount;
 
 			for cfill = 0, min(amount, length) do
-				v.draw(16 + cfill, 43, v.cachePatch("CAPSFILL"), V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP|V_HUDTRANS);
+				v.draw(16 + cfill, 43, v.cachePatch("CAPSFILL"), V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP|V_HUDTRANS, nights_colormap);
 			end
 		end
 
 		if (total_spherecount >= stplyr.capsule.health) then
-			v.draw(40, 13, v.cachePatch("NREDAR"..((leveltime&7) + 1)), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+			v.draw(40, 13, v.cachePatch("NREDAR"..((leveltime&7) + 1)), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 		else
-			v.draw(40, 13, v.cachePatch("NARROW"..(((leveltime/2)&7) + 1)), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+			v.draw(40, 13, v.cachePatch("NARROW"..(((leveltime/2)&7) + 1)), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 		end
 
 	elseif (oldspecialstage and total_spherecount < ssspheres) then
@@ -759,8 +830,8 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 		local length = 88;
 		local amount = (total_spherecount * length)/ssspheres;
 
-		local em = P_GetNextEmerald() + 1;
-		v.draw(72, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+		local em = P_GetNextEmerald();
+		v.draw(72, 8, v.cachePatch("NBRACKET"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 
 		local sprite = Options:getPureValue("emeralds")
 
@@ -768,7 +839,7 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 			v.draw(88, 32, v.getSpritePatch(sprite, em, 0, 0), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
 		end
 
-		v.draw(40, 8 + 5, v.cachePatch("NARROW"..(((leveltime/2)&7)) + 1), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+		v.draw(40, 8 + 5, v.cachePatch("NARROW"..(((leveltime/2)&7)) + 1), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 
 		-- Lil' white box!
 		v.draw(15, 8 + 34, v.cachePatch("CAPSBAR"), V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP|V_HUDTRANS);
@@ -777,7 +848,7 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 			v.draw(15 + cfill + 1, 8 + 35, v.cachePatch("CAPSFILL"), V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP|V_HUDTRANS);
 		end
 	else
-		v.draw(40, 8 + 5, v.cachePatch("NARROW8"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
+		v.draw(40, 8 + 5, v.cachePatch("NARROW8"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP, nights_colormap);
 	end
 
 	if (oldspecialstage) then
@@ -796,14 +867,14 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 		end
 
 		-- now rings! you know, for that perfect bonus.
-		v.draw(272, 8, v.cachePatch("NBRACKET"), V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS);
+		v.draw(272, 8, v.cachePatch("NBRACKET"), V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS, nights_colormap);
 		v.draw(280, 17, v.cachePatch("NRNG1"), V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS);
-		v.draw(280, 13, v.cachePatch("NARROW"..(((leveltime/2)&7) + 1)), V_FLIP|V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS);
+		v.draw(280, 13, v.cachePatch("NARROW"..(((leveltime/2)&7) + 1)), V_FLIP|V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS, nights_colormap);
 
-		drawf(v, prefix..'TNUM', 262*FU, 18*FU, FU, total_ringcount, V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "center", txtpadding)
+		write(v, prefix..'TNUM', 262*FU, 18*FU, FU, total_ringcount, V_PERPLAYER|V_SNAPTOTOP|V_SNAPTORIGHT|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "center", txtpadding)
 	end
 
-	drawf(v, prefix..'TNUM', 60*FU, 18*FU, FU, total_spherecount, V_PERPLAYER|V_SNAPTOTOP|V_SNAPTOLEFT|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1), "center", txtpadding)
+	write(v, prefix..'TNUM', 60*FU, 18*FU, FU, total_spherecount, V_PERPLAYER|V_SNAPTOTOP|V_SNAPTOLEFT|V_HUDTRANS, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "center", txtpadding)
 
 
 end, "game", 1, 3)
@@ -813,10 +884,10 @@ end, "game", 1, 3)
 --#region UTILITIES
 
 HOOK("styles_hudhide_manager", "classichud", function(v, p, t, e)
-	if p.teamsprings_scenethread and p.teamsprings_scenethread.valid then 
+	if p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
 		Styles_HideHud()
 	end
-	
+
 	if hud_hide_cv.value then
 		if styles_hide_hud then
 			if hide_offset_x > -160 then
@@ -989,7 +1060,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 
 		if specialstage_togg then
 			local color = v.getColormap(TC_DEFAULT, SKINCOLOR_YELLOW)
-			local color2 = tallyrecoloring and v.getColormap(TC_DEFAULT, 0, tallyrecoloring) or v.getColormap(TC_DEFAULT, 1, color_profile)
+			local color2 = tallyrecoloring and v.getColormap(TC_DEFAULT, 0, tallyrecoloring) or v.getColormap(TC_DEFAULT, 1, color_profile.score)
 
 			if titletype and hud_data[titletype].tallyspecialbg then
 				hud_data[titletype].tallyspecialbg(v, p, tally_title, color, color2, 15+min(p.styles_tallytimer+80, 0))
@@ -1015,7 +1086,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			v.draw(tally_x_row2+29, 139, v.cachePatch(prefix..'TBICON'), 0, color)
 			v.draw(tally_x_row2, 140, v.cachePatch(prefix..'TTSCORE'), 0, color2)
 
-			drawf(v, prefix..'TNUM', (tally_x_row2+160)*FU, 140*FU, FU, p.score, 0, color2, "right", txtpadding)
+			write(v, prefix..'TNUM', (tally_x_row2+160)*FU, 140*FU, FU, p.score, 0, color2, "right", txtpadding)
 
 			if (maptol & TOL_NIGHTS) then
 				v.draw(tally_x_row3+160, 156, v.cachePatch(prefix..'TBICONNUM'))
@@ -1024,7 +1095,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				v.draw(tally_x_row3, 156, v.cachePatch(prefix..'TNIGHTS'), 0, color2)
 				v.draw(tally_x_row3+56, 156, v.cachePatch(prefix..'TBONUS'), 0, color2)
 
-				drawf(v, prefix..'TNUM', (tally_x_row3+160)*FU, 156*FU, FU, fake_nightsbonus, 0, color2, "right", txtpadding)
+				write(v, prefix..'TNUM', (tally_x_row3+160)*FU, 156*FU, FU, fake_nightsbonus, 0, color2, "right", txtpadding)
 			else
 				local RINGS = mariomode and 'TCOIN' or 'TRING'
 
@@ -1034,7 +1105,7 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 				v.draw(tally_x_row3, 156, v.cachePatch(prefix..RINGS), 0, color2)
 				v.draw(tally_x_row3+40, 156, v.cachePatch(prefix..'TBONUS'), 0, color2)
 
-				drawf(v, prefix..'TNUM', (tally_x_row3+160)*FU, 156*FU, FU, fake_ringbonus, 0, color2, "right", txtpadding)
+				write(v, prefix..'TNUM', (tally_x_row3+160)*FU, 156*FU, FU, fake_ringbonus, 0, color2, "right", txtpadding)
 			end
 		else
 			if titletype and hud_data[titletype].tallybg then
@@ -1054,26 +1125,26 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			v.draw(tally_x_row4+70, 107, v.cachePatch(prefix..'TBICON'), 0, cached_tallyskincolor)
 			v.draw(tally_x_row3+70, 123, v.cachePatch(prefix..'TBICON'), 0, cached_tallyskincolor)
 
-			v.draw(tally_x_row4, 108, v.cachePatch(prefix..'TTTIME'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
-			v.draw(tally_x_row3, 124, v.cachePatch(prefix..RINGS), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
+			v.draw(tally_x_row4, 108, v.cachePatch(prefix..'TTTIME'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.time))
+			v.draw(tally_x_row3, 124, v.cachePatch(prefix..RINGS), 0, v.getColormap(TC_DEFAULT, 1, color_profile.rings))
 
-			v.draw(tally_x_row4+40, 108, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
-			v.draw(tally_x_row3+40, 124, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
+			v.draw(tally_x_row4+40, 108, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
+			v.draw(tally_x_row3+40, 124, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 
 			v.draw(tally_x_row4+160, 108, v.cachePatch(prefix..'TBICONNUM'))
 			v.draw(tally_x_row3+160, 124, v.cachePatch(prefix..'TBICONNUM'))
 
-			drawf(v, prefix..'TNUM', (tally_x_row4+160)*FU, 108*FU, FU, fake_timebonus, 0, v.getColormap(TC_DEFAULT, 1, color_profile), "right", txtpadding)
-			drawf(v, prefix..'TNUM', (tally_x_row3+160)*FU, 124*FU, FU, fake_ringbonus, 0, v.getColormap(TC_DEFAULT, 1, color_profile), "right", txtpadding)
+			write(v, prefix..'TNUM', (tally_x_row4+160)*FU, 108*FU, FU, fake_timebonus, 0, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", txtpadding)
+			write(v, prefix..'TNUM', (tally_x_row3+160)*FU, 124*FU, FU, fake_ringbonus, 0, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", txtpadding)
 
 			-- Perfect Bleh
 			if fake_perfect > -1 then
 				v.draw(tally_x_row2+82, 139, v.cachePatch(prefix..'TBICON'), 0, cached_tallyskincolor)
-				v.draw(tally_x_row2-12, 140, v.cachePatch(prefix..'TPERFC'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
-				v.draw(tally_x_row2+52, 140, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
+				v.draw(tally_x_row2-12, 140, v.cachePatch(prefix..'TPERFC'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
+				v.draw(tally_x_row2+52, 140, v.cachePatch(prefix..'TBONUS'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 				v.draw(tally_x_row2+160, 140, v.cachePatch(prefix..'TBICONNUM'))
 
-				drawf(v, prefix..'TNUM', (tally_x_row2+160)*FU, 140*FU, FU, fake_perfect, 0, v.getColormap(TC_DEFAULT, 1, color_profile), "right", txtpadding)
+				write(v, prefix..'TNUM', (tally_x_row2+160)*FU, 140*FU, FU, fake_perfect, 0, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", txtpadding)
 			end
 
 			local mania_move = hud_select == 6 and 22 or 0
@@ -1081,14 +1152,14 @@ HOOK("styles_levelendtally", "classichud", function(v, p, t, e)
 			-- Total vs Score nonsense
 			if hud_select > 1 and not hud_select ~= 3 then
 				v.draw(tally_x_row1+50, 155, v.cachePatch(prefix..'TBICON'), 0, cached_tallyskincolor)
-				v.draw(tally_x_row1+21, 156, v.cachePatch(prefix..'TTOTAL'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
+				v.draw(tally_x_row1+21, 156, v.cachePatch(prefix..'TTOTAL'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 				v.draw(tally_x_row1+160-mania_move, 156, v.cachePatch(prefix..'TBICONNUM'))
-				drawf(v, prefix..'TNUM', (tally_x_row1+160-mania_move)*FU, 156*FU, FU, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1, color_profile), "right", txtpadding)
+				write(v, prefix..'TNUM', (tally_x_row1+160-mania_move)*FU, 156*FU, FU, tally_totalcalculation, 0, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", txtpadding)
 			else
 				v.draw(tally_x_row5+29, 91, v.cachePatch(prefix..'TBICON'), 0, cached_tallyskincolor)
-				v.draw(tally_x_row5, 92, v.cachePatch(prefix..'TTSCORE'), 0, v.getColormap(TC_DEFAULT, 1, color_profile))
+				v.draw(tally_x_row5, 92, v.cachePatch(prefix..'TTSCORE'), 0, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 				v.draw(tally_x_row5+160, 92, v.cachePatch(prefix..'TBICONNUM'))
-				drawf(v, prefix..'TNUM', (tally_x_row5+160)*FU, 92*FU, FU, p.score, 0, v.getColormap(TC_DEFAULT, 1, color_profile), "right", txtpadding)
+				write(v, prefix..'TNUM', (tally_x_row5+160)*FU, 92*FU, FU, p.score, 0, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", txtpadding)
 			end
 		end
 	end
@@ -1270,6 +1341,46 @@ end, "intermission", 1, 3)
 
 --#endregion
 
+--#region COLLECTIBLES
+
+local emblemsprites = {
+	[0] = "EMBVANILLA",
+	[1] = "EMBCLASSIC",
+	[2] = "EMBSONICR"
+}
+
+HOOK("tabemblems", "classichud", function(v)
+	if menu_toggle then return end
+	local cv = Options:getCV("emblems")[1]
+	local value = emblemsprites[cv and cv.value or 0] or "EMBVANILLA"
+
+	v.draw(253, 29, v.cachePatch(value), V_SNAPTORIGHT|V_SNAPTOTOP)
+
+	write(v, 'LIFENUM', 280*FU, 30*FU, FU, emblems, V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
+	write(v, 'LIFENUM', 280*FU, 37*FU, FU, "/"..(numemblems+numextraemblems), V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
+end, "scores", 1, 3)
+
+local tokensprites = {
+	[0] = "TOKVANILLA",
+	[1] = "TOK3DBLAST",
+	[2] = "TOKSONICR",
+	[3] = "TOKORIGINS",
+}
+
+HOOK("tokens", "classichud", function(v)
+	if menu_toggle then return end
+	if not token then return end
+	
+	local cv = Options:getCV("tokensprite")[1]
+	local value = tokensprites[cv and cv.value or 0] or "TOKVANILLA"
+
+	v.draw(257, 48, v.cachePatch(value), V_SNAPTORIGHT|V_SNAPTOTOP)
+
+	write(v, 'LIFENUM', 280*FU, 53*FU, FU, token, V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
+end, "scores", 1, 3)
+
+--#endregion
+
 --
 --	MENU
 --
@@ -1284,40 +1395,32 @@ local press_delay = 0
 local offset_y = 0
 local offset_x = 0
 local prevsel = 0
+local menufin = 180
 
 local holding_scores = false
 local holding_tics = 1
 local distitems = 57
 local disttimer = FRACUNIT/(distitems/12)
 
-local music_turnback = false
-local musicdelay = nil
-local musicfile = freeslot("sfx_options2")
-local musictics = tofixed("6.455") * TICRATE / FRACUNIT
-local musicruntime
+local musicfile = "OPTS2"
+local musicprev = nil
+local musicprev_pos = nil
+local musicprev_looppoint = nil
 
 HOOK("classic_menu", "classichud", function(v, p, t, e)
 	if menu_toggle then
-		if offset_x < 180 then
+		if offset_x < menufin then
 			offset_x = $+10
 		else
-			offset_x = 180
+			offset_x = menufin
 		end
 	else
 		if offset_x then
 			offset_x = 2*offset_x/3
-		else
-			if music_turnback then
-				S_SetInternalMusicVolume(100, p)
-				music_turnback = nil
-			end
 		end
 	end
 
 	if offset_x then
-		S_SetInternalMusicVolume(10 + 90 - (offset_x * 90 / 180), p)
-		music_turnback = true
-
 		local x_off = offset_x-105
 		local slide = offset_x-180
 
@@ -1433,7 +1536,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 						local num = set[3]
 
 						if num ~= nil then
-							drawf(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", num)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
+							write(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", num)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
 						end
 
 						if opt ~= nil then
@@ -1449,7 +1552,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 						end
 					end
 				elseif item.cv then
-					drawf(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
+					write(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
 					local font = "center"
 					local yfnt = y+17
 
@@ -1483,7 +1586,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 				v.drawString(x_off, yfnt, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT|V_SNAPTOTOP, font)
 			elseif type(item) == "string" then
 				local y = 100+i*distitems-z
-				drawf(v, 'S3KTT', x_off*FU, (y-8)*FU, FU, item, V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
+				write(v, 'S3KTT', x_off*FU, (y-8)*FU, FU, item, V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
 			end
 		end
 
@@ -1524,7 +1627,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 
 
 		if menuactive or gamestate ~= GS_LEVEL then
-			menu_toggle = false
+			MENU_DISABLE()
 		end
 
 		if press_delay then
@@ -1537,31 +1640,33 @@ end, "game", 16, 3)
 addHook("PlayerThink", function(p)
 	if menu_toggle then
 		p.pflags = $|PF_FORCESTRAFE|PF_JUMPDOWN|PF_USEDOWN
-	
-		if offset_x == 180
-		and (musicdelay == nil or not ((leveltime + musicdelay) % musictics)) then
-			S_StartSound(p.mo, musicfile, p)
-			musicruntime = true
-			
-			if musicdelay == nil then
-				musicdelay = abs(musictics - (leveltime % musictics))
+
+		if offset_x > (menufin/2) then
+			local current = S_MusicName(p)
+
+			if current == nil or current ~= musicfile then
+				musicprev = current
+				musicprev_pos = S_GetMusicPosition()
+				musicprev_looppoint = S_GetMusicLoopPoint(p)
+				S_ChangeMusic(musicfile, true, p)
 			end
 		end
 	elseif menu_toggle == false then
 		p.pflags = $ &~ PF_FORCESTRAFE|PF_JUMPDOWN|PF_USEDOWN
 		menu_toggle = nil
 
-		if musicruntime and S_SoundPlaying(p.mo, musicfile) then
-			S_StopSoundByID(p.mo, musicfile)
-			musicruntime = nil
-			musicdelay = nil
+		if musicprev then
+			S_ChangeMusic(musicprev, musicprev_looppoint ~= nil, p, nil, musicprev_pos, MUSICRATE/4)
+			musicprev = nil
+			musicprev_pos = nil
+			musicprev_looppoint = nil
 		end
 	end
 end)
 
 addHook("KeyDown", function(key_event)
 	if menu_toggle and key_event.name == "escape" then
-		menu_toggle = false
+		MENU_DISABLE()
 		return true
 	end
 end)
@@ -1675,7 +1780,7 @@ addHook("PlayerCmd", function(p, cmd)
 			end
 
 			if cmd.buttons & BT_SPIN then
-				menu_toggle = false
+				MENU_DISABLE()
 			end
 
 			if cmd.buttons & BT_CUSTOM1 then
@@ -1712,7 +1817,7 @@ addHook("PlayerCmd", function(p, cmd)
 				holding_scores = nil
 				holding_tics = 1
 
-				menu_toggle = true
+				MENU_ENABLE()
 				press_delay = 16
 			end
 

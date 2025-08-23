@@ -152,7 +152,7 @@ end
 
 --- Gets the tag, value, and raw value of a CVAR option.
 ---@param name string The name of the option.
----@return table|nil any A table containing the tag, value, and raw value, or nil if not found
+---@return table<string name, any value, integer option>|nil any A table containing the tag, value, and raw value, or nil if not found
 function module:getvalue(name)
 	if not self.database[name] then return end
 	local item = self.database[name]

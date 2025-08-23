@@ -9,7 +9,6 @@ local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
 local textlen = drawlib.text_lenght
-local fontlen = drawlib.lenght
 
 local clamping = tbsrequire 'helpers/anim_clamp'
 
@@ -51,7 +50,7 @@ return{
 				end
 			end
 
-			---@diagnostic disable-next-line			
+			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
 				drawf(v, 'S3BTFNT', (262-titlelenm)*FU-tryx-offset*3, 90*FU, FU, "ZONE", 0, v.getColormap(TC_DEFAULT, 1, translation), "left")
 			end
@@ -63,7 +62,7 @@ return{
 		end
 	end,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
@@ -91,7 +90,13 @@ return{
 			end
 
 			if G_GametypeUsesLives() then
-				drawf(v, prefix..'TNUM', (lives_x+18)*FU, (lives_y+1)*FU, FU, 'X'..p.lives, lives_f, colorprofile, "left")
+				local lives = p.lives
+
+				if lives == INFLIVES then
+					lives = "I"
+				end
+
+				drawf(v, prefix..'TNUM', (lives_x+18)*FU, (lives_y+1)*FU, FU, 'X'..lives, lives_f, colorprofile2, "left")
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)
 			end
@@ -120,7 +125,7 @@ return{
 
 		drawf(v, 'S3BTFNT', (72-offsetx)*FU, 66*FU, FU, gotthrough)
 
-		-- TODO: Check for level long (ZONE) in S3K and 3D Blast
+		-- TODO: Check for level long (ZONE) in S3K and 3D Blast to cut it... likely do it in every other case smh :V
 		if act ~= "0" then
 			drawf(v, 'S3BTFNT', (200-offsetx)*FU, 72*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 		end
