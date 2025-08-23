@@ -1670,6 +1670,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 	return true
 end, "game", 16, 3)
 
+-- Fix return
 addHook("PlayerThink", function(p)
 	if menu_toggle then
 		p.pflags = $|PF_FORCESTRAFE|PF_JUMPDOWN|PF_USEDOWN
@@ -1677,7 +1678,7 @@ addHook("PlayerThink", function(p)
 		if offset_x > (menufin/2) then
 			local current = S_MusicName(p)
 
-			if current == nil or current ~= musicfile then
+			if current ~= nil and current ~= musicfile then
 				musicprev = current
 				musicprev_pos = S_GetMusicPosition()
 				musicprev_looppoint = S_GetMusicLoopPoint(p)
