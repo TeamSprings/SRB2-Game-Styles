@@ -5,8 +5,6 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
--- TODO: NIGHTS
-
 ]]
 
 local modio = tbsrequire 'classic_io'
@@ -82,7 +80,7 @@ local COM_MENU = "classic_menu"
 
 COM_AddCommand(COM_MENU, function(p, var1)
 	if consoleplayer ~= p then return end
-	
+
 	if modio.embedded then
 		---@diagnostic disable-next-line
 		menu_toggle = nil
@@ -777,15 +775,14 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 		v.draw(74, 12, v.cachePatch("MINICAPS"), V_HUDTRANS|V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP);
 
 		if (stplyr.capsule.reactiontime ~= 0) then
-			--[[
 
 			local orblength = 20;
 
 			for r = 0, 5 do
-				V_DrawScaledPatch(230 - (7*r), 144, V_PERPLAYER|V_HUDTRANS, redstat);
-				V_DrawScaledPatch(188 - (7*r), 144, V_PERPLAYER|V_HUDTRANS, orngstat);
-				V_DrawScaledPatch(146 - (7*r), 144, V_PERPLAYER|V_HUDTRANS, yelstat);
-				V_DrawScaledPatch(104 - (7*r), 144, V_PERPLAYER|V_HUDTRANS, byelstat);
+				v.draw(230 - (7*r), 144, v.cachePatch("REDSTAT"), V_PERPLAYER|V_HUDTRANS);
+				v.draw(188 - (7*r), 144, v.cachePatch("ORNGSTAT"), V_PERPLAYER|V_HUDTRANS);
+				v.draw(146 - (7*r), 144, v.cachePatch("YELSTAT"), V_PERPLAYER|V_HUDTRANS);
+				v.draw(104 - (7*r), 144, v.cachePatch("BYELSTAT"), V_PERPLAYER|V_HUDTRANS);
 			end
 
 			amount = (origamount - stplyr.capsule.health);
@@ -802,11 +799,9 @@ HOOK("nightsrings", "classichud", function(v, stplyr)
 					if (r > 10) then t = $ + 1 end;
 					if (r > 5) then t = $ + 1 end;
 
-					V_DrawScaledPatch(69 + (7*t), 144, V_PERPLAYER|V_HUDTRANS, bluestat);
+					v.draw(69 + (7*t), 144, v.cachePatch("BLUESTAT"), V_PERPLAYER|V_HUDTRANS);
 				end
 			end
-
-			]]
 		else
 			-- Lil' white box!
 			v.draw(15, 42, v.cachePatch("CAPSBAR"), V_PERPLAYER|V_SNAPTOLEFT|V_SNAPTOTOP|V_HUDTRANS);
@@ -1353,11 +1348,14 @@ HOOK("tabemblems", "classichud", function(v)
 	if menu_toggle then return end
 	local cv = Options:getCV("emblems")[1]
 	local value = emblemsprites[cv and cv.value or 0] or "EMBVANILLA"
+	local total = (numemblems or 0)+(numextraemblems or 0)
+
+	if total < 1 then return end
 
 	v.draw(253, 29, v.cachePatch(value), V_SNAPTORIGHT|V_SNAPTOTOP)
 
 	write(v, 'LIFENUM', 280*FU, 30*FU, FU, emblems, V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
-	write(v, 'LIFENUM', 280*FU, 37*FU, FU, "/"..(numemblems+numextraemblems), V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
+	write(v, 'LIFENUM', 280*FU, 37*FU, FU, "/"..total, V_SNAPTORIGHT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 0, numberscolor_opt()), "left", 1)
 end, "scores", 1, 3)
 
 local tokensprites = {
@@ -1370,7 +1368,7 @@ local tokensprites = {
 HOOK("tokens", "classichud", function(v)
 	if menu_toggle then return end
 	if not token then return end
-	
+
 	local cv = Options:getCV("tokensprite")[1]
 	local value = tokensprites[cv and cv.value or 0] or "TOKVANILLA"
 
@@ -1380,6 +1378,41 @@ HOOK("tokens", "classichud", function(v)
 end, "scores", 1, 3)
 
 --#endregion
+
+HOOK("pause", "classichud", function(v)
+	if not paused then return end
+
+	v.draw(160, 100, v.cachePatch(prefix..'TPAUSE'), 0)
+end, "game", 1, 3)
+
+HOOK("gameover", "classichud", function(v, player)
+	if not player.deadtimer then return end
+
+	if not ((G_GametypeUsesLives() or ((gametyperules & (GTR_RACE|GTR_LIVES)) == GTR_RACE)) and player.lives <= 0) then return end
+
+	local countdown = false
+	local tics = 0
+
+	-- tics recalculation
+	if (gametyperules & GTR_TIMELIMIT) and timelimit then
+		tics = max(60*timelimit*TICRATE - player.realtime, 0)
+		countdown = true
+	elseif mapheaderinfo[gamemap].countdown then
+		tics = tonumber(mapheaderinfo[gamemap].countdown) - player.realtime
+		countdown = true
+	end
+
+	local ease = ease.linear(min(player.deadtimer * FU / (gameovertics/3), FU), 500, 0)
+
+	if countdown and tics < 2 then
+		v.draw(160 - ease, 100, v.cachePatch(prefix..'TGOTIME'), 0)
+	else
+		v.draw(160 - ease, 100, v.cachePatch(prefix..'TGOGAME'), 0)
+	end
+
+	v.draw(160 + ease, 100, v.cachePatch(prefix..'TGOOVER'), 0)
+end, "game", 1, 3)
+
 
 --
 --	MENU

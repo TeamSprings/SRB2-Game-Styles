@@ -148,7 +148,6 @@ return{
 		end
 	end,
 
-	-- ADD ZONE
 	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
 
@@ -177,6 +176,8 @@ return{
 			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
 			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
 			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+		else
+			v.draw(214-offsetx, 76, v.cachePatch('S3KZONETAG'), 0)
 		end
 	end,
 

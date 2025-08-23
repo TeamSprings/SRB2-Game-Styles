@@ -223,7 +223,7 @@ addHook("PlayerThink", function(p)
     end
 
     if p.styles_tallyendtime
-    and styles_tallytimer ~= nil
+    and p.styles_tallytimer ~= nil
     and p.styles_exitcut ~= nil and p.styles_tallytimer > p.styles_tallyendtime-1 then
         if p.cmd and p.cmd.buttons & BT_SPIN
         and p.teamsprings_scenethread and p.teamsprings_scenethread.valid then
