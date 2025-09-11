@@ -49,10 +49,10 @@ local frame_offset = 0
 local icon_height = 0
 
 local style = Options:new("monitor", "assets/tables/sprites/monitor", function(var)
-	local sets = {13, 0, 3, 10, 6, 16}
+	local sets = {13, 0, 3, 10, 6, 16, 19, 22, 25, 28}
 	frame_offset = sets[var.value]
 
-	local heights = {14, 14, 20, 15, 14, 14}
+	local heights = {14, 14, 20, 15, 14, 17, 16, 16, 16, 14}
 	icon_height = heights[var.value]
 end)
 

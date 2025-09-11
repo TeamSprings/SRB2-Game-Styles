@@ -7,8 +7,8 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.820'
-rawset(_G, "Style_ClassicVersion", 3820)
+local packVersion = '3.830'
+rawset(_G, "Style_ClassicVersion", 3830)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active", true)
 
@@ -111,7 +111,9 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 	end)
 
 	-- RUN ALREADY
-	safeDoFile("libs/sal_lib-customhud-v4-4.lua")
+	safeDoFile("libs/sal_lib-customhud-v4-5.lua")
+
+	safeDoFile("libs/lib_emb_aliases.lua")
 
 	-- Game Assets
 	safeDoFile(gameString.."_init.lua")

@@ -28,6 +28,14 @@ local prerankhook = api:addHook("PreRankSetup") -- Unused for other styles
 local rankhook = 	api:addHook("RankSetup") -- Unused for other styles
 
 --
+--	Setpiece functions
+--
+
+local styles_skiptally = false
+local customexit = nil
+local lastspecialsector = nil
+
+--
 --	Console Variable
 --
 
@@ -60,16 +68,50 @@ addHook("AddonLoaded", function()
 	end
 end)
 
-addHook("PlayerSpawn", function(p)
+addHook("PlayerSpawn", function(player)
 	if change_var > -1 then
 		end_tallyenabled = change_var
 		change_var = -1
 	end
+
+	if not multiplayer then return end
+
+	local playerlate = true
+	local count = 0
+
+	for p in players.iterate() do
+		count = $ + 1
+		
+		if p == player then continue end
+
+		if p.styles_tallytimer == nil then
+			playerlate = false
+		end
+	end
+
+	if count < 2 then return end
+
+	if player and playerlate then
+		P_DoPlayerFinish(player)
+	end
+end)
+
+addHook("NetVars", function(net)
+	styles_skiptally = net($)
+	customexit = net($)
+	lastspecialsector = net($)
+	specialpackdetected = net($)
+	end_tallyenabled = net($)
 end)
 
 addHook("MapLoad", function()
+	styles_skiptally = false
+	customexit = nil
+	lastspecialsector = nil
+
 	for p in players.iterate() do
 		p.styles_tallytimer = nil
+		p.styles_tallyfinished = nil
 
 		-- Anti exploit measure
 		if p.styles_tallylastscore then
@@ -86,19 +128,14 @@ addHook("MapLoad", function()
 	end
 end)
 
-
---
---	Setpiece functions
---
-
-local styles_skiptally = false
-local customexit = nil
-local lastspecialsector = nil
-
 --
 -- Switch & Updated definition of G_SetCustomExitVars for mod support.
 -- Such a horrible unprotected way to do @override
 --
+
+local G_CheckIfSectorIsCustomExit
+local G_InteprateStyleSectors
+local G_InitiateNewExit
 
 if keepcutscene == nil and mapexitflags == nil then
 
@@ -159,7 +196,7 @@ if keepcutscene == nil and mapexitflags == nil then
 	-- 	Setup functions
 	--
 
-	local function G_CheckIfSectorIsCustomExit(s)
+	G_CheckIfSectorIsCustomExit = function(s)
 		local result = nil
 
 		for l in lines.tagged(s.tag) do
@@ -179,7 +216,7 @@ if keepcutscene == nil and mapexitflags == nil then
 		return result
 	end
 
-	local function G_InteprateStyleSectors(finish)
+	G_InteprateStyleSectors = function(finish)
 		if not finish then return end
 
 		local binary_skip = ((finish[5] & ML_NOCLIMB) and true or styles_skiptally)
@@ -198,7 +235,7 @@ if keepcutscene == nil and mapexitflags == nil then
 		lastspecialsector = finish
 	end
 
-	local function G_InitiateNewExit()
+	G_InitiateNewExit = function()
 		G_SetCustomExitOriginal(nil or customexit, 1)
 	end
 
@@ -285,7 +322,7 @@ local function G_StylesExitLevel()
 end
 
 local function G_StylesTallyBackend(p)
-	if (multiplayer and not splitscreen) or not end_tallyenabled then return end
+	if not end_tallyenabled then return end
 	if not (p.mo and p.mo.valid) then return end
 	if specialpackdetected then return end
 	if p.bot then return end
@@ -300,9 +337,14 @@ local function G_StylesTallyBackend(p)
 
 	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
 
-		G_StylesSetupTally(p)
-
 		if G_EnoughPlayersFinished() then
+			G_StylesSetupTally(p)
+
+			if p.styles_tallyfinished then
+				p.exiting = 2
+				return
+			end
+
 			if not styles_skiptally then
 				if not stagefailed then
 					G_StylesGrantEmerald(p)
@@ -401,10 +443,16 @@ local function G_StylesTallyBackend(p)
 					p.styles_tallytimer = $+1
 
 					if p.styles_tallytimer > p.styles_tallyendtime and p.styles_exitcut == nil then
-						p.exiting = 1
+
 						p.styles_tallylastscore = p.score
 						p.styles_tallylastlives = p.lives
-						G_StylesExitLevel()
+
+						if multiplayer then
+							p.styles_tallyfinished = true
+						else
+							p.exiting = 1
+							G_StylesExitLevel()
+						end
 
 						endhook(p.realmo and p.realmo.skin or p.skin, p)
 						return
@@ -426,6 +474,7 @@ end
 addHook("MapChange", function()
 	for p in players.iterate do
 		p.styles_tallytimer = nil
+		p.styles_tallyfinished = nil
 	end
 
 	customexit = nil
@@ -434,3 +483,36 @@ end)
 
 
 addHook("PlayerThink", G_StylesTallyBackend)
+
+addHook("ThinkFrame", function()
+	if not multiplayer then return end
+
+	if not end_tallyenabled then return end
+	
+	if specialpackdetected then return end
+	
+	if marathonmode then return end
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return
+	end
+
+	local specialstage = G_IsSpecialStage(gamemap)
+
+	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
+
+		if G_EnoughPlayersFinished() then
+			local notyet = false
+			
+			for p in players.iterate() do
+				if p.styles_tallyfinished ~= true then
+					notyet = true
+				end
+			end
+
+			if not notyet then
+				G_StylesExitLevel()
+			end
+		end
+	end
+end)

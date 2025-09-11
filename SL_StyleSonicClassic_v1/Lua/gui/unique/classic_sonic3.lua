@@ -11,7 +11,7 @@ local drawf = drawlib.draw
 local textlen = drawlib.text_lenght
 
 local min_lifelen = 6*4
-local min_lifexap = 6*5+2
+local min_lifexap = 6*5-2
 local max_lifelen = 7*9
 
 local clamping = tbsrequire 'helpers/anim_clamp'
@@ -154,7 +154,7 @@ return{
 		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
-		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
+		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"), V_PERPLAYER)
 
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
@@ -163,27 +163,26 @@ return{
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
 
-			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
+			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, V_PERPLAYER, color_1, color_2, "right")
 		else
 			local skin_name = "YOU"
 			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
+			drawS3KTXT(v, (158-offsetx)*FU, 54*FU, FU, skin_name, V_PERPLAYER, color_1, color_2, "right")
 		end
 
 		if act ~= "0" then
-			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
-			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
-			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), V_PERPLAYER)
+			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), V_PERPLAYER)
+			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		else
-			v.draw(214-offsetx, 76, v.cachePatch('S3KZONETAG'), 0)
+			v.draw(214-offsetx, 76, v.cachePatch('S3KZONETAG'), V_PERPLAYER)
 		end
 	end,
 
 	tallyspecial = function(v, p, offsetx, color, color2)
 		local mo = p.mo
-		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		local str = "CHAOS EMERALDS"
 
@@ -197,6 +196,6 @@ return{
 			end
 		end
 
-		drawS3KTXT(v, 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+		drawS3KTXT(v, 160*FU, 48*FU, FU, str, V_PERPLAYER, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
 	end,
 }

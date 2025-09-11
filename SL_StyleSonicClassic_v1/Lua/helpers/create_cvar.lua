@@ -17,12 +17,16 @@ local option_t = {
 ---@param func function? The function to call when the CVAR changes.
 ---@param addflags number? Additional flags for the CVAR.
 ---@param priority number? The priority of the CVAR for loading.
+---@param nametag string? Adds name for menus and auto assigns CV_MENU
+---@param category string? Adds category for menus and auto assigns CV_MENU
 ---@return table any A table containing information about the CVAR option.
-function module:new(name, path, func, addflags, priority)
+function module:new(name, path, func, addflags, priority, nametag, category)
 	local get = type(path) == "string" and tbsrequire(path) or path
 
 	self.database[name] = {
 		name = name,
+		nametag = nametag,
+		category = category,
 		
 		cv = nil,
 		
@@ -63,6 +67,10 @@ function module:new(name, path, func, addflags, priority)
 		flags = $|CV_CALL
 	end
 
+	if CV_MENU and (nametag or category) then
+		flags = $|CV_MENU
+	end
+
 	-- setuping up cvar
 
 	self.database[name].cv = modio:register(priority or 0, {
@@ -70,6 +78,8 @@ function module:new(name, path, func, addflags, priority)
 		defaultvalue = minv,
 		flags = flags,
 		func = func,
+		displayname = nametag,
+		category = category,
 		PossibleValue = possible_values
 	})
 

@@ -2,9 +2,6 @@
 
 		Special Stage Entrance Handler
 
-	While possible to make work in multiplayer, it makes absolutely no sense design wise.
-	Therefore no multiplayer support, ever. :P
-
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
@@ -102,7 +99,7 @@ local entrance_opt = Options:new("specialentrance", "gameplay/cvars/specialtoken
 		else
 			-- first of many cheating measures
 			if change_var == -1 or anotherlvl then
-				print("[Classic Styles] Please restart the game or escape to the main menu for changes to take effect.")
+				print("[Classic Styles] Please restart the game for the change to take effect.")
 				anotherlvl = nil
 			end
 		end
@@ -111,11 +108,23 @@ local entrance_opt = Options:new("specialentrance", "gameplay/cvars/specialtoken
 	end
 end, CV_NETVAR)
 
+local force_opt = Options:new("forcespecial", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
+
 rawset(_G, "StylesC_SPE", function()
 	return special_entrance
 end)
 
-local entrance_cv = entrance_opt.cv
+rawset(_G, "Styles_SpecialEntryAvailable", function()
+	local forced = force_opt()
+
+	if forced then
+		return true
+	elseif (multiplayer and not splitscreen) then
+		return false
+	end
+
+	return true
+end)
 
 --
 --	Functions
@@ -137,7 +146,9 @@ local function P_GiantRingCheck(a)
 				return
 			else
 				if a.state ~= giantring_endstage then
-					if a.state ~= giantring_used then
+					if a.state == giantring_used then
+						a.flags2 = MF2_DONTDRAW
+					else
 						a.state = (a.state == giantring and giantring_tiny or giantring_tinyhyper)
 					end
 					a.scale = a.scale/4
@@ -165,42 +176,36 @@ local function SP_SaveState(mobj, toucher)
 
 	if mapthing then
 		local storage = maps_data[gamemap]
-		storage.x = displayplayer.mo.x
-		storage.y = displayplayer.mo.y
-		storage.z = displayplayer.mo.z
-		storage.angle = displayplayer.mo.angle
-		storage.scale = displayplayer.mo.scale
-		storage.starpostx = displayplayer.starpostx
-		storage.starposty = displayplayer.starposty
-		storage.starpostz = displayplayer.starpostz
-		storage.starpostnum = displayplayer.starpostnum
-		storage.starposttime = displayplayer.starposttime
-		storage.starpostangle = displayplayer.starpostangle
-		storage.starpostscale = displayplayer.starpostscale
-		storage.flags = displayplayer.mo.flags &~ MF_NOTHINK
-		storage.flags2 = displayplayer.mo.flags2
-		storage.eflags = displayplayer.mo.eflags
-		storage.player1 = true
 
 		storage.leveltime = leveltime
+		storage.players = {}
 
-		if splitscreen and secondarydisplayplayer then
-			storage.p2x = secondarydisplayplayer.mo.x
-			storage.p2y = secondarydisplayplayer.mo.y
-			storage.p2z = secondarydisplayplayer.mo.z
-			storage.p2angle = secondarydisplayplayer.mo.angle
-			storage.p2scale = secondarydisplayplayer.mo.scale
-			storage.p2starpostx = secondarydisplayplayer.starpostx
-			storage.p2starposty = secondarydisplayplayer.starposty
-			storage.p2starpostz = secondarydisplayplayer.starpostz
-			storage.p2starpostnum = secondarydisplayplayer.starpostnum
-			storage.p2starposttime = secondarydisplayplayer.starposttime
-			storage.p2starpostangle = secondarydisplayplayer.starpostangle
-			storage.p2starpostscale = secondarydisplayplayer.starpostscale
-			storage.p2flags = secondarydisplayplayer.mo.flags &~ MF_NOTHINK
-			storage.p2flags2 = secondarydisplayplayer.mo.flags2
-			storage.p2eflags = secondarydisplayplayer.mo.eflags
-			storage.player2 = true
+		for player in players.iterate() do
+			if not ((player.mo and player.mo.valid) or (player.realmo and player.realmo.valid)) then continue end
+
+			storage.players[#player] = {}
+			local store = storage.players[#player]
+			local mo = player.realmo or player.mo
+
+			store.x = mo.x
+			store.y = mo.y
+			store.z = mo.z
+
+			store.angle = mo.angle
+			store.scale = mo.scale
+
+			store.starpostx      = player.starpostx
+			store.starposty      = player.starposty
+			store.starpostz      = player.starpostz
+
+			store.starpostnum    = player.starpostnum
+			store.starposttime   = player.starposttime
+			store.starpostangle  = player.starpostangle
+			store.starpostscale  = player.starpostscale
+
+			store.flags          = mo.flags &~ MF_NOTHINK
+			store.flags2         = mo.flags2
+			store.eflags         = mo.eflags
 		end
 
 		if not maps_data[gamemap].delete then
@@ -227,145 +232,68 @@ end
 local function SP_LoadState(map)
 	if maps_data[map] then
 		local data = maps_data[map]
+		local checkpoint_trigger = 0
 
-		if data.delete then
-			local checkpoint_trigger = 0
+		if data.players then
+			for player in players.iterate() do
+				if not ((player.mo and player.mo.valid) or (player.realmo and player.realmo.valid)) then
+					continue
+				end
 
-			--
-			--	PLAYER 1
-			--
+				local mo = player.realmo or player.mo
 
-			if displayplayer.mo and data.player1 then
-				displayplayer.starpostx = data.starpostx
-				displayplayer.starposty = data.starposty
-				displayplayer.starpostz = data.starpostz
-				displayplayer.starpostnum = data.starpostnum
-				displayplayer.starposttime = max(data.starposttime, data.leveltime)
-				displayplayer.starpostangle = data.starpostangle
-				displayplayer.starpostscale = data.starpostscale
-				checkpoint_trigger = data.starpostnum
+				if not data.players[#player] then
+					if mo then player.style_additionaltime = 0 end
+					continue
+				end
 
-				displayplayer.style_additionaltime = max(data.starposttime, data.leveltime)
-				displayplayer.mo.alpha = FU
+				local store = data.players[#player]
 
-				displayplayer.mo.flags = data.flags &~ MF_NOTHINK
-				displayplayer.mo.flags2 = data.flags2
-				displayplayer.mo.eflags = data.eflags
+				player.starpostx     = store.starpostx
+				player.starposty     = store.starposty
+				player.starpostz     = store.starpostz
+				player.starpostnum   = store.starpostnum
+				player.starposttime  = max(store.starposttime, data.leveltime or 0)
+				player.starpostangle = store.starpostangle
+				player.starpostscale = store.starpostscale
 
-				displayplayer.powers[pw_flashing] = 2*TICRATE
+				checkpoint_trigger   = max(store.starpostnum, checkpoint_trigger)
 
-				local subsector = R_PointInSubsectorOrNil(data.x, data.y)
+				mo.alpha = FU
+
+				mo.flags  = store.flags &~ MF_NOTHINK
+				mo.flags2 = store.flags2
+				mo.eflags = store.eflags
+
+				player.powers[pw_flashing] = 2*TICRATE
+				player.style_additionaltime = max(store.starposttime, data.leveltime or 0)
+
+				local subsector = R_PointInSubsectorOrNil(store.x, store.y)
 
 				if subsector and subsector.sector then
 					local sector = subsector.sector
 
 					if (sector.damagetype > 0
-					or (displayplayer.mo.floorrover and displayplayer.mo.floorrover.sector and displayplayer.mo.floorrover.sector.damagetype > 0)
-					or (displayplayer.mo.ceilingrover and displayplayer.mo.ceilingrover.sector and displayplayer.mo.ceilingrover.sector.damagetype > 0))
-					and displayplayer.starpostnum > 0 then
-						P_SetOrigin(displayplayer.mo, displayplayer.starpostx, displayplayer.starposty, displayplayer.starpostz)
-						displayplayer.mo.angle = data.starpostangle
-						displayplayer.mo.scale = data.starpostscale
+					or (mo.floorrover and mo.floorrover.sector and mo.floorrover.sector.damagetype > 0)
+					or (mo.ceilingrover and mo.ceilingrover.sector and mo.ceilingrover.sector.damagetype > 0))
+					and player.starpostnum > 0 then
+						P_SetOrigin(mo, store.starpostx, store.starposty, store.starpostz)
+						mo.angle = store.starpostangle
+						mo.scale = store.starpostscale
 					elseif sector.damagetype == 0
-					or (displayplayer.mo.floorrover and displayplayer.mo.floorrover.sector and displayplayer.mo.floorrover.sector.damagetype > 0)
-					or (displayplayer.mo.ceilingrover and displayplayer.mo.ceilingrover.sector and displayplayer.mo.ceilingrover.sector.damagetype > 0)	then
-						P_SetOrigin(displayplayer.mo, data.x, data.y, data.z)
-						displayplayer.mo.angle = data.angle
-						displayplayer.mo.scale = data.scale
+					or (mo.floorrover and mo.floorrover.sector and mo.floorrover.sector.damagetype > 0)
+					or (mo.ceilingrover and mo.ceilingrover.sector and mo.ceilingrover.sector.damagetype > 0)	then
+						P_SetOrigin(mo, store.x, store.y, store.z)
+						mo.angle = store.angle
+						mo.scale = store.scale
 					end
 				end
 
-				data.x = nil
-				data.y = nil
-				data.z = nil
-				data.angle = nil
-				data.scale = nil
-				data.starpostx = nil
-				data.starposty = nil
-				data.starpostz = nil
-				data.starpostnum = nil
-				data.starposttime = nil
-				data.starpostangle = nil
-				data.starpostscale = nil
-				data.flags = nil
-				data.flags2 = nil
-				data.eflags = nil
-
-				data.player1 = nil
-			elseif displayplayer.mo then
-				displayplayer.style_additionaltime = 0
+				data.players[#player] = nil
 			end
+		end
 
-			--
-			--	PLAYER 2
-			--
-
-			if splitscreen and secondarydisplayplayer and secondarydisplayplayer.mo and data.player2 then
-				P_SetOrigin(secondarydisplayplayer.mo, data.p2x, data.p2y, data.p2z)
-				secondarydisplayplayer.mo.angle = data.p2angle
-				secondarydisplayplayer.mo.scale = data.p2scale
-				secondarydisplayplayer.starpostx = data.p2starpostx
-				secondarydisplayplayer.starposty = data.p2starposty
-				secondarydisplayplayer.starpostz = data.p2starpostz
-				secondarydisplayplayer.starpostnum = data.p2starpostnum
-				secondarydisplayplayer.starposttime = max(data.p2starposttime, data.leveltime)
-				secondarydisplayplayer.starpostangle = data.p2starpostangle
-				secondarydisplayplayer.starpostscale = data.p2starpostscale
-				checkpoint_trigger = max(checkpoint_trigger, data.p2starpostnum)
-
-				secondarydisplayplayer.style_additionaltime = max(data.p2starposttime, data.leveltime)
-				secondarydisplayplayer.mo.alpha = FU
-
-				secondarydisplayplayer.mo.flags = data.p2flags &~ MF_NOTHINK
-				secondarydisplayplayer.mo.flags2 = data.p2flags2
-				secondarydisplayplayer.mo.eflags = data.p2eflags
-
-				secondarydisplayplayer.powers[pw_flashing] = TICRATE
-
-				local subsector = R_PointInSubsectorOrNil(data.x, data.y)
-
-				if subsector and subsector.sector then
-					local sector = subsector.sector
-
-					if ((sector.damagetype > 0)
-					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
-					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0))
-					and secondarydisplayplayer.starpostnum > 0 then
-						P_SetOrigin(secondarydisplayplayer.mo, secondarydisplayplayer.starpostx, secondarydisplayplayer.starposty, secondarydisplayplayer.starpostz)
-						secondarydisplayplayer.mo.angle = data.starpostangle
-						secondarydisplayplayer.mo.scale = data.starpostscale
-					elseif sector.damagetype == 0
-					or (secondarydisplayplayer.mo.floorrover and secondarydisplayplayer.mo.floorrover.sector and secondarydisplayplayer.mo.floorrover.sector.damagetype > 0)
-					or (secondarydisplayplayer.mo.ceilingrover and secondarydisplayplayer.mo.ceilingrover.sector and secondarydisplayplayer.mo.ceilingrover.sector.damagetype > 0) then
-						P_SetOrigin(secondarydisplayplayer.mo, data.x, data.y, data.z)
-						secondarydisplayplayer.mo.angle = data.angle
-						secondarydisplayplayer.mo.scale = data.scale
-					end
-				end
-
-				data.p2x = nil
-				data.p2y = nil
-				data.p2z = nil
-				data.p2angle = nil
-				data.p2scale = nil
-				data.p2starpostx = nil
-				data.p2starposty = nil
-				data.p2starpostz = nil
-				data.p2starpostnum = nil
-				data.p2starposttime = nil
-				data.p2starpostangle = nil
-				data.p2starpostscale = nil
-				data.p2flags = nil
-				data.p2flags2 = nil
-				data.p2eflags = nil
-
-				data.player2 = nil
-			elseif secondarydisplayplayer and secondarydisplayplayer.mo then
-				secondarydisplayplayer.style_additionaltime = 0
-			end
-
-			data.leveltime = 0
-
+		if data.delete then
 			for _,v in ipairs(data.delete) do
 				if mapthings[v] and mapthings[v].mobj then
 					local replacement = P_SpawnMobjFromMobj(mapthings[v].mobj, 0, 0, 0, MT_GFZFLOWER2)
@@ -377,28 +305,25 @@ local function SP_LoadState(map)
 					replacement.styles_sizecheck = true
 				end
 			end
+		end
 
-			if checkpoint_trigger then
-				for mobj in mobjs.iterate() do
-					if mobj.type ~= MT_STARPOST then
-						continue
-					end
-
-					if mobj.health > checkpoint_trigger then
-						continue
-					end
-
-					mobj.state = S_STARPOST_FLASH
+		if checkpoint_trigger then
+			for mobj in mobjs.iterate() do
+				if mobj.type ~= MT_STARPOST then
+					continue
 				end
-			end
 
-			specialstage_returnevent("Generic", data)
-		else
-			displayplayer.style_additionaltime = 0
-			if splitscreen and secondarydisplayplayer then
-				secondarydisplayplayer.style_additionaltime = 0
+				if mobj.health > checkpoint_trigger then
+					continue
+				end
+
+				mobj.state = S_STARPOST_FLASH
 			end
 		end
+
+		data.leveltime = 0
+
+		specialstage_returnevent("Generic", data)
 	end
 end
 
@@ -442,7 +367,7 @@ addHook("AddonLoaded", function()
 	end
 end)
 
-addHook("GameQuit", function()
+addHook(demoplayback == nil and "GameQuit" or "GameStart", function()
 	maps_data = {}
 	last_map = 0
 
@@ -452,12 +377,19 @@ addHook("GameQuit", function()
 	end
 end)
 
+addHook("NetVars", function(net)
+	special_entrance = net($)
+	last_map = net($)
+
+	maps_data = net($)
+end)
+
 --
 --	BIG RING ENTRANCE
 --
 
 addHook("MapThingSpawn", function(a)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if specialpackdetected then return end
 
 	if not special_entrance or special_entrance == 3 then
@@ -468,7 +400,7 @@ addHook("MapThingSpawn", function(a)
 end, MT_TOKEN)
 
 addHook("MapThingSpawn", function(a)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance or special_entrance ~= 1 then return end
 	if specialpackdetected then return end
 
@@ -479,7 +411,7 @@ addHook("MapThingSpawn", function(a)
 end, MT_SIGN)
 
 addHook("MobjThinker", function(a)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance or special_entrance ~= 1 then return end
 	if specialpackdetected then return end
 
@@ -493,7 +425,7 @@ addHook("MobjThinker", function(a)
 end, MT_SIGN)
 
 addHook("MobjSpawn", function(a)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance then return end
 	if specialpackdetected then return end
 
@@ -505,22 +437,30 @@ addHook("MobjSpawn", function(a)
 		a.height = original_height
 	end
 
-	a.state = All7Emeralds(emeralds) and giantring_hyper
-	or (special_entrance == 1 and giantring_endstage or giantring)
+	if All7Emeralds(emeralds) then
+		a.state = giantring_hyper
+	else
+		a.state = (special_entrance == 1 and giantring_endstage or giantring)
+	end
+
+	if special_entrance == 3 then
+		a.styles_scalingtimer = 0
+		a.styles_scaling = a.spritexscale
+	end
 
 	a.flags = $|MF_SPECIAL
 	a.shadowscale = FU/4
 end, MT_TOKEN)
 
 addHook("TouchSpecial", function(a, k)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance then return end
 	if specialpackdetected then return end
 	return true
 end, MT_TOKEN)
 
 addHook("MobjCollide", function(a, k)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance then return false end
 	if specialpackdetected then return end
 	if not k.player then return false end
@@ -576,10 +516,13 @@ addHook("MobjCollide", function(a, k)
 	return false
 end, MT_TOKEN)
 
+local ringsize_playerdist = 2048
+local ringsize_speed = FU / (3 * TICRATE / 2)
+
 addHook("MobjThinker", function(a)
 	-- Token Sprite Switching
 
-	if not special_entrance or specialpackdetected or (multiplayer and not splitscreen) then
+	if not special_entrance or specialpackdetected or not Styles_SpecialEntryAvailable() then
 		local sprite = Options:getPureValue("tokensprite")
 
 		if a.health > 0 and a.state ~= sprite[1] then
@@ -597,14 +540,46 @@ addHook("MobjThinker", function(a)
 	end
 
 	-- Making sure that FOFs are loaded before checking, can't use mobj spawn due to order of things.
-	if leveltime > 2 and not a.styles_sizecheck then
+	if not a.styles_sizecheck and leveltime > 2 then
 		P_GiantRingCheck(a)
+
+		if a.state ~= giantring and a.state ~= giantring_hyper then
+			a.styles_noscaling = true
+		end
 
 		a.styles_sizecheck = true
 	end
 
 	if not leveltime then
 		return false
+	end
+
+	if a.styles_sizecheck and special_entrance == 3 and not a.styles_noscaling then
+		local nearbyplayer = P_LookForPlayers(a, ringsize_playerdist * a.scale, true)
+
+		if nearbyplayer and a.target and P_CheckSight(a.target, a) then
+			if a.styles_scalingtimer < FU then
+				a.styles_scalingtimer = $ + ringsize_speed
+
+				if a.styles_scalingtimer > FU then
+					a.styles_scalingtimer = FU
+				end
+			end
+		else
+			if a.styles_scalingtimer > 0 then
+				a.styles_scalingtimer = $ - ringsize_speed
+
+				if a.styles_scalingtimer < 0 then
+					a.styles_scalingtimer = 0
+				end
+			end
+		end
+
+		
+		a.spritexscale = ease.linear(a.styles_scalingtimer, 8, a.styles_scaling)
+		a.spriteyscale = a.spritexscale
+
+		a.spriteyoffset = ease.linear(a.styles_scalingtimer, 168*FU, 0)
 	end
 
 	if a.levelcountdown then
@@ -627,6 +602,7 @@ addHook("MobjThinker", function(a)
 			P_RandomRange(0, a.height/FU)*FU, MT_SUPERSPARK)
 			star.color = SKINCOLOR_GOLD
 			star.colorized = true
+			star.rollangle = P_RandomKey(360) * ANG1
 		end
 	end
 end, MT_TOKEN)
@@ -635,10 +611,10 @@ end, MT_TOKEN)
 -- Bonus Stage Entrance
 --
 
-freeslot("SPR_SSS0")
+freeslot("SPR_SPECIALENTRANCE_S2")
 
 addHook("TouchSpecial", function(a, mt)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 	if specialpackdetected then return end
 
@@ -651,7 +627,7 @@ addHook("TouchSpecial", function(a, mt)
 			local ang = a.angle + i*ANG1*((360*FU/16)/FU)
 			local stars = P_SpawnMobjFromMobj(a, 4*cos(ang), 4*sin(ang), a.height, MT_BUSH)
 			stars.state = S_INVISIBLE
-			stars.sprite = SPR_SSS0
+			stars.sprite = SPR_SPECIALENTRANCE_S2
 			stars.frame = ((i % 2)*3)|FF_TRANS10|FF_FULLBRIGHT
 			stars.renderflags = $|AST_ADD
 			stars.angle = ang
@@ -662,7 +638,7 @@ addHook("TouchSpecial", function(a, mt)
 end,  MT_STARPOST)
 
 addHook("MobjCollide", function(a, mt)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 	if specialpackdetected then return end
 
@@ -672,7 +648,7 @@ addHook("MobjCollide", function(a, mt)
 end,  MT_STARPOST)
 
 addHook("MobjThinker", function(a, mt)
-	if (multiplayer and not splitscreen) then return end
+	if not Styles_SpecialEntryAvailable() then return end
 	if not special_entrance or special_entrance ~= 2 then return end
 	if specialpackdetected then return end
 

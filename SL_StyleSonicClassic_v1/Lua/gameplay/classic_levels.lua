@@ -12,96 +12,46 @@ local cutlib = tbsrequire 'libs/lib_emb_cutscene'
 local level_opt = Options:get("disablelevel")
 local cutscene_opt = Options:get("disablecutscenes")
 
-local TRAPF_ENDLVL 	= 1
-local TRAPF_LIFT 	= 2
-local TRAPF_FLIGHT 	= 4
-local TRAPF_DROP 	= 8
-
-local TRPPF_CHANGE 	= 1
-local TRPPF_POOF 	= 2
-local TRPPF_HEADLOW = 4
-local TRPPF_HEADTOP = 8
-
-local function move_mapthing(id, x, y, z)
-    if mapthings[id] and mapthings[id].mobj and mapthings[id].mobj.valid then
-        local mobj = mapthings[id].mobj
-        P_SetOrigin(mobj,
-        x == nil and mobj.x or (x * FU),
-        y == nil and mobj.y or (y * FU),
-        z == nil and mobj.z or (z * FU))
-    end
+local function LEVEL(mod, zone, act)
+    return tbsrequire("gameplay/levels/"..mod.."/"..zone.."/"..act)
 end
 
-local function delete_mapthing(id)
-    if mapthings[id] and mapthings[id].mobj and mapthings[id].mobj.valid then
-        P_RemoveMobj(mapthings[id].mobj)
-    end
-end
-
-local function get_mapthing(id)
-    if mapthings[id] and mapthings[id].mobj and mapthings[id].mobj.valid then
-        return mapthings[id].mobj
-    end
-end
-
-local function player_lock(p)
-    if p.cmd then
-        p.cmd.buttons = 0
-        p.cmd.forwardmove = 0
-        p.cmd.sidemove = 0
-
-        p.powers[pw_nocontrol] = 2
-    end
+local function VANILLA(zone, act)
+    return LEVEL('vanilla', zone, act)
 end
 
 local __data = {
     [1] = {
-        tbsrequire("gameplay/levels/gfz1"),
+        VANILLA('greenflower', 'act1'),
     },
 
-	[3] = { -- GFZ3
-		{
-			name = "Greenflower",
-			hash = -838659965,
-
-			_func = function()
-				local center = P_SpawnMobj(4470*FU, 3688*FU, 3552*FU, MT_STYLES_EGGTR)
-				center.styles_flags = TRAPF_ENDLVL|TRAPF_FLIGHT
-				center.styles_tagged = 382
-				center.styles_list = {mapthings[112].mobj}
-                --center.styles_flickylist = {MT_FLICKY_01, MT_FLICKY_02}
-
-				local side = P_SpawnMobj(5070*FU, 4088*FU, 3552*FU, MT_STYLES_EGGTR)
-                side.z = side.floorz
-
-				sectors[11].special = 0
-				sectors[30].special = 0
-				sectors[23].special = 0
-				sectors[26].special = 0
-				sectors[11].tag = 0
-				sectors[30].tag = 0
-				sectors[23].tag = 0
-				sectors[26].tag = 0
-			end,
-		}
+	[2] = {
+        VANILLA('greenflower', 'act2'),
 	},
 
-	[22] = { -- EGZ1
-		{
-			name = "Egg Rock",
-			hash = -1710163032,
-
-			_func = function()
-				if not multiplayer and StylesC_SPE() == 3 then
-					local special_ring1 = get_mapthing(29)
-					special_ring1.styles_nochecks = true
-					special_ring1.flags2 = $ | MF2_OBJECTFLIP
-				end
-
-			end,
-		}
+	[3] = {
+        VANILLA('greenflower', 'act3'),
 	},
 
+	[6] = {
+        VANILLA('technohill', 'act3'),
+	},
+
+	[9] = {
+        VANILLA('deepsea', 'act3'),
+	},
+
+	[12] = {
+        VANILLA('castleeggman', 'act3'),
+	},
+
+	[15] = {
+        VANILLA('aridcanyon', 'act3'),
+	},
+
+	[22] = {
+        VANILLA('eggrock', 'act1'),
+	},
 }
 
 local __playedmaps = {}

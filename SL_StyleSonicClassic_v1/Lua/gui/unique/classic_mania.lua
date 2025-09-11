@@ -53,18 +53,18 @@ local function G_EncoreModeColors()
 	return {false, 65, 34, 53, 136, 123}
 end
 
-local function drawTextBG(v, x, y, width)
+local function drawTextBG(v, x, y, width, flags)
 	local nwidth = max(0, width)
 	local corner1 = v.cachePatch("INTMASKEW1")
 	local corner2 = v.cachePatch("INTMASKEW2")
 
-	v.draw(x - corner1.width, y, corner1, 0)
-	v.drawFill(x, y, nwidth, 17, 31)
-	v.draw(x + nwidth, y, corner2, 0)
+	v.draw(x - corner1.width, y, corner1, flags)
+	v.drawFill(x, y, nwidth, 17, 31|flags)
+	v.draw(x + nwidth, y, corner2, flags)
 end
 
-local function drawTextBG_A(v, x, y, width)
-	drawTextBG(v, x, y + 17, width)
+local function drawTextBG_A(v, x, y, width, flags)
+	drawTextBG(v, x, y + 17, width, flags)
 end
 
 
@@ -295,27 +295,27 @@ return {
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
 
-			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20)
-			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31)
+			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20, V_PERPLAYER)
+			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31, V_PERPLAYER)
 
 			local colors = G_EncoreModeColors()
 
 			if colors[1] then
 				if tonumber(act) > 9 then
-					drawf(v, 'MAI4FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+					drawf(v, 'MAI4FNT', act_x+31*FU, act_y+8*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "center", 1)
 				else
-					drawf(v, 'MAI3FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+					drawf(v, 'MAI3FNT', act_x+31*FU, act_y+8*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "center")
 				end
 			else
 				if tonumber(act) > 9 then
-					drawf(v, 'MAI2FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center", 1)
+					drawf(v, 'MAI2FNT', act_x+31*FU, act_y+8*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "center", 1)
 				else
-					drawf(v, 'MAI1FNT', act_x+31*FU, act_y+8*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1), "center")
+					drawf(v, 'MAI1FNT', act_x+31*FU, act_y+8*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "center")
 				end
 			end
 
-			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
-			drawf(v, "MATAFNT", (166+text_width-offsetx)*FU, 77*FU, FU, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left", 1)
+			drawf(v, "MATAFNT", (166+text_width-offsetx)*FU, 77*FU, FU, gotthrough, V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		else
 			---@diagnostic disable-next-line
 			if (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
@@ -327,11 +327,11 @@ return {
 			local text_width = textlen(v, 'MATAFNT', "GOT", 1)
 			local text_width2 = textlen(v, 'MATAFNT', gotthrough, 1)
 
-			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20)
-			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31)
+			drawTextBG_A(v, 197-offsetx-text_width2, 41, text_width2 + 20, V_PERPLAYER)
+			drawTextBG_A(v, 217-offsetx-text_width2, 64, text_width2 + 31, V_PERPLAYER)
 
-			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
-			drawf(v, "MATAFNT", (200+text_width-offsetx)*FU, 77*FU, FU, gotthrough, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
+			drawf(v, "MATAFNT", (166-offsetx)*FU, 54*FU, FU, "GOT", V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "left")
+			drawf(v, "MATAFNT", (200+text_width-offsetx)*FU, 77*FU, FU, gotthrough, V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "right", 1)
 		end
 
 		if mo and mo.valid then
@@ -340,12 +340,12 @@ return {
 			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname))
 			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
 
-			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_2, "right", 1)
+			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, V_PERPLAYER, color_2, "right", 1)
 		else
 			local skin_name = "YOU"
 			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
 
-			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, "right", 1)
+			drawf(v, "MATAFNT", (158-offsetx)*FU, 54*FU, FU, skin_name, V_PERPLAYER, color_1, "right", 1)
 		end
 	end,
 
@@ -365,8 +365,8 @@ return {
 
 		local len = textlen(v, 'MATAFNT', str, 1)
 
-		drawTextBG_A(v, 160-offsetx-len/2, 40, len)
-		drawf(v, "MATAFNT", (160-offsetx)*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "center", 1)
+		drawTextBG_A(v, 160-offsetx-len/2, 40, len, V_PERPLAYER)
+		drawf(v, "MATAFNT", (160-offsetx)*FU, 48*FU, FU, str, V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "INTERMISSION_FONT_MANIA"), "center", 1)
 	end,
 
 	tallyspecialbg = function(v, p, offsetx, color, color2, fading)

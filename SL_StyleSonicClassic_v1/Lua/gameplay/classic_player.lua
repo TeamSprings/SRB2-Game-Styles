@@ -32,6 +32,8 @@ local momentum_opt = Options:new("momentum", {{false, "disable", "Disabled"}, {t
 
 local runonwater_opt = Options:new("runonwater", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, CV_NETVAR)
 
+local superstarssuper_opt = Options:new("superstarssuper", {{false, "disable", "Disabled"}, {true, "enable", "Enabled"}}, nil, 0)
+
 local preserveshield_opt = Options:new("preserveshield", {{nil, "disable", "Disabled"}, {1, "managed", "Managed"}, {2, "zone", "Zone only"}, {3, "always", "Always"}}, nil, CV_NETVAR)
 
 local jumpsounds_opt = Options:new("jumpsfx", "gameplay/sfx/jumpsfx", nil, 0)
@@ -147,6 +149,31 @@ addHook("PlayerThink", function(p)
 		end
 	end
 
+	--
+	-- SUPER SONIC
+	--
+
+	local sparkles = superstarssuper_opt()
+
+	if sparkles and p.powers[pw_super] then
+		if not (leveltime % 3) then
+			local radius = 5 * p.mo.radius / 2 / FU
+			local halfheight = p.mo.height / 2
+			local height = 2 * p.mo.height / 3 / FU
+			local ang = P_RandomRange(1, 1280) * ANG1
+			local horizontal = P_RandomRange(-radius, radius)
+
+			local sparkle = P_SpawnMobjFromMobj(p.mo,
+				horizontal * cos(ang),
+				horizontal * sin(ang),
+				halfheight + P_RandomRange(-height, height) * FU,
+				MT_SUPERSPARK)
+
+			sparkle.scale = FixedMul(sparkle.scale, P_RandomRange(1, 48) * FU / 64)
+			sparkle.rollangle = ang * 8
+		end
+	end
+
 	-- MOMENTUM
 	-- Edited Clairbun's work
 
@@ -255,9 +282,9 @@ addHook("PlayerThink", function(p)
 	-- EYE CANDY
 
 	if thok_cv.value then
-		p.thokitem = MT_RAY
-		p.spinitem = MT_RAY
-		p.revitem = MT_RAY
+		p.thokitem = p.thokitem == MT_THOK and MT_RAY or $
+		p.spinitem = p.spinitem == MT_THOK and MT_RAY or $
+		p.revitem = p.revitem == MT_THOK and MT_RAY or $
 
 		p.styles_swappedthok = true
 	elseif p.styles_swappedthok then

@@ -1,4 +1,5 @@
 return {
-	[0] = {nil, "vanilla", 					"Vanilla"},
-	{nil, "classic",						"Classic / Stand"},
+	{0, "classic",		"Classic"},
+	{1, "cd",			"Sonic CD"},
+	{2, "vanilla", 		"Sonic Mania/Vanilla"},
 }

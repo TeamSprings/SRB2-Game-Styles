@@ -21,11 +21,17 @@ local internal = {}
 -- Error Types
 local ERR_FAILURE   = 1
 local ERR_WRONGTYPE = 2
+local ERR_WRONGSIZE = 3
 
 local ERR_MESSAGES = {
-    [ERR_FAILURE]   = "",
-    [ERR_WRONGTYPE] = "",    
+    [ERR_FAILURE]   = "Failure to register %s",
+    [ERR_WRONGTYPE] = "Wrong datatype in %s; expected: %s; got: %s",
+    [ERR_WRONGSIZE] = "Wrong range in %s; expected: enumtype (number max %d, min %d); got: %s",
 }
+
+--
+-- REQUIREMENTS
+--
 
 local REQ_ACHIVEMENT = 1
 
@@ -36,13 +42,15 @@ local REQ_PLAYERCUST = 5
 
 local REQ_CUSTOM     = 6
 
+local REQ_STATS      = 7
+
 local REQ_TYPES = {
 
     -- BASIC REQUIREMENT
 
     [REQ_ACHIVEMENT] = function(player, value, field)
-        if module.StringLUT[value] then
-            return module.StringLUT[value].unlocked
+        if module.StringLUT[field] then
+            return module.StringLUT[field].unlocked
         end
 
         return false
@@ -67,15 +75,30 @@ local REQ_TYPES = {
 
     [REQ_PLAYERCUST] = function(player, value, field)
         if not (player and player.valid) then return false end
-        return (value(player) or false)
+        return (field(player) or false)
     end,
 
     -- CUSTOM
 
     [REQ_CUSTOM] = function(player, value, field)
-        return (value() or false)
+        return (field() or false)
+    end,
+
+    -- STATS
+
+    [REQ_STATS] = function(player, value, field)
+        return (field() or false)
     end
 }
+
+--
+-- AUTOTRIGGERS
+--
+
+local TRI_ACHIEVEMENT = 1
+local TRI_MAPCHANGE   = 2
+
+local TRI_MAX = TRI_ACHIEVEMENT | TRI_MAPCHANGE
 
 --
 -- ACHIEVEMENT
@@ -111,8 +134,8 @@ local achivement_meta = {
 -- METHODS
 --
 
-function internal:error(type, string)
-    print("[Styles] "..ERR_MESSAGES[type]..string)
+function internal:error(type, ...)
+    print(string.format("[Styles] "..ERR_MESSAGES[type], unpack({...})))
     
     return true
 end
@@ -130,17 +153,26 @@ function internal:loadSaveFile(file)
     end
 end
 
--- TODO: DO THIS ONE
 function internal:validateConditions(name, requirements)
     for key, req in ipairs(requirements) do
         if type(req.type) ~= "number" then
-            return internal:error(ERR_WRONGTYPE, 
-            name.."->required..["..key.."]->type; expected: enumtype (number max "..#REQ_TYPES..", min 1); got: "..type(req.type))
+            return internal:error(ERR_WRONGTYPE, name.."->required..["..key.."]->type", "number", type(req.type))
         end
 
         if req.type < 1 or req.type > #REQ_TYPES then
-            return internal:error(ERR_WRONGTYPE, 
-            name.."->required..["..key.."]->type; expected: enum max "..#REQ_TYPES..", min 1; got: "..req.type)
+            return internal:error(ERR_WRONGSIZE, name.."->required..["..key.."]->type", #REQ_TYPES, 1, req.type)
+        end
+
+        if type(req.field) == "nil" then
+            return internal:error(ERR_WRONGTYPE, name.."->required..["..key.."]->field", "any", "nil")
+        end
+
+        if type(req.trigger) ~= "number" then
+            return internal:error(ERR_WRONGTYPE, name.."->required..["..key.."]->trigger", "number", type(req.triggr))
+        end
+
+        if req.trigger < 0 or req.trigger > TRI_MAX then
+            return internal:error(ERR_WRONGSIZE, name.."->required..["..key.."]->trigger", TRI_MAX, 0, req.trigger)
         end
     end
 
@@ -154,27 +186,27 @@ function internal:validate(draft)
     --
 
     if type(draft.stringid) ~= "string" then
-        return internal:error(ERR_WRONGTYPE, "achievement->stringid; expected: string; got: "..type(draft.stringid))
+        return internal:error(ERR_WRONGTYPE, "achievement->stringid", "string", type(draft.stringid))
     end
 
     if type(draft.category) ~= "string" then
-        return internal:error(ERR_WRONGTYPE, draft.stringid.."->category; expected: string; got: "..type(draft.stringid))
+        return internal:error(ERR_WRONGTYPE, "achievement->category", "string", type(draft.category))
     end
 
     if draft.name and type(draft.name) ~= "string" then
-        return internal:error(ERR_WRONGTYPE, draft.stringid.."->name; expected: string; got: "..type(draft.name))
+        return internal:error(ERR_WRONGTYPE, "achievement->name", "string", type(draft.name))
     end
 
     if draft.desc and type(draft.desc) ~= "string" then
-        return internal:error(ERR_WRONGTYPE, draft.stringid.."->desc; expected: string; got: "..type(draft.desc))
-    end       
+        return internal:error(ERR_WRONGTYPE, "achievement->desc", "string", type(draft.desc))
+    end  
 
     if draft.flags and type(draft.flags) ~= "number" then
-        return internal:error(ERR_WRONGTYPE, draft.flags.."->category; expected: number; got: "..type(draft.flags))
+        return internal:error(ERR_WRONGTYPE, "achievement->flags", "number", type(draft.flags))
     end
 
     if draft.required and type(draft.required) ~= "table" then
-        return internal:error(ERR_WRONGTYPE, draft.required.."->category; expected: table<conditions>; got: "..type(draft.required))
+        return internal:error(ERR_WRONGTYPE, "achievement->required", "table<conditions>", type(draft.required))
     else
         local failure = internal:validateConditions(draft.stringid, draft.required)
 
@@ -184,7 +216,7 @@ function internal:validate(draft)
     end
 
     if draft.metadata and type(draft.metadata) ~= "table" then
-        return internal:error(ERR_WRONGTYPE, draft.metadata.."->category; expected: table<any>; got: "..type(draft.metadata))
+        return internal:error(ERR_WRONGTYPE, "achievement->metadata", "table<any>", type(draft.metadata))
     end
 
     return false
@@ -226,8 +258,6 @@ function module:search(id)
     if self.StringLUT[id] then
         return self.StringLUT[id]
     end
-
-    return internal:error(ERR_FAILURE, "failed to get achievement with "..id)
 end
 
 function module:progress()

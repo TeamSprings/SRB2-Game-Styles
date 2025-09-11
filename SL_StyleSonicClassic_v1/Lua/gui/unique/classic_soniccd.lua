@@ -9,6 +9,7 @@ Contributors: Clone Fighter, Skydusk
 
 ]]
 
+local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawBG = tbsrequire 'helpers/draw_background'
 local drawf = drawlib.draw
@@ -294,42 +295,28 @@ return{
 		drawBG(v, v.cachePatch("CDTSPECBG"), 0, nil)
 	end,
 
-	-- TODO: CREATE CD TALLY TITLE - Font, graphic etc.
-	--[[
-	tallytitle = function(v, p, offsetx)
+	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
-
-		local lvlt = string.upper(""..mapheaderinfo[gamemap].lvlttl)
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
-		v.draw(96-offsetx, 54, v.cachePatch("S3KPLACEHTALLY"))
+		v.draw(112-offsetx, 45, v.cachePatch("SCDPLACEHTALLY"), V_PERPLAYER)
 
 		if mo and mo.valid then
 			local skin = skins[p.mo.skin or p.skin]
 
-			local skin_name = nametrim(string.upper(skin.realname), "%d", "")
-			local color_2 = v.getColormap(TC_DEFAULT, skin.prefcolor)
-			local color_1 = v.getColormap(TC_DEFAULT, skin.prefoppositecolor or skincolors[skin.prefcolor].invcolor)
-
-			--drawf(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
+			local skin_name = nametrim(string.upper(overwrite and overwrite or skin.realname))
+			drawf(v, 'SCDINTERFNT', (168-offsetx)*FU, 45*FU, FU, skin_name, V_PERPLAYER, color, "right")
 		else
-			local skin_name = "YOU"
-			local color_2 = v.getColormap(TC_DEFAULT, SKINCOLOR_WHITE)
-			local color_1 = v.getColormap(TC_DEFAULT, SKINCOLOR_BLACK)
-
-			--drawf(v, (158-offsetx)*FU, 54*FU, FU, skin_name, 0, color_1, color_2, "right")
+			drawf(v, 'SCDINTERFNT', (168-offsetx)*FU, 45*FU, FU, "YOU", V_PERPLAYER, color, "right")
 		end
 
 		if act ~= "0" then
-			v.draw(228-offsetx, 51, v.cachePatch(S3K_graphic_lvl_icon[lvlt] or 'S3KBGAIZ'), 0)
-			v.draw(214-offsetx, 76, v.cachePatch('S3KTTACTC'), 0)
-			drawf(v, 'S3KANUM', (239-offsetx)*FU, 55*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'SCDINTERFNT', (251-offsetx)*FU, 69*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
 	tallyspecial = function(v, p, offsetx, color, color2)
 		local mo = p.mo
-		local act = tostring(mapheaderinfo[gamemap].actnum)
 
 		local str = "CHAOS EMERALDS"
 
@@ -343,7 +330,6 @@ return{
 			end
 		end
 
-		--drawS3KTXT(v, 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, SKINCOLOR_GREEN), v.getColormap(TC_DEFAULT, SKINCOLOR_BLUE), "center")
+		drawf(v, 'SCDINTERFNT', 160*FU, 39*FU, FU, str, V_PERPLAYER, color, "center")
 	end,
-	--]]
 }

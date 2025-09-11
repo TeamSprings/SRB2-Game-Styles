@@ -4,6 +4,9 @@ local TRPPF_HEADLOW = 4
 local TRPPF_HEADTOP = 8
 local TRPPF_DISOLVE = 16
 local TRPPF_NOSOLID = 32
+local TRPPF_ONLYFLY = 64
+local TRPPF_NOFLIGH = 128
+local TRPPF_FROTATE = 256
 
 local TRAP_LENGHTEXPL = 2*TICRATE
 
@@ -92,6 +95,7 @@ local SONIC2_MODEL = {
 	-- Button Stem
 	{
 		frame = 12,
+		width = 48*FU,
 		trflags = TRPPF_HEADLOW,
 		trigger = 2,
 		z = 112*FU,
@@ -127,7 +131,7 @@ P_RegisterMultiPartT{
     changeoffsetbool = true,
 }
 
--- Supports
+-- Legs
 P_RegisterMultiPartT{
 	source           = SONIC2_MODEL,
 	dist             = 30,
@@ -139,6 +143,21 @@ P_RegisterMultiPartT{
 	angleincrement   = ANGLE_90,
 	frameincrement   = 0,
 	framemodulo      = 1,
+    changeoffsetbool = nil,
+}
+
+-- Propeller (Flight Mode) attached to Legs
+P_RegisterMultiPartT{
+	source           = SONIC2_MODEL,
+	dist             = 30,
+	angle            = 0,
+	frame            = 25|FF_PAPERSPRITE,
+	trflags          = TRPPF_FROTATE|TRPPF_ONLYFLY,
+	trchange         = nil,
+	iterations       = 4,
+	angleincrement   = ANGLE_90,
+	frameincrement   = 0,
+	framemodulo      = 0,
     changeoffsetbool = nil,
 }
 
@@ -182,8 +201,8 @@ local SONICCD_MODEL = {
 
 	-- Stem
 	{
-		trflags = TRPPF_NOSOLID,
-		frame   = A|FF_TRANS20,
+		trflags = TRPPF_NOSOLID|TRPPF_NOFLIGH,
+		frame   = 0|FF_TRANS20,
 
 		width   = 24*FU,
 		height  = 49*FU,
@@ -191,13 +210,37 @@ local SONICCD_MODEL = {
 
 	-- Head
 	{
-		frame   = B,
+		frame   = 1,
 		trflags = TRPPF_DISOLVE,
 		trigger = 3,
 
 		z       = 57*FU,
 		radius  = 70*FU,
 		height  = 85*FU,
+	},
+
+	-- Stem (Flight Mode)
+	{
+		trflags = TRPPF_NOSOLID|TRPPF_ONLYFLY,
+		frame   = 2|FF_TRANS20,
+
+		width   = 24*FU,
+		height  = 49*FU,
+
+		z = 0*FU,
+		revz = -40*FU,
+	},
+
+	-- Propeller (Flight Mode)
+	{
+		trflags = TRPPF_NOSOLID|TRPPF_FROTATE|TRPPF_ONLYFLY,
+		frame   = 3|FF_TRANS20|FF_PAPERSPRITE,
+
+		width   = 24*FU,
+		height  = 49*FU,
+
+		z = 0*FU,
+		revz = -40*FU,
 	}
 }
 
@@ -219,6 +262,7 @@ local SONIC3_MODEL = {
 	-- Button Stem
 	{
 		frame = 9,
+		width = 48*FU,
 		trflags = TRPPF_HEADLOW,
 		trigger = 2,
 		z = 112*FU,
@@ -248,7 +292,7 @@ P_RegisterMultiPartT{
     changeoffsetbool = nil,
 }
 
--- Supports
+-- Legs
 P_RegisterMultiPartT{
 	source           = SONIC3_MODEL,
 	dist             = 30,
@@ -262,6 +306,22 @@ P_RegisterMultiPartT{
 	framemodulo      = 0,
     changeoffsetbool = nil,
 }
+
+-- Propeller (Flight Mode) attached to Legs
+P_RegisterMultiPartT{
+	source           = SONIC3_MODEL,
+	dist             = 30,
+	angle            = 0,
+	frame            = 16|FF_PAPERSPRITE,
+	trflags          = TRPPF_FROTATE|TRPPF_ONLYFLY,
+	trchange         = nil,
+	iterations       = 4,
+	angleincrement   = ANGLE_90,
+	frameincrement   = 0,
+	framemodulo      = 0,
+    changeoffsetbool = nil,
+}
+
 
 -- Button
 P_RegisterMultiPartT{

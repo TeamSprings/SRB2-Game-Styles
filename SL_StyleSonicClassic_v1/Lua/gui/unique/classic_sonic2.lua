@@ -103,9 +103,9 @@ return{
 		if mo then
 			local skin_name = string.lower((overwrite and overwrite or skins[mo.skin].realname))
 
-			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", 0)
+			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", V_PERPLAYER)
 		else
-			v.drawLevelTitle(72-offsetx, 48, "you got", 0)
+			v.drawLevelTitle(72-offsetx, 48, "you got", V_PERPLAYER)
 		end
 
 		local gotthrough = "through "
@@ -119,11 +119,11 @@ return{
 			local act = ''..mapheaderinfo[gamemap].actnum
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FU, 57*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FU, 57*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 			end
 		end
 
-		v.drawLevelTitle(72-offsetx, 66, gotthrough, 0)
+		v.drawLevelTitle(72-offsetx, 66, gotthrough, V_PERPLAYER)
 	end,
 
 	tallyspecial = function(v, p, offsetx, color, color2)
@@ -142,6 +142,6 @@ return{
 			end
 		end
 
-		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, V_PURPLEMAP)
+		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, V_PERPLAYER|V_PURPLEMAP)
 	end,
 }

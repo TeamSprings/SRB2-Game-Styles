@@ -80,6 +80,12 @@ local pity = Options:new("pity", "assets/tables/sprites/pity", switchon)
 local invincibility = Options:new("invincibility", "assets/tables/sprites/invincibility", switchon)
 
 --
+--	Super Sparks!
+--
+
+local supersparkles = Options:new("supersparks", "assets/tables/sprites/supersparks", switchon)
+
+--
 --	Score Text!
 --
 
@@ -97,9 +103,8 @@ end, MT_SCORE)
 freeslot("SPR_SIGNS")
 
 local sign_opt = Options:new("sign", "assets/tables/sprites/sign", switchon)
-local sign_cv = sign_opt.cv
 
-local signmove_opt = Options:new("sign_movement", "assets/tables/sprites/sign", nil, CV_NETVAR)
+local signmove_opt = Options:new("sign_movement", "gameplay/cvars/signmovement", nil, CV_NETVAR)
 local signmove_cv = signmove_opt.cv
 
 -- TODO: Multiple behaviors
@@ -132,7 +137,6 @@ local emblemsprites = Options:new("emblems", "assets/tables/sprites/emblems", ni
 addHook("MobjThinker", function(a)
 	if a.health > 0 then
 		a.sprite = Options:getPureValue("emblems")
-		a.frame = ((a.frame & FF_FRAMEMASK) % 5)|(a.frame &~ FF_FRAMEMASK)
 	end
 end, MT_EMBLEM)
 
@@ -232,8 +236,15 @@ addHook("ThinkFrame", function()
 		states[S_IVSP].var1 = invinc[3]
 		states[S_IVSP].var2 = invinc[4]
 
+		-- Supersparks
+
+		local sparks = supersparkles()
+		states[S_SSPK1].sprite = sparks
+		states[S_SSPK2].sprite = sparks
+		states[S_SSPK3].sprite = sparks
+
 		-- Signpost
-		local sign_frame = sign_cv.value == 1 and A or B
+		local sign_frame = sign_opt()
 
 		states[S_SIGN].sprite = SPR_SIGNS
 		states[S_SIGN].frame = sign_frame
@@ -255,7 +266,6 @@ addHook("ThinkFrame", function()
 		states[S_SIGNSTOP].frame = sign_frame
 		states[S_SIGNPLAYER].sprite = SPR_SIGNS
 		states[S_SIGNPLAYER].frame = sign_frame
-
 
 		switch = false
 

@@ -109,9 +109,9 @@ return{
 
 		if mo then
 			local skin_name = nametrim(skins[mo.skin].realname)
-			drawf(v, 'S3BTFNT', (96-offsetx)*FU, 48*FU, FU, string.upper((overwrite and overwrite or skin_name).." got"))
+			drawf(v, 'S3BTFNT', (96-offsetx)*FU, 48*FU, FU, string.upper((overwrite and overwrite or skin_name).." got"), V_PERPLAYER)
 		else
-			drawf(v, 'S3BTFNT', (72-offsetx)*FU, 48*FU, FU, "YOU GOT")
+			drawf(v, 'S3BTFNT', (72-offsetx)*FU, 48*FU, FU, "YOU GOT", V_PERPLAYER)
 		end
 
 		local gotthrough = "THROUGH "
@@ -123,11 +123,11 @@ return{
 			gotthrough = $..'ACT'
 		end
 
-		drawf(v, 'S3BTFNT', (72-offsetx)*FU, 66*FU, FU, gotthrough)
+		drawf(v, 'S3BTFNT', (72-offsetx)*FU, 66*FU, FU, gotthrough, V_PERPLAYER)
 
 		-- TODO: Check for level long (ZONE) in S3K and 3D Blast to cut it... likely do it in every other case smh :V
 		if act ~= "0" then
-			drawf(v, 'S3BTFNT', (200-offsetx)*FU, 72*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+			drawf(v, 'S3BTFNT', (200-offsetx)*FU, 72*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 		end
 	end,
 
@@ -147,7 +147,7 @@ return{
 			end
 		end
 
-		drawf(v, 'S3BTFNT', 160*FU, 48*FU, FU, str, 0, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC3DB_TALLY"), "center")
+		drawf(v, 'S3BTFNT', 160*FU, 48*FU, FU, str, V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC3DB_TALLY"), "center")
 	end,
 
 	tallybg = function(v, p, offsetx, color, color2, fading)

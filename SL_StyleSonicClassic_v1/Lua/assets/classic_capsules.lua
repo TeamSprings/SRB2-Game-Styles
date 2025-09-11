@@ -28,7 +28,7 @@ mobjinfo[EGGTRAPPART] = {
 	radius = 32*FU,
 	height = 64*FU,
 	mass = 100,
-	flags = (mobjinfo[MT_BUSH].flags|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPHEIGHT|MF_PAPERCOLLISION) &~ MF_NOTHINK,
+	flags = (mobjinfo[MT_BUSH].flags|MF_NOGRAVITY|MF_NOCLIP|MF_NOCLIPTHING|MF_NOCLIPHEIGHT|MF_PAPERCOLLISION) &~ MF_NOTHINK,
 }
 
 mobjinfo[EGGTRAPTRIGGER] = {
@@ -39,7 +39,7 @@ mobjinfo[EGGTRAPTRIGGER] = {
 	radius = 24*FU,
 	height = 16*FU,
 	mass = 100,
-	flags = MF_SOLID|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_NOCLIP|MF_SHOOTABLE,
+	flags = MF_SOLID|MF_NOGRAVITY|MF_NOCLIPHEIGHT,
 }
 
 mobjinfo[EGGTRAPTRIGGERTOUCH] = {
@@ -185,6 +185,47 @@ local modes = {
 	EGGTRAPTRIGGERTOUCH
 }
 
+local TRAPF_ENDLVL 	= 1
+local TRAPF_LIFT 	= 2
+local TRAPF_FLIGHT 	= 4
+local TRAPF_DROP 	= 8
+
+local TRAPF_VERTMOVE = TRAPF_DROP | TRAPF_LIFT
+
+local TRPPF_CHANGE 	= 1
+local TRPPF_POOF 	= 2
+local TRPPF_HEADLOW = 4
+local TRPPF_HEADTOP = 8
+local TRPPF_DISOLVE = 16
+local TRPPF_NOSOLID = 32
+local TRPPF_ONLYFLY = 64
+local TRPPF_NOFLIGH = 128
+local TRPPF_FROTATE = 256
+
+local TRAP_LENGHTEXPL = 2*TICRATE
+
+---@alias eggtrapenum_types : table<function>
+---| 'Sonic 2'
+---| 'Sonic CD'
+---| 'Sonic 3K'
+
+---@alias eggtrap_flags
+---| 'TRAPF_ENDLVL'
+---| 'TRAPF_LIFT'
+---| 'TRAPF_FLIGHT'
+---| 'TRAPF_DROP'
+
+---@alias eggtrappart_flags
+---| 'TRPPF_CHANGE'
+---| 'TRPPF_POOF'
+---| 'TRPPF_HEADLOW'
+---| 'TRPPF_HEADTOP'
+---| 'TRPPF_DISOLVE'
+---| 'TRPPF_NOSOLID'
+---| 'TRPPF_ONLYFLY'
+---| 'TRPPF_NOFLIGH'
+---| 'TRPPF_FROTATE'
+
 local function P_SpawnEggCapsulePart(
 	source,
 	x,
@@ -201,6 +242,11 @@ local function P_SpawnEggCapsulePart(
 	dist,
 	revz
 )
+	if (trflags & TRPPF_ONLYFLY) and not (source.styles_flags & TRAPF_FLIGHT) then
+		return
+	elseif (trflags & TRPPF_NOFLIGH) and (source.styles_flags & TRAPF_FLIGHT) then
+		return
+	end
 
 	local mode = modes[trigger]
 
@@ -237,41 +283,6 @@ local function P_SpawnEggCapsulePart(
 	end
 end
 
-local TRAPF_ENDLVL 	= 1
-local TRAPF_LIFT 	= 2
-local TRAPF_FLIGHT 	= 4
-local TRAPF_DROP 	= 8
-
-local TRAPF_VERTMOVE = TRAPF_DROP | TRAPF_LIFT
-
-local TRPPF_CHANGE 	= 1
-local TRPPF_POOF 	= 2
-local TRPPF_HEADLOW = 4
-local TRPPF_HEADTOP = 8
-local TRPPF_DISOLVE = 16
-local TRPPF_NOSOLID = 32
-
-local TRAP_LENGHTEXPL = 2*TICRATE
-
----@alias eggtrapenum_types : table<function>
----| 'Sonic 2'
----| 'Sonic CD'
----| 'Sonic 3K'
-
----@alias eggtrap_flags
----| 'TRAPF_ENDLVL'
----| 'TRAPF_LIFT'
----| 'TRAPF_FLIGHT'
----| 'TRAPF_DROP'
-
----@alias eggtrappart_flags
----| 'TRPPF_CHANGE'
----| 'TRPPF_POOF'
----| 'TRPPF_HEADLOW'
----| 'TRPPF_HEADTOP'
----| 'TRPPF_DISOLVE'
----| 'TRPPF_NOSOLID'
-
 -- TODO: ADD MORE CAPSULES (S1, MANIA and finish CD)
 -- TODO: ADD MORE FEATURES (flight, drop)
 -- TODO: MAKE IT FIRST UDMF CUSTOMIZABLE OBJECT
@@ -279,7 +290,7 @@ local TRAP_LENGHTEXPL = 2*TICRATE
 local models = tbsrequire("assets/tables/capsule_models")
 
 addHook("MobjSpawn", function(a, tm)
-	a.styles_flags = 0
+	a.styles_flags = $ or 0
 
 	a.radius = 46*FU
 	a.height = 84*FU
@@ -289,31 +300,6 @@ addHook("MobjSpawn", function(a, tm)
 	a.styles_flickyflip = false
 	a.styles_scaletarget = a.scale
 	a.styles_seed = P_RandomRange(0, 999)
-
-	local model = models[model_type]
-
-	a.styles_destroytics = model.destroytics or TRAP_LENGHTEXPL
-
-	for i = 1, #model do
-		local part = model[i]
-	
-		P_SpawnEggCapsulePart(
-			a,
-			part.x or 0,
-			part.y or 0,
-			part.z or 0,
-			part.angle or 0,
-			model.sprite or 0,
-			part.frame or 0,
-			part.trflags or 0,
-			part.trchange or 0,
-			part.trigger or false,
-			part.radius,
-			part.height,
-			part.dist,
-			part.revz
-		)
-	end
 
 	a.disty = 0
 	a.activatable = true
@@ -345,6 +331,34 @@ local RANGE = (FU * 3) / 2
 
 addHook("MobjThinker", function(a)
 	-- Thinker
+
+	if not a.capsule or not a.capsulesetup then
+		local model = models[model_type]
+
+		for i = 1, #model do
+			local part = model[i]
+
+			P_SpawnEggCapsulePart(
+				a,
+				part.x or 0,
+				part.y or 0,
+				part.z or 0,
+				part.angle or 0,
+				model.sprite or 0,
+				part.frame or 0,
+				part.trflags or 0,
+				part.trchange or 0,
+				part.trigger or false,
+				part.radius,
+				part.height,
+				part.dist,
+				part.revz
+			)
+		end
+
+		a.styles_destroytics = model.destroytics or TRAP_LENGHTEXPL
+		a.capsulesetup = true
+	end
 
 	if not a.styles_xorigin then
 		a.styles_xorigin = a.x
@@ -463,15 +477,15 @@ addHook("MobjThinker", function(a)
 				end
 
 				local ang = a.angle + (leveltime + a.styles_seed) * (ANG1 / 4)
-				local dist = (a.styles_movement * 2 + a.radius*6/FU) * a.scale
+				local dist = (a.radius*6/FU - a.styles_movement * 2) * a.scale
 
 				local updw = sin(leveltime * ANG2) * (a.height/6/FU)
 
 				local x = a.styles_xorigin + FixedMul(cos(ang), dist)
 				local y = a.styles_yorigin + FixedMul(sin(ang), dist)
-				local z = ease.linear(tics, a.styles_movetarget, a.styles_movestart) + updw
+				local z = ease.insine(tics, a.styles_movetarget, a.styles_movestart) + updw
 
-				a.scale = ease.linear(tics, a.styles_scaletarget, 8)
+				a.scale = ease.insine(tics, a.styles_scaletarget, 8)
 
 
 				P_SetOrigin(a, x, y, z)
@@ -519,8 +533,10 @@ addHook("MobjThinker", function(a)
 
 						if a.styles_flickyflip then
 							if P_MobjFlip(a) > 0 then
+								flicky.eflags = $ | MFE_VERTICALFLIP
 								flicky.flags2 = $ | MF2_OBJECTFLIP
 							else
+								flicky.eflags = $ &~ MFE_VERTICALFLIP
 								flicky.flags2 = $ &~ MF2_OBJECTFLIP
 							end
 						end
@@ -531,8 +547,10 @@ addHook("MobjThinker", function(a)
 
 						if a.styles_flickyflip then
 							if P_MobjFlip(a) > 0 then
+								flicky.eflags = $ | MFE_VERTICALFLIP
 								flicky.flags2 = $ | MF2_OBJECTFLIP
 							else
+								flicky.eflags = $ &~ MFE_VERTICALFLIP
 								flicky.flags2 = $ &~ MF2_OBJECTFLIP
 							end
 						end
@@ -558,7 +576,6 @@ addHook("MobjThinker", function(a)
 			a.press = nil
 		end
 	end
-
 end, EGGTRAP)
 
 addHook("MobjThinker", function(a)
@@ -579,7 +596,12 @@ addHook("MobjThinker", function(a)
 						a.target.y + _sin,
 						a.target.z + FixedMul(z, a.target.scale) * flip)
 
-			a.angle = dir
+			if a.styles_trflags and (a.styles_trflags & TRPPF_FROTATE) then
+				a.angle = $+ANG1 * 8
+			else
+				a.angle = dir
+			end
+
 			a.scale = a.target.scale
 		end
 	
@@ -620,7 +642,7 @@ addHook("MobjThinker", function(a)
 		end
 
 		if a.styles_trflags then
-			if a.target.press and (a.styles_trflags & TRPPF_HEADTOP) then
+			if a.target.press and (a.styles_trflags & TRPPF_HEADTOP) or (a.styles_trflags & TRPPF_HEADLOW) then
 				local dir = a.target.angle + a.styles_trdir
 				local ang = a.target.angle + a.styles_trangle
 				local dis = a.styles_trdist or 0
@@ -633,7 +655,7 @@ addHook("MobjThinker", function(a)
 				P_SetOrigin(a, a.target.x + _cos,
 							a.target.y + _sin,
 							a.target.z + FixedMul(z - 16*FU, a.target.scale) * flip)
-				
+
 				a.angle = dir
 				a.scale = a.target.scale
 			end
@@ -661,7 +683,12 @@ addHook("MobjThinker", function(a)
 						a.target.y + _sin,
 						a.target.z + FixedMul(z, a.target.scale) * flip)
 
-			a.angle = dir
+			if a.styles_trflags and (a.styles_trflags & TRPPF_FROTATE) then
+				a.angle = $+ANG1 * 8
+			else
+				a.angle = dir
+			end
+
 			a.scale = a.target.scale
 		end
 
@@ -677,18 +704,36 @@ addHook("MobjThinker", function(a)
 
 
 		if a.styles_trflags then
-			if (a.styles_trflags & TRPPF_DISOLVE) 
-			and a.target.openinganim and a.target.openinganim < a.target.styles_destroytics then
-				P_RemoveMobj(a)
-			end
-
 			if a.target.press then
-				if (a.styles_trflags & TRPPF_HEADLOW) then
-					a.alpha = 0
+				if a.target.press and (a.styles_trflags & TRPPF_HEADTOP) or (a.styles_trflags & TRPPF_HEADLOW) then
+					local dir = a.target.angle + a.styles_trdir
+					local ang = a.target.angle + a.styles_trangle
+					local dis = a.styles_trdist or 0
+					local offz = (flip < 0 and (a.styles_trrevz or a.offz) or a.offz) or 0
+					local z = offz - ((flip < 0 and offz ~= 0) and 64*FU or 0)
+
+					local _cos = FixedMul(cos(ang), a.target.scale) * dis
+					local _sin = FixedMul(sin(ang), a.target.scale) * dis
+
+					P_SetOrigin(a, a.target.x + _cos,
+								a.target.y + _sin,
+								a.target.z + FixedMul(z - 16*FU, a.target.scale) * flip)
+
+					a.angle = dir
+					a.scale = a.target.scale
+
+					if (a.styles_trflags & TRPPF_HEADLOW) then
+						a.alpha = 0
+					end
 				end
 
 				if (a.styles_trflags & TRPPF_NOSOLID) then
 					a.flags = $ &~ MF_SOLID
+				end
+
+				if (a.styles_trflags & TRPPF_DISOLVE) 
+				and a.target.openinganim and a.target.openinganim < a.target.styles_destroytics then
+					P_RemoveMobj(a)
 				end
 			else
 				if (a.styles_trflags & TRPPF_HEADLOW) then
@@ -719,7 +764,12 @@ addHook("MobjThinker", function(a)
 						a.target.y + _sin,
 						a.target.z + FixedMul(z, a.target.scale) * flip)
 
-			a.angle = dir
+			if a.styles_trflags and (a.styles_trflags & TRPPF_FROTATE) then
+				a.angle = $+ANG1 * 8
+			else
+				a.angle = dir
+			end
+
 			a.scale = a.target.scale
 		end
 
@@ -734,18 +784,36 @@ addHook("MobjThinker", function(a)
 		end
 
 		if a.styles_trflags then
-			if (a.styles_trflags & TRPPF_DISOLVE) 
-			and a.target.openinganim and a.target.openinganim < a.target.styles_destroytics then
-				P_RemoveMobj(a)
-			end
-
 			if a.target.press then
-				if (a.styles_trflags & TRPPF_HEADLOW) then
-					a.alpha = 0
+				if a.target.press and (a.styles_trflags & TRPPF_HEADTOP) or (a.styles_trflags & TRPPF_HEADLOW) then
+					local dir = a.target.angle + a.styles_trdir
+					local ang = a.target.angle + a.styles_trangle
+					local dis = a.styles_trdist or 0
+					local offz = (flip < 0 and (a.styles_trrevz or a.offz) or a.offz) or 0
+					local z = offz - ((flip < 0 and offz ~= 0) and 64*FU or 0)
+
+					local _cos = FixedMul(cos(ang), a.target.scale) * dis
+					local _sin = FixedMul(sin(ang), a.target.scale) * dis
+
+					P_SetOrigin(a, a.target.x + _cos,
+								a.target.y + _sin,
+								a.target.z + FixedMul(z - 16*FU, a.target.scale) * flip)
+
+					a.angle = dir
+					a.scale = a.target.scale
+
+					if (a.styles_trflags & TRPPF_HEADLOW) then
+						a.alpha = 0
+					end
 				end
 
 				if (a.styles_trflags & TRPPF_NOSOLID) then
 					a.flags = $ &~ MF_SOLID
+				end
+
+				if (a.styles_trflags & TRPPF_DISOLVE)
+				and a.target.openinganim and a.target.openinganim < a.target.styles_destroytics then
+					P_RemoveMobj(a)
 				end
 			else
 				if (a.styles_trflags & TRPPF_HEADLOW) then
@@ -758,12 +826,41 @@ addHook("MobjThinker", function(a)
 	end
 end, EGGTRAPTRIGGERTOUCH)
 
-addHook("MobjCollide", function(a,mt)
-	if mt.player then
-		if a.target and a.target.activatable == true then
-			local discenter = P_AreMobjsClose3D(a, mt, 36 * a.scale)
+local function HITBOX(a, mt, hordistance, triggerdist)
+	local incenter = (R_PointToDist2(a.x, a.y, mt.x, mt.y) < hordistance)
 
-			if discenter then
+	if incenter then
+		local oz1, oz2
+		local pz1, pz2
+
+		if P_MobjFlip(a) < 0 then
+			oz1 = a.z - a.height - triggerdist
+			oz2 = a.z + triggerdist
+		else
+			oz1 = a.z - triggerdist
+			oz2 = a.z + a.height + triggerdist
+		end
+
+		if P_MobjFlip(mt) < 0 then
+			pz1 = mt.z-mt.height
+			pz2 = mt.z
+		else
+			pz1 = mt.z
+			pz2 = mt.z+mt.height
+		end
+
+		return (oz1 < pz2 and oz2 > pz1)
+	end
+
+	return 0
+end
+
+local function collision(a, mt)
+	if mt.player then
+		if a.target then
+			local hit = HITBOX(a, mt, 36 * a.scale, 2 * a.scale)
+
+			if a.target.activatable == true and hit then
 				if ((a.target.styles_flags & TRAPF_LIFT) and not a.target.styles_movement)
 				or ((a.target.styles_flags & TRAPF_LIFT) ~= 1) then
 					a.target.activated = true
@@ -772,10 +869,13 @@ addHook("MobjCollide", function(a,mt)
 				a.target.press = 4
 			end
 		end
+	else
+		return false
 	end
+end
 
-	return false
-end, EGGTRAPTRIGGER)
+addHook("MobjCollide", collision, EGGTRAPTRIGGER)
+addHook("MobjMoveCollide", collision, EGGTRAPTRIGGER)
 
 addHook("TouchSpecial", function(a,mt)
 	if mt.player then

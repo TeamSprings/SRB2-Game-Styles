@@ -13,7 +13,7 @@ local textlen = drawlib.text_lenght
 local clamping = tbsrequire 'helpers/anim_clamp'
 
 local min_lifelen = 6*4
-local min_lifexap = 6*5+2
+local min_lifexap = 6*5-2
 local max_lifelen = 7*9
 
 local titledur = TICRATE/5 - TICRATE/16
@@ -133,21 +133,21 @@ return{
 		local mo = p.mo
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
-		v.draw(176-offsetx, 43, v.cachePatch('SO1SPI'), 0, color)
+		v.draw(176-offsetx, 43, v.cachePatch('SO1SPI'), V_PERPLAYER, color)
 		local colormap = v.getColormap(TC_DEFAULT, 1)
 
 		if mo then
 			local skin_name = skins[mo.skin].realname
 
-			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, string.lower((overwrite and overwrite or skin_name).." has"), 0, v.getColormap(TC_DEFAULT, 1), "center")
+			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, string.lower((overwrite and overwrite or skin_name).." has"), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1), "center")
 		else
-			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, "you have", 0, colormap, "center")
+			drawf(v, 'SO1FNT', (160-offsetx)*FU, 43*FU, FU, "you have", V_PERPLAYER, colormap, "center")
 		end
 
-		drawf(v, 'SO1FNT', (160-offsetx)*FU, 64*FU, FU, "passed", 0, colormap, "center")
+		drawf(v, 'SO1FNT', (160-offsetx)*FU, 64*FU, FU, "passed", V_PERPLAYER, colormap, "center")
 
 		if act ~= "0" then
-			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), 0)
+			v.draw(184-offsetx, 86, v.cachePatch('SO1ACT'), V_PERPLAYER)
 			drawf(v, 'S1ANUM', (213-offsetx)*FU, 65*FU+FU/2, FU, string.upper(act), V_PERPLAYER, colormap)
 		end
 	end,
@@ -156,7 +156,7 @@ return{
 		local mo = p.mo
 		local act = tostring(mapheaderinfo[gamemap].actnum)
 
-		v.draw(136-offsetx, 43, v.cachePatch('SO1SPI'), 0, color)
+		v.draw(136-offsetx, 43, v.cachePatch('SO1SPI'), V_PERPLAYER, color)
 		local str = "chaos emeralds"
 
 		if emeralds == All7Emeralds(emeralds) then
@@ -169,7 +169,7 @@ return{
 			end
 		end
 
-		drawf(v, 'SO1FNT', (160-offsetx)*FU, 57*FU, FU, str, 0, color2, "center")
+		drawf(v, 'SO1FNT', (160-offsetx)*FU, 57*FU, FU, str, V_PERPLAYER, color2, "center")
 	end,
 
 	tallybg = function(v, p, offsetx, color, color2, fading)
