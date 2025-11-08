@@ -13,7 +13,9 @@
 
 --]]
 
-local VERSIONNUM = {4, 5};
+local VERSIONNUM = {4, 6};
+local MINVERSION = 202
+local MINSUBVERSION = 0
 local updating = nil;
 
 --#region library
@@ -28,43 +30,43 @@ end
 
 -- Should match hud_disable_options in lua_hudlib.c
 local defaultitems = {
-	{"stagetitle", "titlecard"},
-	{"textspectator", "game"},
-	{"crosshair", "game"},
-	{"powerups", "game"},
+	{"stagetitle", "titlecard", 1},
+	{"textspectator", "game", 1},
+	{"crosshair", "game", 1},
+	{"powerups", "game", 1},
 
-	{"score", "game"},
-	{"time", "game"},
-	{"rings", "game"},
-	{"lives", "game"},
-	{"input", "game"},
+	{"score", "game", 1},
+	{"time", "game", 1},
+	{"rings", "game", 1},
+	{"lives", "game", 1},
+	{"input", "game", 1},
 
-	{"gameover", "game"},
-	{"pause", "game"},
-	{"cecho", "game"},
-	{"chat", "game"},
-	{"itemhunt", "game"},
+	{"gameover", "game", 16},
+	{"pause", "game", 16},
+	{"cecho", "game", 16},
+	{"chat", "game", 16},
+	{"itemhunt", "game", 16},
 
-	{"weaponrings", "game"},
-	{"powerstones", "game"},
-	{"teamscores", "gameandscores"},
+	{"weaponrings", "game", 1},
+	{"powerstones", "game", 1},
+	{"teamscores", "gameandscores", 1},
 
-	{"nightslink", "game"},
-	{"nightsdrill", "game"},
-	{"nightsrings", "game"},
-	{"nightsscore", "game"},
-	{"nightstime", "game"},
-	{"nightsrecords", "game"},
+	{"nightslink", "game", 1},
+	{"nightsdrill", "game", 1},
+	{"nightsrings", "game", 1},
+	{"nightsscore", "game", 1},
+	{"nightstime", "game", 1},
+	{"nightsrecords", "game", 1},
 
-	{"rankings", "scores"},
-	{"coopemeralds", "scores"},
-	{"tokens", "scores"},
-	{"tabemblems", "scores"},
+	{"rankings", "scores", 1},
+	{"coopemeralds", "scores", 1},
+	{"tokens", "scores", 1},
+	{"tabemblems", "scores", 1},
 
-	{"intermissiontally", "intermission"},
-	{"intermissiontitletext", "intermission"},
-	{"intermissionmessages", "intermission"},
-	{"intermissionemeralds", "intermission"},
+	{"intermissiontally", "intermission", 1},
+	{"intermissiontitletext", "intermission", 1},
+	{"intermissionmessages", "intermission", 1},
+	{"intermissionemeralds", "intermission", 1},
 };
 
 --#region Version Detection
@@ -152,6 +154,20 @@ function customhud.GetVersionNum()
 	return tempNum;
 end
 
+function customhud.GetStringVersion()
+	local result = ""
+
+	for k,v in ipairs(VERSIONNUM) do
+		if k == 1 then
+			result = $..v
+		else
+			result = $..'.'..v
+		end
+	end
+
+	return result;
+end
+
 if (updating == nil) then
 	customhud.hudItems = {};
 end
@@ -186,10 +202,13 @@ customhud.vanillaHooks = {
 	"title",
 	"titlecard",
 	"intermission",
-	"escpanel",
 	"continue",
 	"playersetup"
 };
+
+if SUBVERSION > 15 then
+	table.insert(customhud.vanillaHooks, "escpanel")
+end
 
 for _, v in ipairs(customhud.vanillaHooks) do
 	table.insert(customhud.hookTypes, v)
@@ -303,6 +322,8 @@ function customhud.UpdateHudItemStatus(item)
 end
 
 for _,v in pairs(defaultitems) do
+	if v[3] > SUBVERSION then continue end
+
 	local itemName = v[1];
 	local hookType = v[2];
 
@@ -1043,6 +1064,22 @@ local function RunCustomHooks(hook, v, ...)
 	end
 end
 
+local function AddGenericHook(hook, reqversion, reqsubversion)
+	local reqmajor = reqversion or MINVERSION
+	local reqminor = reqsubversion or MINSUBVERSION
+
+	if VERSION >= reqmajor and reqminor > SUBVERSION then return end
+
+	hudadd(function(v, ...)
+		customhud.CacheQueue(v)
+
+		pcall(RunRawHooks, hook, v, ...);
+		pcall(RunCustomHooks, hook, v, ...)
+
+		pcall(RunCustomHooks, "system", v);
+	end, hook);
+end
+
 hudadd(function(v, player, camera)
 	customhud.CacheQueue(v)
 
@@ -1070,57 +1107,12 @@ hudadd(function(v)
 	RunCustomHooks("system", v);
 end, "scores");
 
-hudadd(function(v)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("title", v);
-	RunCustomHooks("title", v);
-
-	RunCustomHooks("system", v);
-end, "title");
-
-hudadd(function(v, player, ticker, endtime)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("titlecard", v, player, ticker, endtime);
-	RunCustomHooks("titlecard", v, player, ticker, endtime);
-
-	RunCustomHooks("system", v);
-end, "titlecard");
-
-hudadd(function(v)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("intermission", v);
-	RunCustomHooks("intermission", v);
-end, "intermission");
-
-hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
-	RunCustomHooks("continue", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, continuing);
-
-	RunCustomHooks("system", v);
-end, "continue");
-
-hudadd(function(v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
-	RunCustomHooks("playersetup", v, player, x, y, scale, skin, sprite2, frame, rotation, color, ticker, paused);
-
-	RunCustomHooks("system", v);
-end, "playersetup");
-
-hudadd(function(v, x, y, width, height)
-	customhud.CacheQueue(v)
-
-	RunRawHooks("escpanel", v, x, y, width, height);
-	RunCustomHooks("escpanel", v, x, y, width, height);
-
-	RunCustomHooks("system", v);
-end, "escpanel");
+AddGenericHook("title")
+AddGenericHook("titlecard")
+AddGenericHook("intermission",	 	MINVERSION, 2)
+AddGenericHook("continue", 			MINVERSION, 14)
+AddGenericHook("playersetup", 		MINVERSION, 14)
+AddGenericHook("escpanel", 			MINVERSION, 16)
 
 rawset(hud, "enable",  customhud.enable)
 rawset(hud, "enabled", customhud.enabled)

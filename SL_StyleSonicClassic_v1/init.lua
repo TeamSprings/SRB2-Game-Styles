@@ -7,10 +7,10 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.830'
-rawset(_G, "Style_ClassicVersion", 3830)
+local packVersion = '3.880'
+rawset(_G, "Style_ClassicVersion", 3880)
 rawset(_G, "Style_ClassicVersionString", packVersion)
-rawset(_G, "Style_Pack_Active", true)
+rawset(_G, "Style_Pack_Active",  false)
 
 local packType = '[Classic Style '..packVersion..'] '
 local version = '2.2.15'
@@ -40,10 +40,22 @@ skincolors[freeslot("SKINCOLOR_PURPLEMANIAHUD")] = {
 	accessible = false,
 }
 
-local function styles_errerror(str)
-	error(str)
+local function styles_errnote(str)
+	print("[NOTE]" .. str)
 
-	Style_DebugErrorPrinter = $ .. str .. "\n"
+	Style_DebugErrorPrinter = $ .. "[NOTE]" .. str .. "\n"
+end
+
+local function styles_errwarning(str)
+	print("[WARNING]" .. str)
+
+	Style_DebugErrorPrinter = $ .. "[WARNING]" .. str .. "\n"
+end
+
+local function styles_errerror(str)
+	error("[ERROR]" .. str)
+
+	Style_DebugErrorPrinter = $ .. "[ERROR]" .. str .. "\n"
 end
 
 local function styles_errprint(str)
@@ -110,6 +122,14 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 		return modio:register(0, ...)
 	end)
 
+	rawset(_G, "Style_RegisterAddonClassic", function(name, version, description)
+		table.insert(tbsrequire('gui/definitions/submenus/menu_addon'), {
+			name = string.upper(name),
+			desc = description,
+			subtitle = version
+		})
+	end)
+
 	-- RUN ALREADY
 	safeDoFile("libs/sal_lib-customhud-v4-5.lua")
 
@@ -158,6 +178,7 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 		end
 	end
 
+	Style_Pack_Active = true
 	styles_errprint(packType .. "Mod loaded in " .. ( getTimeMicros() - start_metric ) .. " ms")
 elseif Style_DimpsVersion or Style_AdventureVersion then
 	-- Notify 'em

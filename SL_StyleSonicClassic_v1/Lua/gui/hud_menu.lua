@@ -4,6 +4,7 @@ local Options = tbsrequire 'helpers/create_cvar'
 local color_profile = tbsrequire 'gui/hud_colors'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local fonts = tbsrequire('gui/hud_fonts')
+local split = tbsrequire('helpers/into_lines')
 
 local HOOK = customhud.SetupItem
 local write = drawlib.draw
@@ -68,7 +69,6 @@ local function MENU_DISABLE()
 	COM_BufInsertText(consoleplayer, COM_MENU.." false")
 end
 
-
 --
 --	MENU
 --
@@ -95,7 +95,57 @@ local musicprev = nil
 local musicprev_pos = nil
 local musicprev_looppoint = nil
 
+local cache
+
+local V_TOPLEFT = V_SNAPTOLEFT|V_SNAPTOTOP
+
+--
+--	Elements
+--
+
+local types = {
+	opt = function(item)
+		local set = Options:getvalue(item.opt)
+		local toggle = true
+		local index = 0
+		local value = "MISSING"
+
+		if not Options:available(item.opt) then
+			toggle = false
+		end
+
+		if set then
+			value = set[1]
+			index = set[3]
+		end
+
+		return toggle, index, value
+	end,
+
+	com = function(item)
+		return true, nil, "jump to activate"
+	end,
+
+	cv = function(item)
+		local index = 0
+		local value = "MISSING"
+
+		if item.cv then
+			index = item.cv.value
+			value = item.cv.string
+		end
+
+		return true, index, value
+	end,
+}
+
+--
+--
+-- Front End
+
 HOOK("classic_menu", "classichud", function(v, p, t, e)
+	if consoleplayer ~= p then return end
+
 	if menu_toggle then
 		if offset_x < menufin then
 			offset_x = $+10
@@ -122,144 +172,116 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 			end
 		end
 
-		local z = distitems*menu_select+50+offset_y
-		local scale, fxscale = v.dupy()
+		local depth = distitems*menu_select + 50+offset_y
+		local scale,_ = v.dupy()
 		local width = v.width()/scale
 		local height = v.height()/scale
-		local tranpsr = ease.linear(max(offset_x-130, 0)*FU/50, 9, 3)
+		local opacity = ease.linear(max(offset_x-130, 0)*FU/50, 9, 3)
 
-		local selgp_1 = v.cachePatch("S3KBUTTON1")
-		local selgp_2 = v.cachePatch("S3KBUTTON2")
-		local selgp_3 = v.cachePatch("S3KBUTTON3")
-		local selgp_4 = v.cachePatch("S3KBUTTON4")
+		if not cache then
+			cache = {
+				buttonA = v.cachePatch("S3KBUTTON1"),
+				buttonB = v.cachePatch("S3KBUTTON2"),
+				buttonC = v.cachePatch("S3KBUTTON3"),
+				buttonD = v.cachePatch("S3KBUTTON4"),
 
-		if tranpsr < 9 then
-			v.draw(68, -24, v.cachePatch("S3KBACKGROUND"), V_SNAPTOLEFT|V_SNAPTOTOP|(tranpsr << V_ALPHASHIFT))
+				background = v.cachePatch("S3KBACKGROUND"),
+			}
 		end
 
-		local current = menuitems[menu_select]
-		local selshow = menu_select
+		if opacity < 9 then
+			v.draw(68, -24, cache.background, V_TOPLEFT|(opacity << V_ALPHASHIFT))
+		end
 
-		if current and type(current) == "table" then
-			-- current...
-			if current.desc then
+		local currentindex = menu_select
+		local current = menuitems[currentindex]
 
-				local description = current.desc
+		if current and type(current) == "table"
+		and current.desc then
+			local len = (width - 165) / 5
+			lines, _, _ = split(current.desc, len)
 
-				local len = width - 165
-				local line_len = len / 5
+			v.drawFill(0, 180 - slide - 8*#lines, width, 20 + 12*#lines, 24|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
 
-				local words = {}
+			local yt = 190 - slide - 8*#lines
 
-				for str in string.gmatch(description, "([^%s]+)") do
-					table.insert(words, str)
-				end
+			for i = 1, #lines do
+				local substr = lines[i]
 
+				v.drawString(310, yt, string.upper(substr), V_SNAPTORIGHT|V_SNAPTOBOTTOM, "thin-right")
 
-				local new_lines = {}
-				local num_line = 1
-				local num_char_per_line = 0
-
-				for i = 1,#words do
-					local word = new_lines[num_line] and " "..words[i] or words[i]
-					num_char_per_line = num_char_per_line+string.len(word)
-					if num_char_per_line > line_len then
-						word = words[i]
-						num_char_per_line = string.len(word)
-						num_line = num_line+1
-					end
-					new_lines[num_line] = new_lines[num_line] and new_lines[num_line]..word or word
-				end
-
-				v.drawFill(0, 180 - slide - 8*#new_lines, width, 20 + 12*#new_lines, 24|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
-
-				local yt = 190 - slide - 8*#new_lines
-
-				for i = 1, #new_lines do
-					local substr = new_lines[i]
-
-					v.drawString(310, yt, string.upper(substr), V_SNAPTORIGHT|V_SNAPTOBOTTOM, "thin-right")
-
-					yt = $ + 8
-				end
-			else
-				v.drawFill(0, 180 - slide, width, 20, 24|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
+				yt = $ + 8
 			end
 		else
 			v.drawFill(0, 180 - slide, width, 20, 24|V_SNAPTOLEFT|V_SNAPTOBOTTOM)
 		end
 
 		local bg_pos = 0
-		local bg_trps = tranpsr > 3 and (tranpsr-3) << V_ALPHASHIFT or 0
+		local bg_trps = opacity > 3 and (opacity-3) << V_ALPHASHIFT or 0
+		local bg_frame = 1 + (leveltime*TICRATE/24) % 12
 
 		while (bg_pos < height) do
-			v.draw(-133+x_off, bg_pos, v.cachePatch("MENUSRB2BACK"), V_SNAPTOLEFT|V_SNAPTOTOP|bg_trps)
+			v.draw(-133+x_off, bg_pos, v.cachePatch("MENUSRB2BACK"..bg_frame), V_SNAPTOLEFT|V_SNAPTOTOP|bg_trps)
 			bg_pos = $ + 256
 		end
+
+		local buttongpx
 
 		for i = 1, #menuitems do
 			local item = menuitems[i]
 			if type(item) == "table" then
-				local y = 78+i*distitems-z
+				buttongpx = cache.buttonA
+				
+				local y = 78 + i*distitems - depth
 
-				local selgp = selgp_1
+				local toggle = true
+				local index = nil
+				local value = nil
 
 				if item.opt then
-					local set = Options:getvalue(item.opt)
-
-					if Options:available(item.opt) then
-						if selshow == i then
-							selgp = selgp_2
-						end
-					else
-						if selshow == i then
-							selgp = selgp_4
-						else
-							selgp = selgp_3
-						end
-					end
-
-					if set then
-						local opt = set[1]
-						local num = set[3]
-
-						if num ~= nil then
-							write(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", num)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
-						end
-
-						if opt ~= nil then
-							local font = "center"
-							local yfnt = y+17
-
-							if string.len(opt) > 14 then
-								font = "thin-center"
-								yfnt = $ + 1
-							end
-
-							v.drawString(x_off, yfnt, "\x8C"..opt, V_SNAPTOLEFT|V_SNAPTOTOP, font)
-						end
-					end
+					toggle, index, value = types.opt(item)
 				elseif item.cv then
-					write(v, 'S3DBM', x_off*FU, (y+32)*FU, FU, string.upper(string.format("%02x", item.cv.value)), V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
+					toggle, index, value = types.cv(item)
+				elseif item.com then
+					toggle, index, value = types.com(item)
+				end
+
+				if toggle then
+					if currentindex == i then
+						buttongpx = cache.buttonB
+					end
+				else
+					if currentindex == i then
+						buttongpx = cache.buttonD
+					else
+						buttongpx = cache.buttonC
+					end
+				end
+
+				if index ~= nil then
+					write(
+						v,
+						'S3DBM',
+						x_off*FU,
+						(y+32)*FU,
+						FU,
+						string.upper(string.format("%02x", index)),
+						V_TOPLEFT,
+						v.getColormap(TC_DEFAULT, 1),
+						"center"
+					)
+				end
+
+				if value ~= nil then
 					local font = "center"
 					local yfnt = y+17
 
-					if selshow == i then
-						selgp = selgp_2
-					end
-
-					if string.len(item.cv.string) > 14 then
+					if string.len(value) > 14 then
 						font = "thin-center"
 						yfnt = $ + 1
 					end
 
-					v.drawString(x_off, yfnt, "\x8C"..item.cv.string, V_SNAPTOLEFT|V_SNAPTOTOP, font)
-				elseif item.com then
-					if selshow == i then
-						selgp = selgp_2
-					end
-
-					v.drawString(x_off, y+32, "\x8Cpress jump to activate", V_SNAPTOLEFT|V_SNAPTOTOP, "thin-center")
+					v.drawString(x_off, yfnt, "\x8C"..value, V_TOPLEFT, font)
 				end
 
 				local font = "center"
@@ -270,19 +292,19 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 					yfnt = $+1
 				end
 
-				v.draw(x_off, y, selgp, V_SNAPTOLEFT|V_SNAPTOTOP)
-				v.drawString(x_off, yfnt, "\x82*"..string.upper(item.name).."*", V_SNAPTOLEFT|V_SNAPTOTOP, font)
+				v.draw(x_off, y, buttongpx, V_TOPLEFT)
+				v.drawString(x_off, yfnt, "\x82*"..string.upper(item.name).."*", V_TOPLEFT, font)
 			elseif type(item) == "string" then
-				local y = 100+i*distitems-z
-				write(v, 'S3KTT', x_off*FU, (y-8)*FU, FU, item, V_SNAPTOLEFT|V_SNAPTOTOP, v.getColormap(TC_DEFAULT, 1), "center")
+				local y = 100+i*distitems-depth
+				write(v, 'S3KTT', x_off*FU, (y-8)*FU, FU, item, V_TOPLEFT, v.getColormap(TC_DEFAULT, 1), "center")
 			end
 		end
 
 		v.drawFill(88, slide + 18, 144, 4, 24|V_SNAPTOTOP)
 
-		v.drawFill(0, slide, width, 14, 154|V_SNAPTOTOP|V_SNAPTOLEFT)
-		v.drawFill(0, slide + 14, width, 2, 74|V_SNAPTOTOP|V_SNAPTOLEFT)
-		v.drawFill(0, slide + 16, width, 4,	24|V_SNAPTOTOP|V_SNAPTOLEFT)
+		v.drawFill(0, slide, width, 14, 154|V_TOPLEFT)
+		v.drawFill(0, slide + 14, width, 2, 74|V_TOPLEFT)
+		v.drawFill(0, slide + 16, width, 4,	24|V_TOPLEFT)
 
 		local scroller 		= v.cachePatch("MENUCLSTSCROLL")
 		local scroller_x 	= (leveltime % scroller.width) - scroller.width + slide
@@ -295,10 +317,9 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 		v.drawFill(88, slide, 144, 18, 74|V_SNAPTOTOP)
 		v.drawFill(90, slide, 140, 16, 154|V_SNAPTOTOP)
 
+		local strv = string.upper(menuitems.name)
 		local fontsubmenu = "thin-center"
 		local ysubmenu = slide + 5
-
-		local strv = string.upper(menuitems.name)
 
 		if not ((leveltime/4) % 2) then
 			strv = "\x82<   "..strv.."   >"
@@ -306,11 +327,8 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 			strv = "\x82<  "..strv.."  >"
 		end
 
-
 		v.drawString(100, ysubmenu, "C1", V_SNAPTOTOP, fontsubmenu)
-
 		v.drawString(160, ysubmenu, strv, V_SNAPTOTOP, fontsubmenu)
-
 		v.drawString(220, ysubmenu, "C3", V_SNAPTOTOP, fontsubmenu)
 
 		if press_delay then

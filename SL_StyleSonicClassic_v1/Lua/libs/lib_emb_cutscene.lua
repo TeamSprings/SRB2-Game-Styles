@@ -420,7 +420,7 @@ function thread_t:newSub(subscenes)
             paused = false;
 
             tics    = 0;
-            etics   = 0;            
+            etics   = 0;
             scene   = 0;
             scenes  = subscenes;
         }, thread_meta)

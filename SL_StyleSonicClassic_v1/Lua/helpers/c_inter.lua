@@ -67,7 +67,7 @@ end
 
 function helper.Y_GetTimeBonus(time)
 	local secs = max(0, time / TICRATE)
-	
+
 	return (TIMEREWARD[secs / TIMETIER] or 0)
 end
 

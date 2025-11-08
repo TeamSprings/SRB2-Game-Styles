@@ -14,6 +14,22 @@ local clamping = tbsrequire 'helpers/anim_clamp'
 
 local tryx, tryy = 0, 0
 
+local function lifeicon(v, lives_x, lives_y, lives_scale, lives_f, p)
+	local skin_name = string.upper(skins[p.mo.skin].name)
+	local patch_name = "STYLES_B3DLIFE_"..skin_name
+	local patch_s_name = "STYLES_SB3DLIFE_"..skin_name
+
+	if v.patchExists(patch_s_name) and p.powers[pw_super] then
+		v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
+	elseif v.patchExists(patch_name) then
+		v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
+	else
+		v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK1'), lives_f)
+		v.draw(lives_x+8, 	lives_y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
+		v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK2'), lives_f)
+	end
+end
+
 return{
 
 	titlecard = function(v, p, t, e, bfade)
@@ -62,6 +78,8 @@ return{
 		end
 	end,
 
+	playericon = lifeicon,
+
 	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 
@@ -75,19 +93,7 @@ return{
 				lives_y = 184-hudinfo[HUD_LIVES].y
 			end
 
-			local skin_name = string.upper(skins[p.mo.skin].name)
-			local patch_name = "STYLES_B3DLIFE_"..skin_name
-			local patch_s_name = "STYLES_SB3DLIFE_"..skin_name
-
-			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
-			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+8, 	lives_y+11, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
-			else
-				v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK1'), lives_f)
-				v.draw(lives_x+8, 	lives_y+11, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f|V_FLIP, v.getColormap(TC_DEFAULT, p.mo.color))
-				v.draw(lives_x, 	lives_y-1, v.cachePatch('3BLIVBLANK2'), lives_f)
-			end
+			lifeicon(v, lives_x, lives_y, FU, lives_f, p)
 
 			if G_GametypeUsesLives() then
 				local lives = p.lives

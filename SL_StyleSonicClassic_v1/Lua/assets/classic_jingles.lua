@@ -173,9 +173,9 @@ addHook("MusicChange", function(oldname, newname, mflags, looping, position, pre
 			forced_fadeinms = data.endfade
 		end
 
-		if option.values[option.cv.value] then
-			music_change = option.values[option.cv.value]
-		elseif option.cv.value < 0 then
+		if option.values[option:index()] then
+			music_change = option.values[option:index()]
+		elseif option:index() < 0 then
 			speedup = true
 			return S_MusicName(displayplayer)
 		end

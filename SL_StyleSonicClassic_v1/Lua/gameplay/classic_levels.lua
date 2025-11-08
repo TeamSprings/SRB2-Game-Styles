@@ -9,6 +9,9 @@ local Options = tbsrequire('helpers/create_cvar')
 local lvllib = tbsrequire 'libs/lib_emb_levelverification'
 local cutlib = tbsrequire 'libs/lib_emb_cutscene'
 
+-- keep this one loaded in for addons
+tbsrequire('gameplay/stash/cutscenes')
+
 local level_opt = Options:get("disablelevel")
 local cutscene_opt = Options:get("disablecutscenes")
 
@@ -35,6 +38,10 @@ local __data = {
 
 	[6] = {
         VANILLA('technohill', 'act3'),
+	},
+
+	[7] = {
+        VANILLA('deepsea', 'act1'),
 	},
 
 	[9] = {

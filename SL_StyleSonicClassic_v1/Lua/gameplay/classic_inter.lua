@@ -5,10 +5,10 @@
 Contributors: Skydusk
 @Team Blue Spring 2022-2025
 
-	TODO: Make this multiplayer compatible
 ]]
 
 local Options = tbsrequire('helpers/create_cvar')
+local Manager = tbsrequire('gameplay/intermissions/inter_manager')
 
 local list = tbsrequire 'gameplay/compact/specialpacks'
 local calc_help = tbsrequire 'helpers/c_inter'
@@ -327,15 +327,11 @@ local function G_StylesTallyBackend(p)
 	if specialpackdetected then return end
 	if p.bot then return end
 
-	if marathonmode then return end
-
 	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
 		return
 	end
 
-	local specialstage = G_IsSpecialStage(gamemap)
-
-	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
+	if Manager:check() then
 
 		if G_EnoughPlayersFinished() then
 			G_StylesSetupTally(p)
@@ -357,33 +353,7 @@ local function G_StylesTallyBackend(p)
 
 				-- Initial Setup of Tally
 				if p.exiting == 6 then
-					p.styles_tallytimer = -99
-					p.styles_tallyfakecounttimer = calc_help.Y_GetTimingCalculation(p)
-					p.styles_tallyendtime = p.styles_tallyfakecounttimer + 5*TICRATE
-					p.styles_tallylastscore = p.score
-					p.styles_tallylastlives = p.lives
-					p.exiting = 5
-
-					p.powers[pw_invulnerability] = 0
-					p.powers[pw_sneakers] = 0
-					p.powers[pw_extralife] = 0
-					p.powers[pw_super] = 0
-
-					local getTrack = Options:getvalue("levelendtheme")[2]
-
-					S_StopMusic(p)
-					S_ChangeMusic(getTrack, false, p, 0, 0, 0, 0)
-					--p.styles_lasttrack = nil
-					p.styles_tallytrack = getTrack
-					p.styles_tallyposms = 0
-					p.styles_tallystoplooping = nil
-					p.styles_tallysoundlenght = S_GetMusicLength() or 0
-
-					if p.styles_capsule_exit then
-						p.styles_capsule_exit = nil
-					else
-						p.mo.flags = $|MF_NOCLIPTHING
-					end
+					Manager:setup(p)
 
 					setuphook(p.realmo and p.realmo.skin or p.skin, p)
 				-- Background Process
@@ -398,14 +368,23 @@ local function G_StylesTallyBackend(p)
 
 						if p.cmd and p.cmd.buttons & BT_SPIN then
 							p.styles_tallytimer = p.styles_tallyfakecounttimer
-							calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+							if p.styles_tallyingameadditive then
+								calc_help.addScore(p, Manager:restScore(p))
+							end
+							Manager:counterWipe(p)
 
 							skiphook(p.realmo and p.realmo.skin or p.skin, p)
 						else
 							if p.styles_tallytimer < p.styles_tallyfakecounttimer - 1 then
-								calc_help.addScore(p, 222)
+								if p.styles_tallyingameadditive then
+									calc_help.addScore(p, p.styles_tallyspeed or 222)
+								end
+								Manager:counterThink(p)
 							else
-								calc_help.addScore(p, calc_help.Y_CalculateAllScore(p) - max(p.score - p.styles_tallylastscore, 0))
+								if p.styles_tallyingameadditive then
+									calc_help.addScore(p, Manager:restScore(p))
+								end
+								Manager:counterWipe(p)
 							end
 						end
 					end
@@ -438,6 +417,7 @@ local function G_StylesTallyBackend(p)
 						end
 					end
 
+					Manager:think(p)
 					thinkhook(p.realmo and p.realmo.skin or p.skin, p, p.styles_tallytimer, p.styles_tallyendtime)
 
 					p.styles_tallytimer = $+1

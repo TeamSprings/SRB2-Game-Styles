@@ -158,13 +158,11 @@ HOOK("score", "classichud", function(v, p, t, e)
 	return true
 end, "game", 1, 3)
 
---
-local time_display_optcv = timeformat_opt.cv
 local time_display_settingscv = CV_FindVar("timerres")
 
 local function gettimedisplay_cv()
-	if time_display_optcv.value > 0 then
-		return time_display_optcv.value - 1
+	if timeformat_opt:index() > 0 then
+		return timeformat_opt:index() - 1
 	else
 		return time_display_settingscv.value
 	end

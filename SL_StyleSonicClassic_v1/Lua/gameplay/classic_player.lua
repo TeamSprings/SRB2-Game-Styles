@@ -43,20 +43,6 @@ local spinsounds_opt = Options:new("spinsfx", "gameplay/sfx/spinsfx", nil, 0)
 local dashsounds_opt = Options:new("dashsfx", "gameplay/sfx/dashsfx", nil, 0)
 
 --
---	Cvars
---
-
-local spindash_cv = spindash_opt.cv
-
-local springtwirl_cv = springtwirl_opt.cv
-
-local springtwalk_cv = springtwalk_opt.cv
-
-local springtroll_cv = springtroll_opt.cv
-
-local thok_cv = thok_opt.cv
-
---
 --  RUN ON WATER
 --
 
@@ -104,7 +90,7 @@ end)
 addHook("PlayerThink", function(p)
 	if not p.mo then return end
 
-	if spindash_cv.value and p.mo.state == S_PLAY_SPINDASH then
+	if spindash_opt:index() and p.mo.state == S_PLAY_SPINDASH then
 		p.mo.state = S_PLAY_ROLL
 	end
 
@@ -281,7 +267,7 @@ addHook("PlayerThink", function(p)
 
 	-- EYE CANDY
 
-	if thok_cv.value then
+	if thok_opt:index() then
 		p.thokitem = p.thokitem == MT_THOK and MT_RAY or $
 		p.spinitem = p.spinitem == MT_THOK and MT_RAY or $
 		p.revitem = p.revitem == MT_THOK and MT_RAY or $
@@ -324,7 +310,7 @@ addHook("PlayerThink", function(p)
 
 	if p.mo.style_spring_type == nil then return end
 
-	if springtwirl_cv.value and p.mo.style_spring_type == 2
+	if springtwirl_opt:index() and p.mo.style_spring_type == 2
 	and (p.mo.state == S_PLAY_SPRING or p.cd_springtwirl) and not p.style_springroll then
 		p.drawangle = leveltime*ANG1*16
 		p.cd_springtwirl = true
@@ -333,7 +319,7 @@ addHook("PlayerThink", function(p)
 		p.cd_springtwirl = nil
 	end
 
-	if ((springtroll_cv.value == 2 or (springtroll_cv.value == 1 and p.mo.style_spring_type == 1))
+	if ((springtroll_opt:index() == 2 or (springtroll_opt:index() == 1 and p.mo.style_spring_type == 1))
 	and not p.cd_springtwirl and p.mo.state == S_PLAY_SPRING
 	or (p.style_springroll and not onground)) then
 
@@ -347,7 +333,7 @@ addHook("PlayerThink", function(p)
 		p.style_springroll = nil
 	end
 
-	if springtwalk_cv.value then
+	if springtwalk_opt:index() then
 		if (p.mo.state == S_PLAY_SPRING) then
 			p.styles_spronk = true
 		elseif p.styles_spronk and (p.mo.state == S_PLAY_FALL

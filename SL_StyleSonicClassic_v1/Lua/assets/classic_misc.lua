@@ -105,11 +105,10 @@ freeslot("SPR_SIGNS")
 local sign_opt = Options:new("sign", "assets/tables/sprites/sign", switchon)
 
 local signmove_opt = Options:new("sign_movement", "gameplay/cvars/signmovement", nil, CV_NETVAR)
-local signmove_cv = signmove_opt.cv
 
 -- TODO: Multiple behaviors
 addHook("MobjThinker", function(a)
-	if signmove_cv.value then
+	if signmove_opt:index() then
 		if not a.style_spin then
 			a.style_z = a.z
 			a.style_spin = 1

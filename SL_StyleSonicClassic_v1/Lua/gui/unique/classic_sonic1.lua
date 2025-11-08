@@ -20,6 +20,22 @@ local titledur = TICRATE/5 - TICRATE/16
 local titledel = TICRATE/12
 local trx, trx2
 
+local function lifeicon(v, lives_x, lives_y, lives_scale, lives_f, p)
+	local skin_name = string.upper(skins[p.mo.skin].name)
+	local patch_name = "STYLES_S1LIFE_"..skin_name
+	local patch_s_name = "STYLES_SS1LIFE_"..skin_name
+
+	if v.patchExists(patch_s_name) and p.powers[pw_super] then
+		v.draw(lives_x+8, lives_y+12, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
+	elseif v.patchExists(patch_name) then
+		v.draw(lives_x+8, lives_y+12, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
+	else
+		v.draw(lives_x, lives_y, v.cachePatch('S2LIVBLANK1'), lives_f)
+		v.draw(lives_x+8, lives_y+12, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
+		v.draw(lives_x, lives_y, v.cachePatch('S2LIVBLANK2'), lives_f)
+	end
+end
+
 return{
 
 	titlecard = function(v, p, t, e, bfade)
@@ -77,6 +93,8 @@ return{
 		end
 	end,
 
+	playericon = lifeicon,
+
 	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
 		if p and p.mo then
 			local lifename = string.upper(''..(overwrite and overwrite or skins[p.mo.skin].hudname))
@@ -94,19 +112,7 @@ return{
 				lives_y = 184 - hudinfo[HUD_LIVES].y
 			end
 
-			local skin_name = string.upper(skins[p.mo.skin].name)
-			local patch_name = "STYLES_S1LIFE_"..skin_name
-			local patch_s_name = "STYLES_SS1LIFE_"..skin_name
-
-			if v.patchExists(patch_s_name) and p.powers[pw_super] then
-				v.draw(lives_x+8, lives_y+12, v.cachePatch(patch_s_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
-			elseif v.patchExists(patch_name) then
-				v.draw(lives_x+8, lives_y+12, v.cachePatch(patch_name), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
-			else
-				v.draw(lives_x, lives_y, v.cachePatch('S2LIVBLANK1'), lives_f)
-				v.draw(lives_x+8, lives_y+12, v.getSprite2Patch(p.mo.skin, SPR2_LIFE, false, A, 0), lives_f, v.getColormap(TC_DEFAULT, p.mo.color))
-				v.draw(lives_x, lives_y, v.cachePatch('S2LIVBLANK2'), lives_f)
-			end
+			lifeicon(v, lives_x, lives_y, FU, lives_f, p)
 
 			if G_GametypeUsesLives() then
 				drawf(v, 'HUS2NAM', (lives_x+17)*FU, (lives_y+1)*FU, FU, lifename, lives_f, colorprofile, 0, 1)

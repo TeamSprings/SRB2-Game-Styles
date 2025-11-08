@@ -76,15 +76,14 @@ local monitor_staticanim_opt = Options:new("monitorstaticanim", {
 }, nil, CV_NETVAR)
 
 local monitor_typesa_opt = Options:new("monitordistribution", "assets/tables/monitor_distrb", nil, CV_NETVAR)
-local monitor_typesa_cv = monitor_typesa_opt.cv
 
 local MonitorSprites, P_MarioExistsThink, P_MarioMonitorThink = unpack(tbsrequire('assets/compact/classic_mario'))
 local picks, sets = unpack(tbsrequire 'assets/tables/monitor_sets')
 
 local function P_SpawnItemBox(a)
-	if not multiplayer and monitor_typesa_cv.value and picks[a.type] then
-		if sets[monitor_typesa_cv.value][a.type] then
-			P_SpawnMobjFromMobj(a, 0, 0, 0, sets[monitor_typesa_cv.value][a.type])
+	if not multiplayer and monitor_typesa_opt:index() and picks[a.type] then
+		if sets[monitor_typesa_opt:index()][a.type] then
+			P_SpawnMobjFromMobj(a, 0, 0, 0, sets[monitor_typesa_opt:index()][a.type])
 		end
 
 		P_RemoveMobj(a)

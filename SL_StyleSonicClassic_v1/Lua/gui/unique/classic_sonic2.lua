@@ -8,35 +8,29 @@ Contributors: Skydusk
 local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local drawf = drawlib.draw
+local textlen = drawlib.text_lenght
 
-local skins_colors = {
-	["sonic"] = 153,
-	["tails"] = 56,
-	["knuckles"] = 105,
-	["amy"] = 204,
-	["metalsonic"] = 172,
-	["fang"] = 195,
-}
+local uniquecolors = tbsrequire 'gui/definitions/classic_s2title'
 
 local trx1, trx2, try
 
 return{
-	-- FIX SONIC 2 TITLECARD FOR CUTSCENES -> EASING
+	-- TODO: FIX SONIC 2 TITLECARD FOR CUTSCENES -> EASING
 	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
 
 		local lvlt = string.lower(nametrim(""..mapheaderinfo[gamemap].lvlttl))
 		local act = ''..mapheaderinfo[gamemap].actnum
-		local rightflg = v.levelTitleWidth(lvlt)
-		local zonelenght = v.levelTitleWidth('zone')
-		local scalexint, scalexfr = v.dupx()
-		local scaleyint, scaleyfr = v.dupy()
+		local rightflg = textlen(v, 'S2IFT', lvlt, 1)
+		local zonelenght = textlen(v, 'S2IFT', 'zone', 1)
+		local scalexint, _ = v.dupx()
+		local scaleyint, _ = v.dupy()
 		local screenw = v.width()/scalexint
 		local screenh = v.height()/scaleyint
 		local extscrw = screenw-320
 		local extscrh = screenh-200
-		if t < 2 then
+		if t < 3 then
 			trx1 = screenw-20
 			trx2 = screenw-120
 			try = screenh
@@ -73,21 +67,22 @@ return{
 				pskin = p.mo.skin
 			end
 
-			v.drawFill(0-extscrw/2, 0-try-extscrh, screenw+extscrw/2, screenh, (skins_colors[pskin] or 153))
+			v.drawFill(0-extscrw/2, 0-try-extscrh, screenw+extscrw/2, screenh, (uniquecolors[pskin] or 153))
 			v.drawFill(trx1-extscrw/2, 136, screenw+extscrw/2, 64+extscrh, 74)
 			v.drawFill(-trx1-extscrw/2-23, -extscrh, 111, screenh+extscrh, 37)
 			v.draw(88-trx1-extscrw/2, -extscrh, v.cachePatch('S2TTCOR'), 0)
 			v.draw(138+trx1-extscrw/2, 144, v.cachePatch('S2TTANAM'), 0)
-			v.drawLevelTitle(287+trx2-rightflg, 51, lvlt, 0)
+
+			drawf(v, 'S2IFT', (287+trx2-rightflg)*FU, 51*FU, FU, lvlt, 0, nil, 'left', 1)
 			local offset_x = max(rightflg, 164)
 
 			---@diagnostic disable-next-line
 			if not (mapheaderinfo[gamemap].levelflags & LF_NOZONE) then
-				v.drawLevelTitle(382-trx2-offset_x, 76, 'zone', 0)
+				drawf(v, 'S2IFT', (382-trx2-offset_x)*FU, 76*FU, FU, 'zone', 0, nil, 'left', 1)
 			end
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(382-trx2-offset_x+zonelenght)*FU, 80*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'S2IACTNUM',(382-trx2-offset_x+zonelenght)*FU, 80*FU, FU, act, 0, v.getColormap(TC_DEFAULT, 1))
 			end
 
 			v.drawString(160-trx1, 105, mapheaderinfo[gamemap].subttl, V_ALLOWLOWERCASE, "center")
@@ -96,16 +91,15 @@ return{
 		end
 	end,
 
-	--TODO: AUTOADJUSTING FOR NAME
 	tallytitle = function(v, p, offsetx, color, overwrite)
 		local mo = p.mo
 
 		if mo then
 			local skin_name = string.lower((overwrite and overwrite or skins[mo.skin].realname))
 
-			v.drawLevelTitle(96-offsetx, 48, skin_name.." got", V_PERPLAYER)
+			drawf(v, 'S2IFT', (232-offsetx)*FU, 48*FU, FU, skin_name.." got", V_PERPLAYER, nil, 'right', 1)
 		else
-			v.drawLevelTitle(72-offsetx, 48, "you got", V_PERPLAYER)
+			drawf(v, 'S2IFT', (232-offsetx)*FU, 48*FU, FU, "you got", V_PERPLAYER, nil, 'right', 1)
 		end
 
 		local gotthrough = "through "
@@ -119,11 +113,11 @@ return{
 			local act = ''..mapheaderinfo[gamemap].actnum
 
 			if act ~= "0" then
-				drawf(v, 'TTL0',(78 + v.levelTitleWidth(gotthrough) - offsetx)*FU, 57*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
+				drawf(v, 'S2IACTNUM',(78 + textlen(v, 'S2IFT', gotthrough, 1) - offsetx)*FU, 57*FU, FU, act, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1))
 			end
 		end
 
-		v.drawLevelTitle(72-offsetx, 66, gotthrough, V_PERPLAYER)
+		drawf(v, 'S2IFT', (72-offsetx)*FU, 66*FU, FU, gotthrough, V_PERPLAYER, nil, 'left', 1)
 	end,
 
 	tallyspecial = function(v, p, offsetx, color, color2)
@@ -142,6 +136,6 @@ return{
 			end
 		end
 
-		v.drawLevelTitle(160 - v.levelTitleWidth(str)/2 -offsetx, 48, str, V_PERPLAYER|V_PURPLEMAP)
+		drawf(v, 'S2IFT', (160 - textlen(v, 'S2IFT', str, 1) / 2 -offsetx)*FU, 48*FU, FU, str, V_PERPLAYER, v.getColormap(TC_DEFAULT, 0, "SPECIALSTAGE_SONIC2_TALLYTITLE"), 'left', 1)
 	end,
 }

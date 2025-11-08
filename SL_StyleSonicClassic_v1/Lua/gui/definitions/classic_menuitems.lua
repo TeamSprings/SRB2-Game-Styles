@@ -35,4 +35,14 @@ return {
 		name 	= 	"AUDIO",
 		source 	= 	'audio'
 	};
+
+	SUBMENU{
+		name 	= 	"MENU",
+		source 	= 	'menu'
+	};
+
+	SUBMENU{
+		name 	= 	"ADDON",
+		source 	= 	'addon'
+	};
 }
