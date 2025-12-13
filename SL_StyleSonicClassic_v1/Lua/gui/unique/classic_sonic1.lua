@@ -11,6 +11,7 @@ local drawf = drawlib.draw
 local textlen = drawlib.text_lenght
 
 local clamping = tbsrequire 'helpers/anim_clamp'
+local fonts = 	tbsrequire('gui/hud_fonts')
 
 local min_lifelen = 6*4
 local min_lifexap = 6*5-2
@@ -95,7 +96,7 @@ return{
 
 	playericon = lifeicon,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2, icon)
 		if p and p.mo then
 			local lifename = string.upper(''..(overwrite and overwrite or skins[p.mo.skin].hudname))
 			local lifenamelenght = textlen(v, 'HUS2NAM', lifename, 1)
@@ -112,10 +113,10 @@ return{
 				lives_y = 184 - hudinfo[HUD_LIVES].y
 			end
 
-			lifeicon(v, lives_x, lives_y, FU, lives_f, p)
+			icon(v, lives_x, lives_y, FU, lives_f, p)
 
 			if G_GametypeUsesLives() then
-				drawf(v, 'HUS2NAM', (lives_x+17)*FU, (lives_y+1)*FU, FU, lifename, lives_f, colorprofile, 0, 1)
+				drawf(v, fonts.livesfnt..'NAM', (lives_x+17)*FU, (lives_y+1)*FU, FU, lifename, lives_f, colorprofile, 0, 1)
 
 				if lifenamelenght > min_lifexap then
 					v.draw(lives_x+22, lives_y+10, v.cachePatch('S2CROSS'), lives_f, colorprofile2)
@@ -127,7 +128,7 @@ return{
 					lives = "I"
 				end
 
-				drawf(v, 'LIFENUM', (lives_x+17+lifenamelenght)*FU, (lives_y+9)*FU, FU, lives,
+				drawf(v, fonts.livesnum..'NUM', (lives_x+17+lifenamelenght)*FU, (lives_y+9)*FU, FU, lives,
 				lives_f, colorprofile2, "right", 1)
 			elseif G_TagGametype() and (p.pflags & PF_TAGIT) then
 				v.draw(lives_x+22, lives_y, v.cachePatch('CLASSICIT'), lives_f)

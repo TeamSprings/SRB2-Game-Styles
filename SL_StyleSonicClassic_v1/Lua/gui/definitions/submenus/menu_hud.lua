@@ -35,9 +35,15 @@ return 	{
 
     },
 
-    {name = "LIVES STYLE", 	opt = "lifeicon",
+    {name = "LIVES PRESET", opt = "lifeicon",
 
     desc = [[changes apperance of life counter]],
+
+    },
+
+    {name = "LIFE ICON RENDER", opt = "lifeiconrender",
+
+    desc = [[changes life icon's renderer]],
 
     },
 

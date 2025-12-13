@@ -190,7 +190,7 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 		end
 
 		if opacity < 9 then
-			v.draw(68, -24, cache.background, V_TOPLEFT|(opacity << V_ALPHASHIFT))
+			v.draw(68, -24, cache.background, V_TOPLEFT|(opacity << V_ALPHASHIFT), v.getColormap(TC_DEFAULT, 0, color_profile.menu))
 		end
 
 		local currentindex = menu_select
@@ -244,6 +244,9 @@ HOOK("classic_menu", "classichud", function(v, p, t, e)
 					toggle, index, value = types.cv(item)
 				elseif item.com then
 					toggle, index, value = types.com(item)
+				elseif item.addon then
+					v.draw(x_off - 48, y + 32, v.cachePatch(item.addon.icon), V_TOPLEFT)
+					v.drawString(x_off + 48, y + 24, "\x8C"..item.addon.version, V_TOPLEFT, "right")
 				end
 
 				if toggle then
@@ -361,13 +364,16 @@ addHook("PlayerThink", function(p)
 		end
 	elseif menu_toggle == false then
 		p.pflags = $ &~ PF_FORCESTRAFE|PF_JUMPDOWN|PF_USEDOWN
-		menu_toggle = nil
 
-		if p == consoleplayer and musicprev then
-			S_ChangeMusic(musicprev, musicprev_looppoint ~= nil, p, nil, musicprev_pos, MUSICRATE/4)
-			musicprev = nil
-			musicprev_pos = nil
-			musicprev_looppoint = nil
+		if p == consoleplayer then
+			menu_toggle = nil
+			
+			if musicprev then
+				S_ChangeMusic(musicprev, musicprev_looppoint ~= nil, p, nil, musicprev_pos, MUSICRATE/4)
+				musicprev = nil
+				musicprev_pos = nil
+				musicprev_looppoint = nil
+			end
 		end
 	end
 end)
@@ -538,4 +544,8 @@ addHook("PlayerCmd", function(p, cmd)
 
 		holding_scores = nil
 	end
+end)
+
+rawset(_G, "Styles_IsMenuActive", function()
+	return menu_toggle
 end)

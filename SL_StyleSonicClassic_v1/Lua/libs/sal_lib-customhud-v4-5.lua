@@ -13,7 +13,7 @@
 
 --]]
 
-local VERSIONNUM = {4, 6};
+local VERSIONNUM = {4, 8};
 local MINVERSION = 202
 local MINSUBVERSION = 0
 local updating = nil;
@@ -168,7 +168,7 @@ function customhud.GetStringVersion()
 	return result;
 end
 
-if (updating == nil) then
+if (updating == nil or customhud.hudItems == nil) then
 	customhud.hudItems = {};
 end
 
@@ -287,16 +287,27 @@ for _,v in pairs(hooktypes) do
 	end
 end
 
-if updating then
+function customhud.Update()
 	for _,hook in pairs(hooktypes) do
 		for _,item in pairs(huditems[hook]) do
-			if (item.layer and type(item.layer) == "number") then
+			local _type = type(item.layer)
+
+			if (_type == "number") then
 				local saved_num = item.layer;
 				item.layer = {};
 
 				if (item.funcs) then
 					for k,_ in pairs(item.funcs) do
 						item.layer[k] = saved_num;
+						print("WORK!")
+					end
+				end
+			elseif (_type == "nil") then
+				item.layer = {};
+
+				if (item.funcs) then
+					for k,_ in pairs(item.funcs) do
+						item.layer[k] = 0;
 					end
 				end
 			end
@@ -306,6 +317,10 @@ if updating then
 			end
 		end
 	end
+end
+
+if updating then
+	customhud.Update()
 end
 
 function customhud.UpdateHudItemStatus(item)
@@ -594,6 +609,7 @@ end
 ---@return boolean|nil
 function customhud.SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority)
 	if SetupItem(itemName, modName, itemFunc, hook, drawlayer, modPriority) then
+
 		for _,hook in pairs(hooktypes) do
 			table.sort(huditems[hook], HudPriority);
 		end
@@ -761,7 +777,7 @@ function customhud.GetMeta()
 end
 
 function customhud.ValidateRawsFunc(hook, path, archive, funcname, line, funcsource)
-	if not debug then 
+	if not debug then
 		warn("Vanilla debug library is missing. Please update to 2.2.16 to use this functionality.");
 		return true;
 	end
@@ -874,21 +890,15 @@ function customhud.CheckRaws(hook, path, archive, funcname, line)
 	end
 end
 
----Identifies raw Custom HUDs by parameters and toggles it
+---Gets function of raw Custom Hud by parameters
 ---@param hook string
 ---@param path string
 ---@param archive string?
 ---@param funcname string?
 ---@param line string?
----@param toggle boolean
-function customhud.ToggleRaws(hook, path, archive, funcname, line, toggle)
-	if customhud.ValidateRawsFunc(hook, path, archive, funcname, line, "customhud.ToggleRaws") then
-		return;
-	end
-
-	if type(toggle) ~= "boolean" then
-		local datatype = type(toggle);
-		warn("Expected: boolean; Got: "..datatype.." in customhud.ToggleRaws's toggle parameter");
+---@return boolean?
+function customhud.GetRaws(hook, path, archive, funcname, line)
+	if customhud.ValidateRawsFunc(hook, path, archive, funcname, line, "customhud.CheckRaws") then
 		return;
 	end
 
@@ -945,14 +955,171 @@ function customhud.ToggleRaws(hook, path, archive, funcname, line, toggle)
 		end
 
 		if pathmatch and archivematch and namematch and linematch then
-			item[2] = toggle;
+			return item[1];
 		end
 	end
 end
 
+---Promotes Raw Item into Custom Hud Item
+---@param hook string
+---@param path string
+---@param archive string?
+---@param funcname string?
+---@param line string?
+---@param itemname string
+---@param modname string
+---@param hudpriority number
+---@param newhook string?
+---@return boolean?
+function customhud.PromoteRaw(hook, path, archive, funcname, line, itemname, modname, hudpriority, newhook)
+	if customhud.ValidateRawsFunc(hook, path, archive, funcname, line, "customhud.PromoteRaw") then
+		return;
+	end
+
+	local defaultarchivebool = (archive == nil);
+	local defaultnamebool = (funcname == nil);
+	local defaultlinebool = (line == nil);
+
+	for pos,item in ipairs(customhud.rawAdditions[hook]) do
+		local _debuginfo = item[3];
+
+		if not _debuginfo then
+			continue;
+		end
+
+		local pathmatch = false;
+		local namematch   = false;
+		local archivematch = false;
+		local linematch   = false;
+
+		local _path = _debuginfo.path;
+
+		if path == _path then
+			pathmatch = true;
+		end
+
+		if defaultarchivebool then
+			archivematch = true;
+		else
+			local _archive = _debuginfo.archive;
+
+			if archive == _archive then
+				archivematch = true;
+			end
+		end
+
+		if defaultnamebool then
+			namematch = true;
+		else
+			local _name = _debuginfo.name;
+
+			if funcname == _name then
+				namematch = true;
+			end
+		end
+
+		if defaultlinebool then
+			linematch = true;
+		else
+			local _line = _debuginfo.line;
+
+			if line == _line then
+				linematch = true;
+			end
+		end
+
+		if pathmatch and archivematch and namematch and linematch then
+			customhud.SetupItem(itemname, modname, item[1], newhook or hook, hudpriority)
+
+			item[2] = false;
+			table.remove(customhud.rawAdditions[hook], pos);
+			break;
+		end
+	end
+end
+
+---Identifies raw Custom HUDs by parameters and toggles it
+---@param hook string
+---@param path string
+---@param archive string?
+---@param funcname string?
+---@param line string?
+---@param toggle boolean
+function customhud.ToggleRaws(hook, path, archive, funcname, line, toggle)
+	if customhud.ValidateRawsFunc(hook, path, archive, funcname, line, "customhud.ToggleRaws") then
+		return false;
+	end
+
+	if type(toggle) ~= "boolean" then
+		local datatype = type(toggle);
+		warn("Expected: boolean; Got: "..datatype.." in customhud.ToggleRaws's toggle parameter");
+		return false;
+	end
+
+	local defaultarchivebool = (archive == nil);
+	local defaultnamebool = (funcname == nil);
+	local defaultlinebool = (line == nil);
+
+	for _,item in ipairs(customhud.rawAdditions[hook]) do
+		local _debuginfo = item[3];
+
+		if not _debuginfo then
+			continue;
+		end
+
+		local pathmatch = false;
+		local namematch   = false;
+		local archivematch = false;
+		local linematch   = false;
+
+		local _path = _debuginfo.path;
+
+		if path == _path then
+			pathmatch = true;
+		end
+
+		if defaultarchivebool then
+			archivematch = true;
+		else
+			local _archive = _debuginfo.archive;
+
+			if archive == _archive then
+				archivematch = true;
+			end
+		end
+
+		if defaultnamebool then
+			namematch = true;
+		else
+			local _name = _debuginfo.name;
+
+			if funcname == _name then
+				namematch = true;
+			end
+		end
+
+		if defaultlinebool then
+			linematch = true;
+		else
+			local _line = _debuginfo.line;
+
+			if line == _line then
+				linematch = true;
+			end
+		end
+
+		if pathmatch and archivematch and namematch and linematch then
+			item[2] = toggle;
+			return item;
+		end
+	end
+
+	return false;
+end
+
 COM_AddCommand("customhud_rawlist", function(_, hook)
 	local count = 0
-	
+
 	if type(hook) ~= "string" then
 		local datatype = type(hook);
 		warn("Expected: string; Got: "..datatype.." in customhud.ToggleRaws's hook parameter");
@@ -962,7 +1129,7 @@ COM_AddCommand("customhud_rawlist", function(_, hook)
 	if not customhud.rawAdditions[hook] then
 		warn("Hook type \""..hook.."\" is invalid in customhud.ToggleRaws");
 		return true;
-	end	
+	end
 
 	for _,item in ipairs(customhud.rawAdditions[hook]) do
 		count = $ + 1
@@ -981,7 +1148,7 @@ COM_AddCommand("customhud_rawlist", function(_, hook)
 end, COM_LOCAL);
 
 if hud.cachePatch then
-	---* In case of hud.cachePatch existing, just caches patches right away, when not queues strings for patching at first oppurnity.	
+	---* In case of hud.cachePatch existing, just caches patches right away, when not queues strings for patching at first oppurnity.
 	---* This is more so cross version solution, as cachePatch was made standalone from hook's own videolib
 	---@param container table<string>
 	---@return table<patch_t>
@@ -1005,7 +1172,7 @@ if hud.cachePatch then
 else
 	customhud.cachingQueue = {}
 
-	function customhud.PreCache(container)	
+	function customhud.PreCache(container)
 		table.insert(customhud.cachingQueue, container)
 		return container ---@cast container patch_t
 	end
@@ -1178,12 +1345,12 @@ end
 local function newhud_add(func, hook, ...)
 	local _hook = hook or "game"
 
-	if type(func) ~= "function" then 
+	if type(func) ~= "function" then
 		warn("While adding HUD hook non-drawer-function was provided.");
 		return
 	end
 
-	if type(_hook) ~= "string" then 
+	if type(_hook) ~= "string" then
 		warn("Invalid hook type provided \""..type(hook).."\"");
 		return
 	end
@@ -1211,10 +1378,10 @@ local function newhud_add(func, hook, ...)
 				name = info.name or "none",
 				path = scriptpath,
 				archive = archive,
-				line = info.linedefined or "unknown"
+				line = info.linedefined.."" or "unknown"
 			}
 		end
-		
+
 		table.insert(customhud.rawAdditions[_hook], {func, true, debuginfo})
 	else
 		hudadd(func, hook, ...)

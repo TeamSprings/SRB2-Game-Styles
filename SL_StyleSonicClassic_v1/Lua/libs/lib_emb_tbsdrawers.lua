@@ -28,10 +28,12 @@ local LEFT 		= "right"
 --
 
 local ASCII 	= {}
-local ASCII_len = 128
+local ASCII_len = 256
 
 for i = 0, ASCII_len do
-	ASCII[i] = strchar(i) or "NONE"
+	local success, input = pcall(strchar, i)
+
+	ASCII[i] = success and (input or "NONE") or "NONE"
 end
 
 local function V_RegisterFont(v, font)

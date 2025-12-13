@@ -7,8 +7,8 @@ local __devMode = true
 
 local gameString = "classic"
 
-local packVersion = '3.880'
-rawset(_G, "Style_ClassicVersion", 3880)
+local packVersion = '3.990'
+rawset(_G, "Style_ClassicVersion", 3990)
 rawset(_G, "Style_ClassicVersionString", packVersion)
 rawset(_G, "Style_Pack_Active",  false)
 
@@ -71,6 +71,7 @@ if not tbsrequire then
 
 	rawset(_G, "tbsrequire", function(path)
 		local path = path .. ".lua"
+
 		if cache_lib[path] then
 			return cache_lib[path]
 		else
@@ -122,11 +123,11 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 		return modio:register(0, ...)
 	end)
 
-	rawset(_G, "Style_RegisterAddonClassic", function(name, version, description)
+	rawset(_G, "Style_RegisterAddonClassic", function(name, version, description, icon)
 		table.insert(tbsrequire('gui/definitions/submenus/menu_addon'), {
 			name = string.upper(name),
 			desc = description,
-			subtitle = version
+			adddon = {version = version, icon = icon}
 		})
 	end)
 
@@ -134,6 +135,8 @@ if VERSION == 202 and SUBVERSION > 14 and not Style_DimpsVersion and not Style_A
 	safeDoFile("libs/sal_lib-customhud-v4-5.lua")
 
 	safeDoFile("libs/lib_emb_aliases.lua")
+
+	--safeDoFile("libs/lib_emb_tagregistry.lua")
 
 	-- Game Assets
 	safeDoFile(gameString.."_init.lua")

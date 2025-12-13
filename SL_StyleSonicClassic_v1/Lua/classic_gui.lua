@@ -64,7 +64,8 @@ HOOK("lives", "classichud", function(v, p, t, e)
 		v.getColormap(TC_DEFAULT, 1, color_profile.lives),
 		name,
 		life_pos,
-		v.getColormap(TC_DEFAULT, 1, color_profile.numbers)
+		v.getColormap(TC_DEFAULT, 1, color_profile.numbers),
+		hudcfg.livesrenderfunc
 	)
 	return true
 end, "game", 1, 3)

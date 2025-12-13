@@ -24,6 +24,7 @@ local module = {
         [6] = tbsrequire('gui/unique/classic_mania'),
         [7] = tbsrequire('gui/unique/classic_xtreme'),
         [8] = tbsrequire('gui/unique/classic_chaotix'),
+        [9] = tbsrequire('gui/unique/classic_custom'),
     },
 
     forceusername_cv = CV_RegisterVar{
@@ -94,42 +95,50 @@ function(var)
 	module.livepos = var.value
 end, 0, 5)
 
+module.lives_index = {1, 3, 4, 5, 6, 7, 8, 9}
+
+module.livesrenderfunc = module.hudspecifics[1].playericon
+module.lifeicon_opt = Options:new("lifeiconrender", "gui/cvars/lifeicon",
+function(var)
+	module.livesrenderfunc = module.hudspecifics[module.lives_index[var.value]].playericon
+end, 0, 4)
+
 module.life_opt = Options:new("lifeicon", "gui/cvars/lifeicon", function(var)
-	local set = {1, 3, 4, 5, 6, 7, 8}
-	module.livestype = set[var.value]
+	module.livestype = module.lives_index[var.value]
+	CV_Set(module.lifeicon_opt.cv, var.value)
 end, 0, 5)
 
-module.title_opt = Options:new("hudtitle", "gui/cvars/hudtitle", function(var)
-	local titles = {1, 2, 3, 4, 6, 5}
+module.titles_index = {1, 2, 3, 4, 6, 5}
 
+module.title_opt = Options:new("hudtitle", "gui/cvars/hudtitle", function(var)
 	if gamestate == GS_LEVEL then
-		titletypechange = titles[var.value]
+		titletypechange = module.titles_index[var.value]
 	else
-		module.titletype = titles[var.value]
+		module.titletype = module.titles_index[var.value]
 	end
 end, 0, 7)
 
+module.hudfont_index  = {1, 2, 3, 4, 5, 6, 7, 8}
+module.hudlives_index = {1, 1, 2, 3, 4, 5, 6, 7}
+module.hudtitle_index = {1, 2, 3, 4, 6, 5, 4, 4}
+
+module.tallyrecolors_index = {
+	"SPECIALSTAGE_SONIC1_TALLY1",
+	"SPECIALSTAGE_SONIC2_TALLY",
+	"SPECIALSTAGE_SONICCD_TALLY",
+	"SPECIALSTAGE_SONIC3_TALLY",
+	"SPECIALSTAGE_SONIC3DB_TALLY",
+	nil, -- mania
+	"SPECIALSTAGE_SONIC1_TALLY1",
+	"SPECIALSTAGE_SONIC1_TALLY1",
+}
+
 module.hud_opt = Options:new("hud", "gui/cvars/hudtypes", function(var)
-	local font = {1, 2, 3, 4, 5, 6, 7, 8}
-	CV_Set(fonts.opt.cv, font[var.value])
+	CV_Set(fonts.opt.cv, module.hudfont_index[var.value])
+	CV_Set(module.life_opt.cv, module.hudlives_index[var.value])
+	CV_Set(module.title_opt.cv, module.hudtitle_index[var.value])
 
-	local lives = {1, 1, 2, 3, 4, 5, 6, 7}
-	CV_Set(module.life_opt.cv, lives[var.value])
-
-	local title = {1, 2, 3, 4, 6, 5, 4, 4}
-	CV_Set(module.title_opt.cv, title[var.value])
-
-	local recolorersinsp = {
-		"SPECIALSTAGE_SONIC1_TALLY1",
-		"SPECIALSTAGE_SONIC2_TALLY",
-		"SPECIALSTAGE_SONICCD_TALLY",
-		"SPECIALSTAGE_SONIC3_TALLY",
-		"SPECIALSTAGE_SONIC3DB_TALLY",
-		nil, -- mania
-		"SPECIALSTAGE_SONIC1_TALLY1",
-		"SPECIALSTAGE_SONIC1_TALLY1",
-	}
-	module.tallycolor = recolorersinsp[var.value]
+	module.tallycolor = module.tallyrecolors_index[var.value]
 
 	if var.value > 4 then
 		---@diagnostic disable-next-line

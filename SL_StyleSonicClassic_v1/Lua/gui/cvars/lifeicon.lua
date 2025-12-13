@@ -6,4 +6,5 @@ return {
 	{nil, "mania",				"Sonic Mania"},
 	{nil, "xtreme",				"Sonic X-Treme"},
 	{nil, "chaotix",			"Knuckles'Chaotix"},
+	{nil, "custom",				"Custom"},
 }

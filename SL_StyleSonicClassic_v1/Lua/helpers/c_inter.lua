@@ -59,7 +59,7 @@ function helper.Y_GetPerfectBonus(rings, perfectb, totrings)
 	end
 
 	if rings >= totrings then
-		return 5000
+		return 50000
 	end
 
 	return -1

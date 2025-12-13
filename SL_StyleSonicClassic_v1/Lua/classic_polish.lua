@@ -10,6 +10,7 @@ Contributors: Skydusk
 local Options = tbsrequire 'helpers/create_cvar'
 local retrolib = {val = 0}
 local monitoriconrot = 0
+local teampity = false
 
 local retro_opt = Options:new("polish", {
 	[0] = {0, "disabled",		"Disabled"},
@@ -20,6 +21,14 @@ function(var)
 	retrolib.val = var.value
 end)
 
+local pityshieldcolor = Options:new("teampityshield", {
+	[0] = {1, "enabled",		"Enabled"},
+	[1] = {0, "disabled",		"Disabled"},
+},
+function(var)
+	teampity = (var.value == 0)
+end)
+
 local rotation_opt = Options:new("monitoriconrot", {
 	[0] = {0, "disabled",		"Disabled/Knuckles Chaotix"},
 	[1] = {1, "classic",		"Classic"},
@@ -28,7 +37,6 @@ local rotation_opt = Options:new("monitoriconrot", {
 function(var)
 	monitoriconrot = var.value
 end, CV_NETVAR)
-
 
 function retrolib.shortFading(mo)
 	if retrolib.val then
@@ -139,6 +147,21 @@ function retrolib.fadingMonitorStateNull(mo)
 	end
 end
 
+addHook("MobjThinker", function(mo)
+	if mo.styles_setup then return end
+
+	if mo.target and mo.target.player then
+		if mo.target.valid and G_GametypeHasTeams() then
+			if mo.target.player.ctfteam == 2 then
+				mo.translation = "STYLES_PITYBLUE"
+			elseif mo.target.player.ctfteam == 1 then
+				mo.translation = "STYLES_PITYRED"
+			end
+
+			mo.styles_setup = true
+		end
+	end
+end, MT_PITY_ORB)
 
 addHook("MobjThinker", retrolib.fadingStateNullLonger, MT_SCORE)
 

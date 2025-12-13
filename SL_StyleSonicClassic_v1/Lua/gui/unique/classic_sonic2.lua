@@ -7,15 +7,13 @@ Contributors: Skydusk
 
 local nametrim = tbsrequire 'helpers/string_trimnames'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
+local timer = tbsrequire 'helpers/anim_clamp'
 local drawf = drawlib.draw
 local textlen = drawlib.text_lenght
 
 local uniquecolors = tbsrequire 'gui/definitions/classic_s2title'
 
-local trx1, trx2, try
-
 return{
-	-- TODO: FIX SONIC 2 TITLECARD FOR CUTSCENES -> EASING
 	titlecard = function(v, p, t, e, bfade)
 		if t > e-1 then return end
 		if p == secondarydisplayplayer then return end -- remove this once adjusted
@@ -30,48 +28,74 @@ return{
 		local screenh = v.height()/scaleyint
 		local extscrw = screenw-320
 		local extscrh = screenh-200
-		if t < 3 then
-			trx1 = screenw-20
-			trx2 = screenw-120
-			try = screenh
-		elseif t > (3*TICRATE+TICRATE/5+1) then
-			trx1 = nil
-			trx2 = nil
-			try = nil
-		end
+
+		local trx1 = ease.linear(
+			timer(TICRATE/30, t, TICRATE/4) -
+			timer(3*TICRATE - 5*TICRATE/4, t, 3*TICRATE-TICRATE),
+
+			screenw,
+			screenw - (screenw-20)
+		)
+
+		local trx2 = ease.linear(
+			timer(TICRATE/5, t, 2*TICRATE/5) -
+			timer(3*TICRATE - TICRATE/3, t, 101*TICRATE/35),
+
+			screenw + 20,
+			15
+		)
+
+		local try = ease.linear(
+			timer(TICRATE/30, t, TICRATE/4) -
+			timer(3*TICRATE - 5*TICRATE/4, t, 3*TICRATE-TICRATE),
+
+			screenh,
+			0
+		)
+
 		if t and t <= 3*TICRATE+TICRATE/5 then
-			if t <= TICRATE/4 then
-				trx1 = $-((screenw-20)/(35/4))
-				try = $-(screenh/(35/4))
-			end
-			if t >= TICRATE/5 and t <= 2*TICRATE/5 then
-				trx2 = $-((screenw-120)/(35/4))
-			end
-			if t >= (3*TICRATE - TICRATE/4-TICRATE) and t <= 3*TICRATE-TICRATE then
-				trx1 = $+((screenw-20)/(35/4))
-				try = $+(screenh/(35/4))
-			end
-			if t >= (3*TICRATE) then
-				trx2 = $+((screenw-120)/(35/4))+4
-			end
-
-			---@cast trx1 number
-			---@cast trx2 number
-			---@cast try number
-			trx1 = max(min(trx1, screenw*2), 0)
-			trx2 = max(min(trx2, screenw*2), 0)
-			try = max(min(try, screenh*2), 0)
-
 			local pskin = "none"
 			if p.mo then
 				pskin = p.mo.skin
 			end
 
-			v.drawFill(0-extscrw/2, 0-try-extscrh, screenw+extscrw/2, screenh, (uniquecolors[pskin] or 153))
-			v.drawFill(trx1-extscrw/2, 136, screenw+extscrw/2, 64+extscrh, 74)
-			v.drawFill(-trx1-extscrw/2-23, -extscrh, 111, screenh+extscrh, 37)
-			v.draw(88-trx1-extscrw/2, -extscrh, v.cachePatch('S2TTCOR'), 0)
-			v.draw(138+trx1-extscrw/2, 144, v.cachePatch('S2TTANAM'), 0)
+			v.drawFill(
+				-extscrw/2,
+				-try-extscrh,
+				screenw+extscrw/2,
+				screenh,
+				(uniquecolors[pskin] or 153)
+			)
+
+			v.drawFill(
+				trx1-extscrw/2,
+				136,
+				screenw+extscrw/2,
+				64+extscrh,
+				74
+			)
+
+			v.drawFill(
+				-trx1-extscrw/2-23,
+				-extscrh,
+				111,
+				screenh+extscrh,
+				37
+			)
+
+			v.draw(
+				88-trx1-extscrw/2,
+				-extscrh,
+				v.cachePatch('S2TTCOR'),
+				0
+			)
+
+			v.draw(
+				138+trx1-extscrw/2,
+				144,
+				v.cachePatch('S2TTANAM'),
+				0
+			)
 
 			drawf(v, 'S2IFT', (287+trx2-rightflg)*FU, 51*FU, FU, lvlt, 0, nil, 'left', 1)
 			local offset_x = max(rightflg, 164)

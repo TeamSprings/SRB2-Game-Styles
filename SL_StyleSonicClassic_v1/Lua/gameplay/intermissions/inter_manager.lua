@@ -14,7 +14,7 @@ module.types = {
     [INTER_COOP] = tbsrequire('gameplay/intermissions/types/inter_coop'),
     [INTER_BOSS] = tbsrequire('gameplay/intermissions/types/inter_boss'),
     [INTER_SPEC] = tbsrequire('gameplay/intermissions/types/inter_spec'),
-    [INTER_MATC] = tbsrequire('gameplay/intermissions/types/inter_coop'),
+    [INTER_MATC] = tbsrequire('gameplay/intermissions/types/inter_match'),
 }
 
 function module:type()
@@ -32,11 +32,25 @@ function module:type()
                 return INTER_COOP
             end
         end
-    elseif gametype & GTR_RACE or gametype & GTR_TAG then
+    elseif gametype & GTR_RINGSLINGER or gametype & GTR_RACE or gametype & GTR_TAG then
         return INTER_MATC
     else
         return 0
     end
+end
+
+function module.conditions(end_tallyenabled, specialpackdetected)
+	if not end_tallyenabled then return true end
+
+	if specialpackdetected then return true end
+
+	if marathonmode or modeattacking then return true end
+
+	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
+		return true
+	end
+
+    return false
 end
 
 function module:check()

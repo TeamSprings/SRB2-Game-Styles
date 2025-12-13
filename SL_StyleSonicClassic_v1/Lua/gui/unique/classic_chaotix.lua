@@ -32,7 +32,7 @@ return{
 
 	playericon = lifeicon,
 
-	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2)
+	lives = function(v, p, t, e, prefix, mo, hide_offset_x, colorprofile, overwrite, lifepos, colorprofile2, icon)
 		if p and p.mo then
 			local lives_f = hudinfo[HUD_LIVES].f|V_HUDTRANS|V_PERPLAYER
 			local lives_x = hudinfo[HUD_LIVES].x+hide_offset_x
@@ -44,7 +44,7 @@ return{
 				lives_y = 184-hudinfo[HUD_LIVES].y
 			end
 
-			lifeicon(v, lives_x, lives_y, FU, lives_f, p)
+			icon(v, lives_x, lives_y, FU, lives_f, p)
 
 			if G_GametypeUsesLives() then
 				local lives = p.lives

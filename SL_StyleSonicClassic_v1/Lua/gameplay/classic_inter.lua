@@ -322,14 +322,11 @@ local function G_StylesExitLevel()
 end
 
 local function G_StylesTallyBackend(p)
-	if not end_tallyenabled then return end
+	if Manager.conditions(end_tallyenabled, specialpackdetected) then return end
+	
 	if not (p.mo and p.mo.valid) then return end
-	if specialpackdetected then return end
+	
 	if p.bot then return end
-
-	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
-		return
-	end
 
 	if Manager:check() then
 
@@ -465,34 +462,26 @@ end)
 addHook("PlayerThink", G_StylesTallyBackend)
 
 addHook("ThinkFrame", function()
-	if not multiplayer then return end
+	if Manager.conditions(end_tallyenabled, specialpackdetected) then return end
 
-	if not end_tallyenabled then return end
-	
-	if specialpackdetected then return end
-	
-	if marathonmode then return end
+    if not multiplayer then return end
 
-	if mapheaderinfo[gamemap].mrce_emeraldstage and mrce and mrce.emstage_attemptavailable then
-		return
-	end
+	if G_EnoughPlayersFinished() then
+		local notyet = false
 
-	local specialstage = G_IsSpecialStage(gamemap)
-
-	if (G_GametypeUsesCoopStarposts() and G_GametypeUsesLives()) or (specialstage and not modeattacking) then
-
-		if G_EnoughPlayersFinished() then
-			local notyet = false
-			
-			for p in players.iterate() do
-				if p.styles_tallyfinished ~= true then
-					notyet = true
-				end
+		for p in players.iterate() do
+			if (p.bot > 0 and p.bot < 3) or (p.ai and p.ai.leader) then
+				continue
 			end
 
-			if not notyet then
-				G_StylesExitLevel()
+			if p.styles_tallyfinished ~= true then
+				notyet = true
+				break
 			end
+		end
+
+		if notyet == false then
+			G_StylesExitLevel()
 		end
 	end
 end)

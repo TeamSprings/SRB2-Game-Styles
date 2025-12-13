@@ -1,9 +1,12 @@
 
+local Rankings = tbsrequire 'gui/leaderboards/lead_render'
 local Options = tbsrequire 'helpers/create_cvar'
 local color_profile = tbsrequire 'gui/hud_colors'
 local drawlib = tbsrequire 'libs/lib_emb_tbsdrawers'
 local fonts = tbsrequire('gui/hud_fonts')
+local hudcfg = 	tbsrequire('gui/hud_conf')
 
+local hudspecifics = hudcfg.hudspecifics
 local HOOK = customhud.SetupItem
 local write = drawlib.draw
 
@@ -56,9 +59,9 @@ HOOK("coopemeralds", "classichud", function(v)
             local em = emeralds_set[i]
             if (emeralds & em) then
                 if i > 4 then
-                    v.draw(28 + ((i-3) * 14), 14, v.cachePatch("TEMER"..i), V_SNAPTOLEFT)
+                    v.draw(28 + ((i-3) * 14), 190, v.cachePatch("TEMER"..i), V_SNAPTOLEFT)
                 else
-                    v.draw(36 + (i * 14), 6, v.cachePatch("TEMER"..i), V_SNAPTOLEFT)
+                    v.draw(36 + (i * 14), 182, v.cachePatch("TEMER"..i), V_SNAPTOLEFT)
                 end
             end
         end
@@ -148,7 +151,6 @@ HOOK("intermissionemeralds", "classichud", function(v)
     return true
 end, "intermission", 1, 3)
 
-    
 local emblemsprites = {
     [0] = "EMBVANILLA",
     [1] = "EMBCLASSIC",
@@ -174,7 +176,7 @@ HOOK("tabemblems", "classichud", function(v)
 
     if multiplayer then
         x = 167
-        y = 6
+        y = 182
     else
         flags = $|V_SNAPTOTOP
     end
@@ -184,11 +186,11 @@ HOOK("tabemblems", "classichud", function(v)
     x = ($ + 27) * FU
     y = ($ + 1) * FU
 
-    write(v, 'LIFENUM', x, y, FU, emblems, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
+    write(v, fonts.livesnum..'NUM', x, y, FU, emblems or 0, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
 
     y = $ + 7 * FU
 
-    write(v, 'LIFENUM', x, y, FU, "/"..total, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
+    write(v, fonts.livesnum..'NUM', x, y, FU, "/"..total, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
 end, "scores", 1, 3)
 
 local tokensprites = {
@@ -210,7 +212,7 @@ HOOK("tokens", "classichud", function(v)
 
     if multiplayer then
         x = 124
-        y = 6
+        y = 182
         
         if not numemblems then
             x = 167
@@ -230,7 +232,7 @@ HOOK("tokens", "classichud", function(v)
     x = ($ + 23) * FU
     y = ($ + 5) * FU
 
-    write(v, 'LIFENUM', x, y, FU, token, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
+    write(v, fonts.livesnum..'NUM', x, y, FU, token, flags, v.getColormap(TC_DEFAULT, 0, color_profile.numbers), "left", 1)
 end, "scores", 1, 3)
 
 HOOK("pause", "classichud", function(v)
@@ -266,3 +268,32 @@ HOOK("gameover", "classichud", function(v, player)
 
     v.draw(160 + ease, 100, v.cachePatch(fonts.font..'TGOOVER'), 0)
 end, "game", 1, 3)
+
+---@param v videolib
+HOOK("rankings", "classichud", function(v)
+    if not multiplayer then return end
+    Rankings(v, 0, 0, true, 0)
+end, "scores")
+
+if SUBVERSION > 15 then
+
+    ---@param v videolib
+    HOOK("pauseenchatment", "classichud", function(v, x, y, width, height)
+        local _scale = v.dupx()
+        local _width = v.width()
+        local width = _width/_scale
+        local rest = (width - 320) / 2
+
+        local pausepatch = v.cachePatch('S1TPAUSE')
+
+        if not multiplayer then
+            v.draw(160, y+2-pausepatch.height, pausepatch, 0)
+        end
+
+        v.drawFill(0, y-2, width, 2, 73|V_SNAPTOLEFT)
+        v.drawFill(0, y, x + rest, height, 159|V_SNAPTOLEFT)
+        v.drawFill(x, y, width-x, height, 159)
+        v.drawFill(0, y+height, width, 2, 73|V_SNAPTOLEFT)
+        v.drawFill(0, y+height+2, width, 2, 24|V_SNAPTOLEFT)
+    end, "escpanel")
+end

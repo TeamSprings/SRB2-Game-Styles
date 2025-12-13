@@ -38,7 +38,7 @@ end
 function inter.counterSetup(player)
 	player.styles_tallyCounterRings = InterCalc.Y_GetRingsBonus(player.rings)
 	player.styles_tallyCounterTime = InterCalc.Y_GetTimeBonus(max(player.realtime + (player.style_additionaltime or 0) - (player.styles_cutscenetime_prize or 0), 0))
-	player.styles_tallyCounterPerf = max(InterCalc.Y_GetPreCalcPerfectBonus(player.rings), 0)
+	player.styles_tallyCounterPerf = InterCalc.Y_GetPreCalcPerfectBonus(player.rings)
 	player.styles_tallyCounterTotal = 0
 end
 
@@ -46,7 +46,7 @@ function inter.calculateALL(player)
 	return (
 		InterCalc.Y_GetRingsBonus(player.rings) +
 		InterCalc.Y_GetTimeBonus(max(player.realtime + (player.style_additionaltime or 0) - (player.styles_cutscenetime_prize or 0), 0)) +
-		max(InterCalc.Y_GetPreCalcPerfectBonus(player.rings), 0)
+		InterCalc.Y_GetPreCalcPerfectBonus(player.rings)
 	)
 end
 
@@ -173,7 +173,7 @@ function inter.draw(v, player, t, e)
 	write(v, fonts.font..'TNUM', (row3x+160)*FU, 124*FU, FU, player.styles_tallyCounterRings, V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.numbers), "right", fonts.padding)
 
 	-- Perfect Bleh
-	if player.styles_tallyCounterPerf > 0 then
+	if player.styles_tallyCounterPerf > -1 then
 		v.draw(row2x+82, 139, v.cachePatch(fonts.font..'TBICON'), V_PERPLAYER, playercolor)
 		v.draw(row2x-12, 140, v.cachePatch(fonts.font..'TPERFC'), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.score))
 		v.draw(row2x+52, 140, v.cachePatch(fonts.font..'TBONUS'), V_PERPLAYER, v.getColormap(TC_DEFAULT, 1, color_profile.score))

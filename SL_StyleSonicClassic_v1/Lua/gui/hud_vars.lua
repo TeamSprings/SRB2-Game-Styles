@@ -16,10 +16,6 @@ local module = {
     totalbonus = 0,
 }
 
-function module.getTallyCounters()
-
-end
-
 local hudconfigurations = tbsrequire('gui/hud_conf')
 
 local HOOK = customhud.SetupItem
