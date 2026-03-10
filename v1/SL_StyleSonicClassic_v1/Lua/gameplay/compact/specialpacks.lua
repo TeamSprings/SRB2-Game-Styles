@@ -1,0 +1,4 @@
+return {
+	"sugoi",
+	"OLDC",
+}

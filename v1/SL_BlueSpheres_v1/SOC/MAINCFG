@@ -1,0 +1,16 @@
+# Single Player
+
+Level CLASSICSTYLE_S3_SPECIALSTAGE
+Levelname = Special Stage
+Act = 1
+Keywords = S3KSS
+Music = GFZ1
+TypeOfLevel = Singleplayer
+SkyNum = 8140
+RecordAttack = true
+LevelSelect = 1
+SkyboxScale = 64
+Lua.SphereMode = 1
+Lua.SphereMap = 1
+Lua.SphereTimer = 300
+#Flicky selection is final.

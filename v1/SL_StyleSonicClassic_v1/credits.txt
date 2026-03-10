@@ -1,0 +1,39 @@
+Contributors:
+
+    "Skydusk",
+    "Clone Fighter",
+	"Trimint123",
+
+Libraries:
+
+    "TehRealSal",
+
+External Code Use:
+
+	Edited snippet from - Momentum Mod by "clairebun": https://mb.srb2.org/addons/the-momentum-mod.1202/
+    JSON library - https://github.com/rxi/json.lua
+
+Sprite Sources:
+
++ Sprite Resources, only those most obvious stuff that came from there like HUD stuff.
+But even then, it didn't went without some corrections/additions/edits and such. A lot of S3K font was missing for example.
+
+Audio Sources:
+
++ https://sonicfangameshq.com/forums/showcase/sonic-advance-2-sound-effects.450/
++ https://soahcity.com/sonic-music/sonic-advance-2001-music/
++ Internet Archive
++ Cutting Room Floor
+
+-- Mostly: https://16bap.theclassicgamer.net/media/
+
+
+Special Thanks:
+
+	"Sonic Team"
+	"Dimps"
+	"SEGA"
+
+    "Team Springs' Discord Community @ https://discord.gg/3rpShvtDGt"
+    "Team Blue Spring"
+    "STJR"

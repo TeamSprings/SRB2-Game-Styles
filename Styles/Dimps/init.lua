@@ -1,0 +1,1 @@
+dofile("core/setup.lua") -- This init.lua is just simple insertion.
